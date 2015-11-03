@@ -1,8 +1,8 @@
 { open Parser } (* Get the token types *)
 
 let num = ['0'-'9']+
-let double = (num'.'num | num'.' | '.'num)
-let letter = ['a-z' 'A-Z']
+let double = num '.' num | num '.' | '.' num
+let letter = ['a'-'z' 'A'-'Z']
 let string_lit = '''_*'''
 
 rule token = parse
