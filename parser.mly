@@ -1,32 +1,24 @@
 %{ open Ast %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA COLON
-%token PLUS MINUS TIMES DIVIDE
-%token ASSIGN NEG EQ NEQ LT LEQ GT GEQ
-%token FALSE TRUE
-%token AND OR
-%token RETURN IF ELSE WHILE INT
-%token INT DOUBLE BOOL STRING
-%token INIT RULES GRAM ARROW
-%token FUNC MAIN MOVE TURN DRAW GROW PRINT
-%token EOF
-%token <int> INT_LIT
+%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
+%token PLUS MINUS TIMES DIVIDE ASSIGN
+%token EQ NEQ LT LEQ GT GEQ
+%token RETURN IF ELSE FOR WHILE INT
+%token <int> LITERAL
 %token <string> ID
-%token <float> DOUBLE_LIT
-%token <string> STRING_LIT
+%token <string> STRING
+%token EOF
 
-%nonassoc NOELSE /* Precedence and associativity of each operator */
+%nonassoc NOELSE
 %nonassoc ELSE
 %right ASSIGN
-%left OR
-%left AND
 %left EQ NEQ
 %left LT GT LEQ GEQ
 %left PLUS MINUS
 %left TIMES DIVIDE
 
-%start program /* Start symbol */
-%type <Ast.program> program /* Type returned by a program */
+%start program
+%type <Ast.program> program
 
 %%
 
@@ -70,6 +62,8 @@ stmt:
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
+  | FOR LPAREN expr_opt SEMI expr_opt SEMI expr_opt RPAREN stmt
+     { For($3, $5, $7, $9) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
 
 expr_opt:
@@ -77,8 +71,9 @@ expr_opt:
   | expr          { $1 }
 
 expr:
-    INT_LIT          { Literal($1) }
+    LITERAL          { Literal($1) }
   | ID               { Id($1) }
+  | STRING           { String($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }

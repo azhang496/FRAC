@@ -1,45 +1,54 @@
-{ open Parser } (* Get the token types *)
-
-let num = ['0'-'9']+
-let double = num '.' num | num '.' | '.' num
-let letter = ['a'-'z' 'A'-'Z']
-let string_lit = '''_*'''
+{ open Parser }
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
-| "//" { single_comment lexbuf }
-| "/*" { multi_comment lexbuf } (* Comments *)
-| '(' { LPAREN } | ')' { RPAREN } (* Punctuation *)
-| '{' { LBRACE } | '}' { RBRACE }
-| ';' { SEMI } | ',' { COMMA } | ':' { COLON }
-| '+' { PLUS } | '-' { MINUS }
-| '*' { TIMES } | '/' { DIVIDE }
-| '=' { ASSIGN } | "==" { EQ }
-| "&&" { AND } | "||" { OR }
-| '!' { NEG } | "!=" { NEQ }
-| '<' { LT } | ">" { GT }
-| "<=" { LEQ } | ">=" { GEQ }
-| "else" { ELSE } | "if" { IF } (* Keywords *)
-| "while" { WHILE }
-| "int" { INT } | "double" { DOUBLE } | "string" { STRING } | "bool" { BOOL }
-| "func" { FUNC } | "return" { RETURN }
-| "turn" { TURN } | "move" { MOVE }
-| "draw" { DRAW } | "grow" { GROW }
-| "print" { PRINT } | "main" { MAIN }
-| "gram" { GRAM } | "rules" { RULES } | "init" { INIT }
-(* | "->" {ARROW} *)
+| "/*"     { comment lexbuf }           (* Comments *)
+| '('      { LPAREN }
+| ')'      { RPAREN }
+| '{'      { LBRACE }
+| '}'      { RBRACE }
+| ';'      { SEMI }
+| ','      { COMMA }
+| '+'      { PLUS }
+| '-'      { MINUS }
+| '*'      { TIMES }
+| '/'      { DIVIDE }
+| '='      { ASSIGN }
+| "=="     { EQ }
+| "!="     { NEQ }
+| '<'      { LT }
+| "<="     { LEQ }
+| ">"      { GT }
+| ">="     { GEQ }
+| "if"     { IF }
+| "else"   { ELSE }
+| "for"    { FOR }
+| "while"  { WHILE }
 | "return" { RETURN }
-| eof { EOF } (* End-of-file *)
-| num as lxm { INT_LIT(int_of_string lxm) } (* integers *)
-| double as lxm { DOUBLE_LIT(float_of_string lxm) } (* double *)
-| string_lit as lxm { STRING_LIT(lxm) } (* string *)
+| "int"    { INT }
+| '"'      { read_string (Buffer.create 17) lexbuf }
+| ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
+| eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
-and single_comment = parse
-  '\n' { token lexbuf } (* End-of-comment *)
-| _    { multi_comment lexbuf } (* Eat everything else *)
+and read_string buf =
+  parse
+  | '"'       { STRING (Buffer.contents buf) }
+  | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
+  | '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
+  | '\\' 'b'  { Buffer.add_char buf '\b'; read_string buf lexbuf }
+  | '\\' 'f'  { Buffer.add_char buf '\012'; read_string buf lexbuf }
+  | '\\' 'n'  { Buffer.add_char buf '\n'; read_string buf lexbuf }
+  | '\\' 'r'  { Buffer.add_char buf '\r'; read_string buf lexbuf }
+  | '\\' 't'  { Buffer.add_char buf '\t'; read_string buf lexbuf }
+  | [^ '"' '\\']+
+    { Buffer.add_string buf (Lexing.lexeme lexbuf);
+      read_string buf lexbuf
+    }
+  | _ { raise (Failure ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
+  | eof { raise (Failure ("String is not terminated")) }
 
-and multi_comment = parse
-  "*/" { token lexbuf } (* End-of-comment *)
-| _    { multi_comment lexbuf } (* Eat everything else *)
+and comment = parse
+  "*/" { token lexbuf }
+| _    { comment lexbuf }

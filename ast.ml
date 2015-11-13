@@ -1,13 +1,9 @@
-type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq | And | Or | Neg
-type bool = True | False
-type arrow = Arrow
+type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq
 
 type expr =
     Literal of int
-  | Float of float
-  | String of string
-  | Boolean of bool
   | Id of string
+  | String of string
   | Binop of expr * op * expr
   | Assign of string * expr
   | Call of string * expr list
@@ -18,18 +14,8 @@ type stmt =
   | Expr of expr
   | Return of expr
   | If of expr * stmt * stmt
+  | For of expr * expr * expr * stmt
   | While of expr * stmt
-
-
-type init =
-    Init of string
-
-type rule =
-    Terminal_Rule of string * arrow * expr
-  | Recursive_Rule of string * arrow * string
-
-type gram =
-    Gram of init * rule list
 
 type func_decl = {
     fname : string;
@@ -42,12 +28,11 @@ type program = string list * func_decl list
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
-  | Float(f) -> string_of_float f
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^
       (match o with
-	Add -> "+" | Sub -> "-" | Mult -> "*" | Div -> "/"
+    Add -> "+" | Sub -> "-" | Mult -> "*" | Div -> "/"
       | Equal -> "==" | Neq -> "!="
       | Less -> "<" | Leq -> "<=" | Greater -> ">" | Geq -> ">=") ^ " " ^
       string_of_expr e2
@@ -64,6 +49,9 @@ let rec string_of_stmt = function
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
+  | For(e1, e2, e3, s) ->
+      "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
+      string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
 let string_of_vdecl id = "int " ^ id ^ ";\n"
