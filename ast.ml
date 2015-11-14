@@ -38,7 +38,10 @@ let rec string_of_expr = function
       string_of_expr e2
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Call(f, el) ->
-      f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+    (match f with
+        "print" -> "printf" ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+      | _       -> f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")" 
+    )
   | Noexpr -> ""
 
 let rec string_of_stmt = function
@@ -49,19 +52,22 @@ let rec string_of_stmt = function
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
-  | For(e1, e2, e3, s) ->
-      "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
-      string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
 let string_of_vdecl id = "int " ^ id ^ ";\n"
 
 let string_of_fdecl fdecl =
-  fdecl.fname ^ "(" ^ String.concat ", " fdecl.formals ^ ")\n{\n" ^
-  String.concat "" (List.map string_of_vdecl fdecl.locals) ^
-  String.concat "" (List.map string_of_stmt fdecl.body) ^
+  (match fdecl.fname with
+      "main" -> "int main"
+    | _      -> fdecl.fname) ^
+  "(" ^ String.concat ", " fdecl.formals ^ ")\n{\n" ^
+(*   String.concat "" (List.map string_of_vdecl fdecl.locals) ^ *)
+  String.concat "" (List.map string_of_stmt fdecl.body) ^ "\n"
+  (match fdecl.fname with
+      "main" -> "return 0;\n"
+    | _      -> "") ^
   "}\n"
 
 let string_of_program (vars, funcs) =
-  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
-  String.concat "\n" (List.map string_of_fdecl funcs)
+  "<include stdio.h>\n" ^
+  String.concat "" (List.map string_of_fdecl funcs)
