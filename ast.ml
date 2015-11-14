@@ -1,13 +1,9 @@
-type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq | And | Or | Neg
-type bool = True | False
-type arrow = Arrow
+type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq
 
 type expr =
     Literal of int
-  | Float of float
-  | String of string
-  | Boolean of bool
   | Id of string
+  | String of string
   | Binop of expr * op * expr
   | Assign of string * expr
   | Call of string * expr list
@@ -18,18 +14,8 @@ type stmt =
   | Expr of expr
   | Return of expr
   | If of expr * stmt * stmt
+  | For of expr * expr * expr * stmt
   | While of expr * stmt
-
-
-type init =
-    Init of string
-
-type rule =
-    Terminal_Rule of string * arrow * expr
-  | Recursive_Rule of string * arrow * string
-
-type gram =
-    Gram of init * rule list
 
 type func_decl = {
     fname : string;
@@ -42,18 +28,20 @@ type program = string list * func_decl list
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
-  | Float(f) -> string_of_float f
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^
       (match o with
-	Add -> "+" | Sub -> "-" | Mult -> "*" | Div -> "/"
+    Add -> "+" | Sub -> "-" | Mult -> "*" | Div -> "/"
       | Equal -> "==" | Neq -> "!="
       | Less -> "<" | Leq -> "<=" | Greater -> ">" | Geq -> ">=") ^ " " ^
       string_of_expr e2
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Call(f, el) ->
-      f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+    (match f with
+        "print" -> "printf" ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+      | _       -> f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")" 
+    )
   | Noexpr -> ""
 
 let rec string_of_stmt = function
@@ -69,11 +57,17 @@ let rec string_of_stmt = function
 let string_of_vdecl id = "int " ^ id ^ ";\n"
 
 let string_of_fdecl fdecl =
-  fdecl.fname ^ "(" ^ String.concat ", " fdecl.formals ^ ")\n{\n" ^
-  String.concat "" (List.map string_of_vdecl fdecl.locals) ^
-  String.concat "" (List.map string_of_stmt fdecl.body) ^
+  (match fdecl.fname with
+      "main" -> "int main"
+    | _      -> fdecl.fname) ^
+  "(" ^ String.concat ", " fdecl.formals ^ ")\n{\n" ^
+(*   String.concat "" (List.map string_of_vdecl fdecl.locals) ^ *)
+  String.concat "" (List.map string_of_stmt fdecl.body) ^ "\n"
+  (match fdecl.fname with
+      "main" -> "return 0;\n"
+    | _      -> "") ^
   "}\n"
 
 let string_of_program (vars, funcs) =
-  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
-  String.concat "\n" (List.map string_of_fdecl funcs)
+  "<include stdio.h>\n" ^
+  String.concat "" (List.map string_of_fdecl funcs)
