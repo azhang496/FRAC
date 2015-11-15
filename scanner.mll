@@ -9,7 +9,7 @@ rule token = parse
 | '}'      { RBRACE }
 | ';'      { SEMI }
 | ','      { COMMA }
-| '+'      { PLUS }
+(*| '+'      { PLUS }
 | '-'      { MINUS }
 | '*'      { TIMES }
 | '/'      { DIVIDE }
@@ -23,7 +23,7 @@ rule token = parse
 | "if"     { IF }
 | "else"   { ELSE }
 | "while"  { WHILE }
-| "return" { RETURN }
+| "return" { RETURN }*)
 | "int"    { INT }
 | '"'      { read_string (Buffer.create 17) lexbuf }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }

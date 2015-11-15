@@ -11,16 +11,18 @@ module StringMap = Map.Make(String)
 
 let generate globals funcs =
   let rec expr = function
-      Literal i -> i
+      Literal i -> string_of_int i
     | Id s -> s
-    | String s -> '"' ^ s '"'
+    | String s -> "\"" ^ s ^ "\""
     | Call (fname, actuals) -> (match fname with
-        "print" -> "printf(" ^ actuals ^ ")"
-      | _       -> fname ^ "(" ^ actuals ^ ")")
+      "print" -> "printf(\"%s\", \"" ^ (expr (List.hd actuals)) ^ "\")"
+(*         "print" -> "printf(" ^ expr actuals ^ ")" *)
+(*       | _       -> fname ^ "(" ^ expr actuals ^ ")") *)
+      | _     -> "")
     | Noexpr -> ""
 
   in let rec stmt = function
-      Block sl -> List.concat (List.map stmt sl)
+      Block sl -> String.concat "" (List.map stmt sl)
     | Expr e -> expr e ^ ";\n"
 
   in let gen_fdecl fdecl =
@@ -32,4 +34,9 @@ let generate globals funcs =
         "main" -> "return 0;\n"
       | _      -> "" ) ^ "}"
 
-  in "<include stdio.h>\n" ^ List.fold_left gen_fdecl "" funcs
+  in let outfile = open_out "test.c"
+  in Printf.fprintf outfile "%s" "hi"(* (String.concat "" (List.map gen_fdecl funcs)) *);
+    close_out outfile;
+
+
+(*   in "<include stdio.h>\n" ^  *)
