@@ -1,5 +1,7 @@
+(* Binary operators *)
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq
 
+(* Expressions *)
 type expr =
     Literal of int
   | Id of string
@@ -9,6 +11,7 @@ type expr =
   | Call of string * expr list
   | Noexpr
 
+(* Statements *)
 type stmt =
     Block of stmt list
   | Expr of expr
@@ -23,4 +26,5 @@ type func_decl = {
     body : stmt list;
   }
 
+(* Program entry point *)
 type program = func_decl list

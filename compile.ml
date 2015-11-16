@@ -1,4 +1,5 @@
 open Ast
+open Str
 
 module StringMap = Map.Make(String)
 
@@ -33,8 +34,8 @@ let gen_fdecl fdecl =
       "main" -> "return 0;\n"
     | _      -> "" ) ^ "}"
 
-let generate funcs =
-  let outfile = open_out "test.c"
+let generate funcs name =
+  let outfile = open_out (name ^ ".c")
   in let translated_program =  "#include <stdio.h>\n" ^ String.concat "" (List.map gen_fdecl funcs) ^ "\n"
   in ignore(Printf.fprintf outfile "%s" translated_program);
   close_out outfile;
