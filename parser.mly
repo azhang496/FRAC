@@ -24,7 +24,7 @@
 %%
 
 program:
-  decls EOF { $1 }
+  fdecl_list EOF { $1 }
 
 decls:
    /* nothing */ { [], [] }
@@ -37,6 +37,10 @@ fdecl:
      formals = $3;
      locals = List.rev $6;
      body = List.rev $7 } }
+
+fdecl_list:
+     /* nothing */    { [] }
+   | fdecl_list fdecl { $2 :: $1 }
 
 formals_opt:
     /* nothing */ { [] }

@@ -9,6 +9,7 @@ let _ =
   let lexbuf = Lexing.from_channel input in
   let program = Parser.program Scanner.token lexbuf in
   Compile.generate program
+
 (*   match action with
     Ast -> let listing = Ast.string_of_program program
            in print_string listing
