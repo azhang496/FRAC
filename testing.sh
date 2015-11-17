@@ -13,12 +13,10 @@ printf "${CYAN}Starting tests...\n\n${NC}"
 
 for input in $TEST_FILES; do
 
-    TEMP=$(mktemp "temp.c")
     c_file=${input/.frac/.c}
     output=${input/.frac/.txt}
-    tester=${input/.frac/-NEW.c}
+    TEMP=${input/.frac/-NEW.c}
     $EXEC $input
-    cat $tester > $TEMP
 
     if [ -e "$c_file" ]; then
         diff -wB $c_file $TEMP
@@ -40,7 +38,7 @@ for input in $TEST_FILES; do
         fi
     fi
 
-    rm -f $TEMP $tester
+    rm -f $TEMP 
     printf "%-50s ${GREEN}SUCCESS\n${NC}" "checking $input..."
 
 done
