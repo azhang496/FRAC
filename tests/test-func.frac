@@ -1,0 +1,3 @@
+main() {
+    foo(x, "hello", y);
+}

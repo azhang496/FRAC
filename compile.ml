@@ -23,7 +23,7 @@ let rec expr = function
   | Assign (v, e) -> v ^ " = " ^ (expr e)
   | Call (fname, actuals) -> (match fname with
     "print" -> "printf(\"%s\", " ^ (expr (List.hd actuals)) ^ ")"
-    | _     -> "")
+    | _     -> fname ^ "(" ^ (String.concat "," (List.map expr actuals)) ^ ")")
   | Noexpr -> ""
 
 let rec stmt = function
