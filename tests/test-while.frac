@@ -1,0 +1,5 @@
+main() {
+    while(x <= 2) {
+        print("x is less than or equal to 2");
+    }
+}
