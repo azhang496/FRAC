@@ -1,36 +1,49 @@
 #!/bin/bash
 
 NC='\033[0m'
-RED='\033[0;31m'
 CYAN='\033[0;36m'
+RED='\033[0;31m'
 GREEN='\033[0;32m'
 
-
-FRAC_FILES="tests/*.frac"
+TEST_FILES="tests/*.frac"
 EXEC="./frac"
-TMP_FILE=$(mktemp "temp.XXXXX")
+C_EXEC="./a.out"
+
 printf "${CYAN}Starting tests...\n\n${NC}"
 
-for input in $FRAC_FILES; do
+for input in $TEST_FILES; do
 
-    c_file = ${input/.frac/.c}
+    TEMP=$(mktemp "temp.c")
+    c_file=${input/.frac/.c}
+    output=${input/.frac/.txt}
+    tester=${input/.frac/-NEW.c}
+    $EXEC $input
+    cat $tester > $TEMP
 
-    # compile frac program to temp c file
-    $($EXEC $input)
-    cat "test-hello_world.c" > TMP_FILE
-
-    # if c test file exists, compare them
     if [ -e "$c_file" ]; then
-        diff -wB $c_file $TMP_FILE
+        diff -wB $c_file $TEMP
         if [ "$?" -ne 0 ]; then
-            printf "%-50s ${RED}ERROR\n${NC}" "  - checking $c_file..." 1>&2
-            rm -f $TMP_FILE
+            printf "%-50s ${RED}ERROR\n${NC}" "checking contents of $c_file..." 1>&2
+            rm -f $TEMP
             exit 1
         fi
     fi
 
-    printf "%-50s ${GREEN}SUCCESS\n${NC}" "  - checking $input..."
+    if [ -e "$output" ]; then
+        gcc -g -Wall $TEMP
+        $C_EXEC > $TEMP
+        diff -wB $output $TEMP
+        if [ "$?" -ne 0 ]; then
+            printf "%-50s ${RED}ERROR\n${NC}" "checking output of $output..." 1>&2
+            rm -rf a.out.dSYM a.out $TEMP
+            exit 1
+        fi
+    fi
+
+    rm -f $TEMP $tester
+    printf "%-50s ${GREEN}SUCCESS\n${NC}" "checking $input..."
+
 done
 
-rm -f $TMP_FILE
+rm -rf a.out.dSYM a.out $TEMP
 exit 0

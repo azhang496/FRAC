@@ -35,7 +35,7 @@ let gen_fdecl fdecl =
     | _      -> "" ) ^ "}"
 
 let generate funcs name =
-  let outfile = open_out (name ^ ".c")
+  let outfile = open_out ("tests/" ^ name ^ "-NEW.c")
   in let translated_program =  "#include <stdio.h>\n" ^ String.concat "" (List.map gen_fdecl funcs) ^ "\n"
   in ignore(Printf.fprintf outfile "%s" translated_program);
   close_out outfile;
