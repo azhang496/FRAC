@@ -19,12 +19,28 @@ type stmt =
   | If of expr * stmt * stmt
   | While of expr * stmt
 
+(* Function Declarations *)
+
 type func_decl = {
-    fname : string;
-    formals : string list;
-    locals : string list;
-    body : stmt list;
-  }
+  fname : string;
+  formals : string list;
+  locals : string list;
+  body : stmt list;
+}
+
+(* Rules *)
+
+type rule =
+    Rec of string * string
+  | Term of string * expr
+
+(* Grammars *)
+
+type gram = {
+  gname : string;
+  init : string;
+  rules : rule list;
+}
 
 (* Program entry point *)
 type program = func_decl list

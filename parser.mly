@@ -6,8 +6,7 @@
 %token RETURN IF ELSE WHILE
 %token INT
 %token <int> LITERAL
-%token <string> ID
-%token <string> STRING
+%token <string> ID STRING
 %token EOF
 
 %nonassoc NOELSE
