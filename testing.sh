@@ -22,7 +22,6 @@ for input in $TEST_FILES; do
         diff -wB $c_file $TEMP
         if [ "$?" -ne 0 ]; then
             printf "%-50s ${RED}ERROR\n${NC}" "checking contents of $c_file..." 1>&2
-            rm -f $TEMP
             exit 1
         fi
     fi
@@ -33,12 +32,12 @@ for input in $TEST_FILES; do
         diff -wB $output $TEMP
         if [ "$?" -ne 0 ]; then
             printf "%-50s ${RED}ERROR\n${NC}" "checking output of $output..." 1>&2
-            rm -rf a.out.dSYM a.out $TEMP
+            rm -rf a.out.dSYM a.out
             exit 1
         fi
     fi
 
-    rm -f $TEMP 
+    rm -f $TEMP
     printf "%-50s ${GREEN}SUCCESS\n${NC}" "checking $input..."
 
 done

@@ -2,7 +2,7 @@
 PLT Project
 
 Group Members:
-Annie Zhang
-Calvin Li
-Justin Chiang
-Kunal Kamath
+Annie Zhang\n
+Calvin Li\n
+Justin Chiang\n
+Kunal Kamath\n
