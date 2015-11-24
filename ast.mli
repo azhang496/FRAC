@@ -1,11 +1,21 @@
 (* Binary operators *)
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq
 
+
+(* Variable types *)
+type var_type =
+    Int
+  | Double
+  | String
+  | Boolean
+
 (* Expressions *)
 type expr =
-    Literal of int
+    Int_lit of int
+  | Double_lit of float
   | Id of string
-  | String of string
+  | String_lit of string
+  | Bool_lit of bool
   | Binop of expr * op * expr
   | Assign of string * expr
   | Call of string * expr list
@@ -13,11 +23,19 @@ type expr =
 
 (* Statements *)
 type stmt =
-    Block of stmt list
-  | Expr of expr
+    Expr of expr
+  | Block of stmt list
   | Return of expr
   | If of expr * stmt * stmt
   | While of expr * stmt
+
+(* Variable Declarations *)
+
+type var_decl = {
+  vtype : string;
+  vname : string;
+  value : expr;
+}
 
 (* Function Declarations *)
 
@@ -28,19 +46,19 @@ type func_decl = {
   body : stmt list;
 }
 
-(* Rules *)
+(*Rules
 
 type rule =
     Rec of string * string
   | Term of string * expr
 
-(* Grammars *)
+Grammars
 
 type gram = {
   gname : string;
   init : string;
   rules : rule list;
-}
+} *)
 
 (* Program entry point *)
 type program = func_decl list

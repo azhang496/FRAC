@@ -1,9 +1,9 @@
 open Ast
 
 let rec expr = function
-    Literal i -> string_of_int i
+    Int_lit i -> string_of_int i
   | Id s -> s
-  | String s -> "\"" ^ s ^ "\""
+  | String_lit s -> "\"" ^ s ^ "\""
   | Binop (e1, o, e2) -> (expr e1) ^ (match o with
         Add -> " + " | Sub -> " - " | Mult -> " * " | Div -> " / "
       | Equal -> " == " | Neq -> " != "

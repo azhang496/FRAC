@@ -20,20 +20,25 @@ rule token = parse
 | "<="     { LEQ }
 | ">"      { GT }
 | ">="     { GEQ }
+| "->"     { ARROW }
 | "if"     { IF }
 | "else"   { ELSE }
 | "while"  { WHILE }
 | "return" { RETURN }
 | "int"    { INT }
+| "double" { DOUBLE }
+| "string" { STRING }
+| "bool"   { BOOL }
 | '"'      { read_string (Buffer.create 17) lexbuf }
-| ['0'-'9']+ as lxm { LITERAL (int_of_string lxm) }
-| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
+| ['0'-'9']+ as lxm { INT_LIT (int_of_string lxm) }
+| ['0'-'9']+'.'['0'-'9']+ as lxm { DOUBLE_LIT (float_of_string lxm) }
+| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID (lxm) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
 and read_string buf =
   parse
-  | '"'       { STRING (Buffer.contents buf) }
+  | '"'       { STRING_LIT (Buffer.contents buf) }
   | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
   | '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
   | '\\' 'b'  { Buffer.add_char buf '\b'; read_string buf lexbuf }

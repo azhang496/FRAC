@@ -3,10 +3,13 @@
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN
 %token EQ NEQ LT LEQ GT GEQ
+%token ARROW
 %token RETURN IF ELSE WHILE
-%token INT
-%token <int> LITERAL
-%token <string> ID STRING
+%token INT DOUBLE STRING
+%token <string> ID 
+%token <int> INT_LIT
+%token <float> DOUBLE_LIT
+%token <string> STRING_LIT
 %token EOF
 
 %nonassoc NOELSE
@@ -25,10 +28,40 @@
 program:
   fdecl_list EOF { $1 }
 
-decls:
+/*decls:
    /* nothing */ { [], [] }
  | decls vdecl { ($2 :: fst $1), snd $1 }
- | decls fdecl { fst $1, ($2 :: snd $1) }
+ | decls fdecl { fst $1, ($2 :: snd $1) }*/
+
+
+ /* VARIABLES */
+
+
+var_type:
+    INT { Int }
+  | DOUBLE { Double }
+  | STRING { String }
+  | BOOL { Boolean }
+
+vdecl:
+  /* variable declaration without assignment */
+    var_type ID SEMI
+      { { vtype = $1;
+      vname = $2;
+      value = Noexpr } }
+  /* variable declaration with assignment */
+  | var_type ID ASSIGN expr SEMI 
+      { { vtype = $1;
+      vname = $2;
+      value = expr } }
+
+vdecl_list:
+    /* nothing */    { [] }
+  | vdecl_list vdecl { $2 :: $1 }
+
+
+ /* FUNCTIONS */
+
 
 fdecl:
    ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
@@ -49,16 +82,9 @@ formal_list:
     ID                   { [$1] }
   | formal_list COMMA ID { $3 :: $1 }
 
-vdecl_list:
-    /* nothing */    { [] }
-  | vdecl_list vdecl { $2 :: $1 }
 
-vdecl:
-   INT ID SEMI { $2 }
+/* STATEMENTS */
 
-stmt_list:
-    /* nothing */  { [] }
-  | stmt_list stmt { $2 :: $1 }
 
 stmt:
     expr SEMI { Expr($1) }
@@ -68,14 +94,22 @@ stmt:
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
 
+stmt_list:
+    /* nothing */  { [] }
+  | stmt_list stmt { $2 :: $1 }
+
+
+/* EXPRESSIONS */
+
+
 expr_opt:
     /* nothing */ { Noexpr }
   | expr          { $1 }
 
 expr:
-    LITERAL          { Literal($1) }
+    INT_LIT          { Int_lit($1) }
   | ID               { Id($1) }
-  | STRING           { String($1) }
+  | STRING_LIT       { String_lit($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
