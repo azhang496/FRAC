@@ -7,7 +7,7 @@ type var_type =
     Int
   | Double
   | String
-  | Boolean
+  | Bool
 
 (* Expressions *)
 type expr =
@@ -32,7 +32,7 @@ type stmt =
 (* Variable Declarations *)
 
 type var_decl = {
-  vtype : string;
+  vtype : var_type;
   vname : string;
   value : expr;
 }
@@ -42,7 +42,7 @@ type var_decl = {
 type func_decl = {
   fname : string;
   formals : string list;
-  locals : string list;
+  locals : var_decl list;
   body : stmt list;
 }
 

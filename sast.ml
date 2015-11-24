@@ -1,7 +1,6 @@
 open Ast
 
 (* Variable types *)
-
 type var_type =
     Int
   | Double
@@ -9,7 +8,6 @@ type var_type =
   | Boolean
 
 (* Expressions *)
-
 type expr =
     Int_lit of int
   | Double_lit of float

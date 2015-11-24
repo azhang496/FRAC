@@ -1,4 +1,4 @@
-OBJS = ast.cmo parser.cmo scanner.cmo compile.cmo frac.cmo
+OBJS = scanner.cmo ast.cmo parser.cmo semantic.cmo compile.cmo frac.cmo
 LIBS=str.cma
 YACC = ocamlyacc
 
@@ -28,6 +28,10 @@ ast.cmo:
 ast.cmx:
 parser.cmo: ast.cmo parser.cmi
 parser.cmx: ast.cmx parser.cmi
+semantic.cmo: ast.cmo sast.cmo
+semantic.cmx: ast.cmx sast.cmx
+sast.cmo: ast.cmo
+sast.cmx: ast.cmx
 scanner.cmo: parser.cmi
 scanner.cmx: parser.cmx
 parser.cmi: ast.cmo

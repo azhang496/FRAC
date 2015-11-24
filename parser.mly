@@ -5,11 +5,12 @@
 %token EQ NEQ LT LEQ GT GEQ
 %token ARROW
 %token RETURN IF ELSE WHILE
-%token INT DOUBLE STRING
-%token <string> ID 
+%token INT DOUBLE STRING BOOL
 %token <int> INT_LIT
 %token <float> DOUBLE_LIT
+%token <string> ID
 %token <string> STRING_LIT
+%token <bool> BOOL_LIT
 %token EOF
 
 %nonassoc NOELSE
@@ -29,7 +30,7 @@ program:
   fdecl_list EOF { $1 }
 
 /*decls:
-   /* nothing */ { [], [] }
+    nothing { [], [] }
  | decls vdecl { ($2 :: fst $1), snd $1 }
  | decls fdecl { fst $1, ($2 :: snd $1) }*/
 
@@ -41,7 +42,7 @@ var_type:
     INT { Int }
   | DOUBLE { Double }
   | STRING { String }
-  | BOOL { Boolean }
+  | BOOL { Bool }
 
 vdecl:
   /* variable declaration without assignment */
@@ -53,7 +54,7 @@ vdecl:
   | var_type ID ASSIGN expr SEMI 
       { { vtype = $1;
       vname = $2;
-      value = expr } }
+      value = $4 } }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -108,8 +109,10 @@ expr_opt:
 
 expr:
     INT_LIT          { Int_lit($1) }
+  | DOUBLE_LIT       { Double_lit($1) }
   | ID               { Id($1) }
   | STRING_LIT       { String_lit($1) }
+  | BOOL_LIT         { Bool_lit($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
