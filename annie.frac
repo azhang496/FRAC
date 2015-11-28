@@ -2,15 +2,11 @@ annie() {
     print("i am frustrated!");
 }
 
-lol() {
-    print("lol");
-}
-
-lol() {
+main() {
     print("annie");
 }
 
-draw() {
+foo() {
     print("lolololol");
 }
 
