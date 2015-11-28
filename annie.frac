@@ -1,0 +1,19 @@
+annie() {
+    print("i am frustrated!");
+}
+
+lol() {
+    print("lol");
+}
+
+lol() {
+    print("annie");
+}
+
+draw() {
+    print("lolololol");
+}
+
+main() {
+    print("lol");
+}

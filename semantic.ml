@@ -1,9 +1,3 @@
-(* 
-todo:
-  + syntax error in last line ?
-  + 
-*)
-
 open Ast
 open Sast
 
@@ -38,26 +32,43 @@ and check_stmts (scope: symbol_table) stmts = match stmts with
   | [stmt] -> check_stmt scope stmt
   | stmt :: more_stmts -> (* CONTINUE WORKING ON THIS *)*)
 
-let find_func (fnames : string list) (f : string) = List.mem f fnames
+let find_func (fnames : string list) (f : string) = List.mem f fnames (* unnecessary function? *)
 
-let rec check_fdecls (fnames : string list) = match fnames with
-    hd -> hd
-  | hd :: tl -> if find_func fnames hd then raise(Failure("function " ^ hd ^ " defined twice"))
-      else match hd with
+(*let rec check_fdecls (fnames : string list) = match fnames with
+    [] -> print_endline "empty"; []
+  | hd :: tl -> if List.mem hd tl then raise(Failure("function " ^ hd ^ " defined twice"))
+      else print_endline "looking for keywords"; match hd with
         "main" -> raise(Failure("reserved function name \"main\""))
       | "print" -> raise(Failure("reserved function name \"print\""))
       | "draw" -> raise(Failure("reserved function name \"draw\""))
-      | _ -> hd :: (check_fdecls tl)
-  (* check to see if the function has been defined already *)
+      | _ -> hd :: (check_fdecls tl)*)
+
+let rec check_fdecls (prog : Ast.program) (fnames : string list ) (main_found : bool) = match prog with
+    [] -> fnames
+  | hd :: tl -> if List.mem hd.fname fnames then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
+      else match hd.fname with
+          "print" -> raise(Failure "reserved function name 'print'")
+        | "draw" -> raise(Failure "reserved function name 'draw'")
+        | "main" -> if main_found then raise(Failure "main function can only be defined once")
+            else check_fdecls tl fnames true
+        | _ -> check_fdecls tl (hd.fname :: fnames) main_found
+
+(* list printer for testing purposes *)
+let rec print_list = function
+    [] -> ()
+  | hd :: tl -> print_endline hd; print_list tl
 
 let check_program (prog : Ast.program) =
   (*let env = { scope = { vars = []; funcs = [];}; main_found = false } in
   check_stmt env (List.hd (prog)) (* this is def wrong *)*)
-  if ((List.hd (prog)).fname <> "main") then raise(Failure "no main function defined") else
-  let checked_fdecls = check_fdecls (List.map (fun f -> f.fname) prog) in
-  print_endline "checked func decls"
+  if ((List.hd (prog)).fname <> "main") then raise(Failure "main function must be defined last") else
+  let checked_fdecls = check_fdecls prog [] false in
+  print_list checked_fdecls; print_endline "checked func decls!";
 
-
+(* todo:
+  + take out main function from the list passed to check_fdecls (so it doesn't throw an error for the actual main function)
+  + 
+*)
 
 
 

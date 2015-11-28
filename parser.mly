@@ -59,7 +59,6 @@ vdecl_list:
     /* nothing */    { [] }
   | vdecl_list vdecl { $2 :: $1 }
 
-
  /* FUNCTIONS */
 
 fdecl:
@@ -81,7 +80,6 @@ formal_list:
     ID                   { [$1] }
   | formal_list COMMA ID { $3 :: $1 }
 
-
 /* STATEMENTS */
 
 stmt:
@@ -96,8 +94,8 @@ stmt_list:
     /* nothing */  { [] }
   | stmt_list stmt { $2 :: $1 }
 
-
 /* EXPRESSIONS */
+
 
 expr_opt:
     /* nothing */ { Noexpr }
