@@ -1,6 +1,7 @@
 %{ open Ast %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
+%token SEMI COMMA
+%token LPAREN RPAREN LBRACE RBRACE
 %token PLUS MINUS TIMES DIVIDE ASSIGN
 %token EQ NEQ LT LEQ GT GEQ
 %token ARROW
@@ -34,9 +35,7 @@ program:
  | decls vdecl { ($2 :: fst $1), snd $1 }
  | decls fdecl { fst $1, ($2 :: snd $1) }*/
 
-
  /* VARIABLES */
-
 
 var_type:
     INT { Int }
@@ -63,7 +62,6 @@ vdecl_list:
 
  /* FUNCTIONS */
 
-
 fdecl:
    ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
      { { fname = $1;
@@ -86,7 +84,6 @@ formal_list:
 
 /* STATEMENTS */
 
-
 stmt:
     expr SEMI { Expr($1) }
   | RETURN expr SEMI { Return($2) }
@@ -101,7 +98,6 @@ stmt_list:
 
 
 /* EXPRESSIONS */
-
 
 expr_opt:
     /* nothing */ { Noexpr }

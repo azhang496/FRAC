@@ -1,7 +1,6 @@
 (* Binary operators *)
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq
 
-
 (* Variable types *)
 type var_type =
     Int
@@ -30,7 +29,6 @@ type stmt =
   | While of expr * stmt
 
 (* Variable Declarations *)
-
 type var_decl = {
   vtype : var_type;
   vname : string;
@@ -38,7 +36,6 @@ type var_decl = {
 }
 
 (* Function Declarations *)
-
 type func_decl = {
   fname : string;
   formals : string list;
