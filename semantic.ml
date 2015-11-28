@@ -32,31 +32,34 @@ and check_stmts (scope: symbol_table) stmts = match stmts with
   | [stmt] -> check_stmt scope stmt
   | stmt :: more_stmts -> (* CONTINUE WORKING ON THIS *)*)
 
+let check_expr (e : Ast.expr) = match e with
+    _ -> Sast.Int_lit(1)
+
 let check_stmt (s : Ast.stmt) = match s with
-    Expr(e) -> check_expr e
+    Block(sl) -> check_stmt_list sl
+  | Expr(e) -> check_expr e
   | Return(e) -> check_expr e
 
-let rec check_stmt_list (sl : Ast.stmt list) = match sl with
+and check_stmt_list (sl : Ast.stmt list) = match sl with
     [] -> []
-  | hd :: tl -> match hd with
-      Block(sl) -> (check_stmt_list sl) :: (check_stmt_list tl)
-    | _ -> (check_stmt hd) :: (check_stmt_list tl)
+  | hd :: tl -> (check_stmt hd) :: (check_stmt_list tl)
 
 (* returns the function name and return type *)
 let check_fdecl (f : Ast.func_decl) = match f.fname with
-    "main" -> let checked_stmts = check_stmt_list f in
-      if List.mem
-  | _ ->
+    "main" -> match f.formals with
+        [] -> check_stmt_list f.body (* PLACEHOLDER *)
+      | _ -> raise(Failure "main function cannot have formal parameters") 
+  | _ -> check_stmt_list f.body
 
 let rec check_fdecl_list (prog : Ast.program) (fnames : string list ) = match prog with
     hd :: [] -> if hd.fname <> "main" then raise(Failure "main function must be defined last") 
-      else (*check_func hd;*) fnames
+      else check_fdecl hd; fnames
   | hd :: tl -> if List.mem hd.fname fnames then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
       else match hd.fname with
           "print" -> raise(Failure "reserved function name 'print'")
         | "draw" -> raise(Failure "reserved function name 'draw'")
         | "main" -> raise(Failure "main function can only be defined once")
-        | _ -> check_fdecl_list tl (hd.fname :: fnames)
+        | _ -> check_fdecl hd; check_fdecl_list tl (hd.fname :: fnames)
 
 (* list printer for testing purposes *)
 let rec print_list = function
