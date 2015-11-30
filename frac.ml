@@ -13,4 +13,4 @@ let _ =
   let lexbuf = Lexing.from_channel input in
   let program = Parser.program Scanner.token lexbuf in
   (*Compile.generate program name*)
-  Semantic.check_program program
+  Semantic.check_stmt_list (List.hd(program)).body

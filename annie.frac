@@ -2,10 +2,6 @@ annie() {
     print("i am frustrated!");
 }
 
-main() {
-    print("annie");
-}
-
 foo() {
     print("lolololol");
 }

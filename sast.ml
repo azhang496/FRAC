@@ -14,6 +14,7 @@ type expr =
   | Id of string
   | String_lit of string
   | Bool_lit of bool
+  | Binop of expr * op * expr
 
 (* Statements *)
 type stmt =
