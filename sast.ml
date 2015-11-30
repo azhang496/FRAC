@@ -2,7 +2,8 @@ open Ast
 
 (* Variable types *)
 type var_type =
-    Int
+    Void
+  | Int
   | Double
   | String
   | Boolean

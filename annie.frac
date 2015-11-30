@@ -2,7 +2,7 @@ annie() {
     print("i am frustrated!");
 }
 
-main() {
+foo() {
     print("annie");
 }
 

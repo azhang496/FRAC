@@ -96,7 +96,6 @@ stmt_list:
 
 /* EXPRESSIONS */
 
-
 expr_opt:
     /* nothing */ { Noexpr }
   | expr          { $1 }

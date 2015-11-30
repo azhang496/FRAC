@@ -6,9 +6,9 @@ type symbol_table = {
   funcs: func_decl list;
 }
 
-type environment = {
+(*type environment = {
   scope: symbol_table;
-}
+}*)
 
 (* idk if i will need this *)
 (*let check_types t1 t2 =
@@ -35,7 +35,7 @@ and check_stmts (scope: symbol_table) stmts = match stmts with
 let check_expr (e : Ast.expr) = match e with
     _ -> Sast.Int_lit(1)
 
-let check_stmt (s : Ast.stmt) = match s with
+let rec check_stmt (s : Ast.stmt) = match s with
     Block(sl) -> check_stmt_list sl
   | Expr(e) -> check_expr e
   | Return(e) -> check_expr e
@@ -45,32 +45,38 @@ and check_stmt_list (sl : Ast.stmt list) = match sl with
   | hd :: tl -> (check_stmt hd) :: (check_stmt_list tl)
 
 (* returns the function name and return type *)
-let check_fdecl (f : Ast.func_decl) = match f.fname with
+let check_fdecl (env : symbol_table) (f : Ast.func_decl) = match f.fname with
     "main" -> match f.formals with
-        [] -> check_stmt_list f.body (* PLACEHOLDER *)
+        [] -> f.fname, Sast.Void (* PLACEHOLDER *)
       | _ -> raise(Failure "main function cannot have formal parameters") 
-  | _ -> check_stmt_list f.body
+  | _ -> f.fname, Sast.Int (* PLACEHOLDER *)
 
-let rec check_fdecl_list (prog : Ast.program) (fnames : string list ) = match prog with
+let rec find_fname (f : string) (funcs : Ast.func_decl list) = match funcs with
+    [] -> false
+  | hd :: tl -> match hd.fname with
+      f -> true || find_fname f tl
+    | _ -> false || find_fname f tl
+
+let rec check_fdecl_list (env : symbol_table ) (prog : Ast.program) = match prog with
     hd :: [] -> if hd.fname <> "main" then raise(Failure "main function must be defined last") 
-      else check_fdecl hd; fnames
-  | hd :: tl -> if List.mem hd.fname fnames then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
+      else (*check_fdecl hd;*) env
+  | hd :: tl -> if (find_fname hd.fname env.funcs) then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
       else match hd.fname with
           "print" -> raise(Failure "reserved function name 'print'")
         | "draw" -> raise(Failure "reserved function name 'draw'")
         | "main" -> raise(Failure "main function can only be defined once")
-        | _ -> check_fdecl hd; check_fdecl_list tl (hd.fname :: fnames)
+        | _ -> (*check_fdecl hd;*)
+               check_fdecl_list ({ vars = env.vars; funcs = (hd :: env.funcs); }) tl
 
 (* list printer for testing purposes *)
 let rec print_list = function
     [] -> ()
-  | hd :: tl -> print_endline hd; print_list tl
+  | hd :: tl -> print_endline hd.fname; print_list tl
 
 let check_program (prog : Ast.program) =
-  (*let env = { scope = { vars = []; funcs = [];}; main_found = false } in
-  check_stmt env (List.hd (prog)) (* this is def wrong *)*)
-  let checked_fdecls = check_fdecl_list (List.rev prog) [] in
-  print_list checked_fdecls; print_endline "checked func decls!";
+  let env = { vars = []; funcs = [] } in
+  let checked_fdecls = check_fdecl_list env (List.rev prog) in
+  print_list checked_fdecls.funcs; print_endline "checked func decls!";
 
 (* todo:
   + check that main func does not have args
