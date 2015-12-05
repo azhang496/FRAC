@@ -1,15 +1,15 @@
 annie() {
-    print("i am frustrated!");
+    1;
 }
 
-foo() {
-    print("annie");
+func() {
+    
 }
 
-foo() {
-    print("lolololol");
+func() {
+    
 }
 
 main() {
-    print("lol");
+
 }

@@ -28,14 +28,14 @@ type stmt =
   | If of expr * stmt * stmt
   | While of expr * stmt
 
-(* Variable Declarations *)
+(* Variable Declaration *)
 type var_decl = {
   vtype : var_type;
   vname : string;
   value : expr;
 }
 
-(* Function Declarations *)
+(* Function Declaration *)
 type func_decl = {
   fname : string;
   formals : string list;
