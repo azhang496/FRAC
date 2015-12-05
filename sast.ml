@@ -2,24 +2,44 @@ open Ast
 
 (* Variable types *)
 type var_type =
-    Int
+    Void
+  | Int
   | Double
   | String
   | Boolean
 
+
+and fdecl = {
+	ftype: var_type;
+	fname : string; (* Name of the function *)
+  formals : string list;
+  locals : var_decl list;
+	body : stmt list;
+}
+
 (* Expressions *)
-type expr =
-    Int_lit of int
+and expr =
+    Noexpr
+  | Int_lit of int
   | Double_lit of float
   | Id of string
   | String_lit of string
   | Bool_lit of bool
-  | Binop of expr * op * expr
+  | Unop of op * expression
+  | Binop of expression * op * expression
+  | Assign of string * expression
+  | Call of string * expression list
+  | Fdecl of fdecl
+
+and expression = expr * var_type
 
 (* Statements *)
-type stmt =
-    Expr of expr
+and stmt =
+    Expr of expression
   | Block of stmt list
-  | Return of expr
-  | If of expr * stmt * stmt
-  | While of expr * stmt
+  | Return of expression
+  | If of expression * stmt * stmt
+  | While of expression * stmt
+
+
+type program = fdecl list
