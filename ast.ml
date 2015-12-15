@@ -29,11 +29,17 @@ type stmt =
   | While of expr * stmt
 
 (* Variable Declarations *)
+type var_decl =
+    Var of var_type * string
+  | Var_Init of var_type * string * expr
+
+(*
 type var_decl = {
   vtype : var_type;
   vname : string;
   value : expr;
 }
+*)
 
 (* Function Declarations *)
 type func_decl = {

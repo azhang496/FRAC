@@ -1,6 +1,7 @@
 main() {
-    1;
+    int var1;
+    string x = "Hello World";
+    x + "YOOO";
     1;
     "HELLOWORLD";
-    1+"b";
 }

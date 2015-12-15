@@ -8,16 +8,26 @@ type var_type =
   | String
   | Boolean
 
-(* Variable Declarations *)
+(* Variable Declarations*)
 and var_decl_checked =
-    Var of string * var_type
+    Var of var_type * string
+  | Var_Init of var_type * string * expression
 
-and fdecl = {
-	ftype: var_type;
-	fname : string; (* Name of the function *)
-  formals : string list;
-  locals : var_decl list;
-	body : stmt list;
+(*
+and var_decl = {
+  vtype : var_type;
+  vname : string;
+  value : expr;
+}
+*)
+
+(* Function Declarations *)
+and func_decl = {
+  fname: string;
+  rtype: var_type;
+  formals: string list;
+  locals: var_decl list;
+  body: stmt list;
 }
 
 (* Expressions *)
@@ -32,7 +42,6 @@ and expr =
   | Binop of expression * op * expression
   | Assign of var_decl_checked * expression
   | Call of string * expression list
-  | Fdecl of fdecl
 
 and expression = expr * var_type
 
@@ -45,4 +54,4 @@ and stmt =
   | While of expression * stmt
 
 
-type program = fdecl list
+type program = func_decl list
