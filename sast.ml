@@ -8,6 +8,9 @@ type var_type =
   | String
   | Boolean
 
+(* Variable Declarations *)
+and var_decl_checked =
+    Var of string * var_type
 
 and fdecl = {
 	ftype: var_type;
@@ -22,12 +25,12 @@ and expr =
     Noexpr
   | Int_lit of int
   | Double_lit of float
-  | Id of string
+  | Id of var_decl_checked
   | String_lit of string
   | Bool_lit of bool
   | Unop of op * expression
   | Binop of expression * op * expression
-  | Assign of string * expression
+  | Assign of var_decl_checked * expression
   | Call of string * expression list
   | Fdecl of fdecl
 
