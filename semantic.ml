@@ -20,22 +20,41 @@ let rec print_list = function
   if (t1 != t2) then raise(Failure "type " ^ t2 ^ " but expected type " ^ t1)
   else print_endline "correct types!" (* should this be returning something instead of printing? *)*)
 
-let rec check_expr (*(scope: symbol_table) *) (expr: Ast.expr), (type: Sast.var_type) = match expr with
-    Int_lit(i) -> Sast.Int_lit(i), Sast.Int
+let rec check_expr (*(scope: symbol_table) *) (expr: Ast.expr) = match expr with
+    Noexpr -> Sast.Noexpr, Void
+  (* Id(str) ->
+    (try
+      let (decl, t) = check_id scope str in Sast.Id(decl), t
+    with Not_found -> raise (Failure ("Id named " ^ str ^ " not found")))*)
+  | Int_lit(i) -> Sast.Int_lit(i), Sast.Int
   | Double_lit(d) -> Sast.Double_lit(d), Sast.Double
   | String_lit(s) -> Sast.String_lit(s), Sast.String
   | Bool_lit(b) -> Sast.Bool_lit(b), Sast.Boolean
-  | Binop(e1, op, e2) -> (check_binop e1 op e2), Sast.Int
+  | Binop(_, _, _) as b -> check_binop b
+  (*| Assign(_, _) as a -> check_assign a*)
   | _ -> raise(Failure "invalid expression")
 
-and check_binop e1 op e2 =
-  let ew1 = check_expr e1 in
-  let ew2 = check_expr e2 in
-  match op with
-    (* Numeric operations *)
-    | Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq ->
-        Sast.Binop(ew1, op, ew2)
-    | _ -> raise (Failure "Incorrect stuff")
+and check_binop binop = match binop with
+  Ast.Binop(xp1, op, xp2) ->
+    let e1 = check_expr xp1 and e2 = check_expr xp2 in
+    let (_, t1) = e1 and (_, t2) = e2 in
+    let t = match op with
+      Add ->
+        if (t1 <> Int || t2 <> Int) then
+          if (t1 <> String || t2 <> String) then raise (Failure "Incorrect types for +")
+          else String
+        else Int
+      | Sub -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for - ") else Sast.Int
+      | Mult -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for * ") else Sast.Int
+      | Div -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for / ") else Sast.Int
+      | Equal -> if (t1 <> t2) then raise (Failure "Incorrect types for = ") else Sast.Boolean
+      | Neq -> if (t1 <> t2) then raise (Failure "Incorrect types for != ") else Sast.Boolean
+      | Less -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for < ") else Sast.Boolean
+      | Leq -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for <= ") else Sast.Boolean
+      | Greater -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for > ") else Sast.Boolean
+      | Geq -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for >= ") else Sast.Boolean
+    in Sast.Binop(e1, op, e2), t
+  | _ -> raise (Failure "Not a binary operator")
 
 let rec check_stmt (s : Ast.stmt) = match s with
     Block(sl) -> Sast.Block(check_stmt_list sl)
@@ -46,21 +65,21 @@ and check_stmt_list (sl : Ast.stmt list) = match sl with
     [] -> []
   | hd :: tl -> (check_stmt hd) :: (check_stmt_list tl)
 
-let rec find_rtype (f : Ast.func_decl) = match f.body with
+let rec find_rtype (body : Ast.stmt list) = match body with
     [] -> raise(Failure "function does not return anything")
   | hd :: tl -> (match hd with
       Return(e) -> let (_, t) = (check_expr e) in t
     | _ -> find_rtype tl)
 
-let sast_fdecl (f : Ast.func_decl) =
-  { fname = f.fname; rtype = (find_rtype f.body); formals = f.formals; locals = f.locals; body = (check_stmt_list f.body) }
+let sast_fdecl (f : Ast.func_decl) (r : Sast.var_type) =
+  { fname = f.fname; rtype = r; formals = f.formals; locals = f.locals; body = (check_stmt_list f.body) }
 
 (* returns an updated func_decl with return type *)
 let check_fdecl (env : symbol_table) (f : Ast.func_decl) = match f.fname with
     "main" -> (match f.formals with
-        [] -> sast_fdecl f
+        [] -> sast_fdecl f Sast.Void
       | _ -> raise(Failure "main function cannot have formal parameters"))
-  | _ -> sast_fdecl f
+  | _ -> sast_fdecl f (find_rtype f.body)
 
 (* returns true if the function name is found in the current scope *)
 let rec find_fname (funcs : func_decl list) (f : string) = match funcs with
@@ -72,7 +91,7 @@ let rec find_fname (funcs : func_decl list) (f : string) = match funcs with
 (* checks the list of function declarations in the program *)
 let rec check_fdecl_list (env : symbol_table ) (prog : Ast.program) = match prog with
     hd :: [] -> if hd.fname <> "main" then raise(Failure "main function must be defined last") 
-      else (*check_fdecl hd;*) env
+      else check_fdecl env hd; env
   | hd :: tl -> if (find_fname env.funcs hd.fname) then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
       else match hd.fname with
           "print" -> raise(Failure "reserved function name 'print'")

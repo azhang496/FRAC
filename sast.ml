@@ -10,23 +10,26 @@ type var_type =
 
 (* Expressions *)
 type expr =
-    Int_lit of int
+    Noexpr
+  | Int_lit of int
   | Double_lit of float
   | Id of string
   | String_lit of string
   | Bool_lit of bool
-  | Binop of expr * op * expr
-  | Assign of string * expr
-  | Call of string * expr list
-  | Noexpr
+  | Unop of op * expression
+  | Binop of expression * op * expression
+  | Assign of string * expression
+  | Call of string * expression list
+
+and expression = expr * var_type
 
 (* Statements *)
 type stmt =
-    Expr of expr
+    Expr of expression
   | Block of stmt list
-  | Return of expr
-  | If of expr * stmt * stmt
-  | While of expr * stmt
+  | Return of expression
+  | If of expression * stmt * stmt
+  | While of expression * stmt
 
 (* Function Declarations *)
 type func_decl = {
