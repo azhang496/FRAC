@@ -20,12 +20,12 @@ let rec print_list = function
   if (t1 != t2) then raise(Failure "type " ^ t2 ^ " but expected type " ^ t1)
   else print_endline "correct types!" (* should this be returning something instead of printing? *)*)
 
-let rec check_expr (*(scope: symbol_table) *) (expr: Ast.expr) = match expr with
-    Int_lit(i) -> Sast.Int_lit(i)
-  | Double_lit(d) -> Sast.Double_lit(d)
-  | String_lit(s) -> Sast.String_lit(s)
-  | Bool_lit(b) -> Sast.Bool_lit(b)
-  | Binop(e1, op, e2) -> check_binop e1 op e2
+let rec check_expr (*(scope: symbol_table) *) (expr: Ast.expr), (type: Sast.var_type) = match expr with
+    Int_lit(i) -> Sast.Int_lit(i), Sast.Int
+  | Double_lit(d) -> Sast.Double_lit(d), Sast.Double
+  | String_lit(s) -> Sast.String_lit(s), Sast.String
+  | Bool_lit(b) -> Sast.Bool_lit(b), Sast.Boolean
+  | Binop(e1, op, e2) -> (check_binop e1 op e2), Sast.Int
   | _ -> raise(Failure "invalid expression")
 
 and check_binop e1 op e2 =
@@ -46,12 +46,14 @@ and check_stmt_list (sl : Ast.stmt list) = match sl with
     [] -> []
   | hd :: tl -> (check_stmt hd) :: (check_stmt_list tl)
 
-let find_rtype (sl : Ast.stmt list) = match sl with
-    [] -> []
-  | hd :: tl -> 
+let rec find_rtype (f : Ast.func_decl) = match f.body with
+    [] -> raise(Failure "function does not return anything")
+  | hd :: tl -> (match hd with
+      Return(e) -> let (_, t) = (check_expr e) in t
+    | _ -> find_rtype tl)
 
 let sast_fdecl (f : Ast.func_decl) =
-  { fname = f.fname; rtype = find_rtype f.body; formals = f.formals; locals = f.locals; body = (check_stmt_list f.body) }
+  { fname = f.fname; rtype = (find_rtype f.body); formals = f.formals; locals = f.locals; body = (check_stmt_list f.body) }
 
 (* returns an updated func_decl with return type *)
 let check_fdecl (env : symbol_table) (f : Ast.func_decl) = match f.fname with
@@ -83,7 +85,3 @@ let check_program (prog : Ast.program) =
   let env = { vars = []; funcs = [] } in
   let checked_fdecls = check_fdecl_list env (List.rev prog) in
   print_list checked_fdecls.funcs; print_endline "checked func decls!";
-
-
-
-
