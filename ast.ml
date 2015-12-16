@@ -1,5 +1,5 @@
-(* Binary operators *)
-type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq
+(* Operators *)
+type op = Add | Sub | Mult | Div | Mod | Equal | Neq | Less | Leq | Greater | Geq | Or | And | Not
 
 (* Variable types *)
 type var_type =
@@ -15,6 +15,7 @@ type expr =
   | Id of string
   | String_lit of string
   | Bool_lit of bool
+  | Unop of op * expr
   | Binop of expr * op * expr
   | Assign of string * expr
   | Call of string * expr list

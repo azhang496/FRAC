@@ -11,6 +11,34 @@ let rec print_list = function
     [] -> ()
   | hd :: tl -> print_endline hd.fname; print_list tl
 
+
+(**************
+ * Exceptions *
+**************)
+
+exception Except of string
+
+let op_error t = match t with
+    Ast.Not -> raise (Except("Invalid use of unop: '!'"))
+  | Ast.Add -> raise (Except("Invalid types for binop: '+'"))
+  | Ast.Sub -> raise (Except("Invalid types for binop: '-'"))
+  | Ast.Mult -> raise (Except("Invalid types for binop: '*'"))
+  | Ast.Div -> raise (Except("Invalid types for binop: '/'"))
+  | Ast.Mod -> raise (Except("Invalid types for binop: '%'"))
+  | Ast.Or -> raise (Except("Invalid types for binop: '||'"))
+  | Ast.And -> raise (Except("Invalid types for binop: '&&'"))
+  | Ast.Equal -> raise (Except("Invalid types for binop: '=='"))
+  | Ast.Neq -> raise (Except("Invalid types for binop: '!='"))
+  | Ast.Less -> raise (Except("Invalid types for binop: '<'"))
+  | Ast.Greater -> raise (Except("Invalid types for binop: '>'"))
+  | Ast.Leq -> raise (Except("Invalid types for binop: '<='"))
+  | Ast.Geq -> raise (Except("Invalid types for binop: '>='"))
+
+
+(**************
+ * Checking *
+**************)
+
 let rec check_expr (env : symbol_table) (expr : Ast.expr) = match expr with
     Noexpr -> Sast.Noexpr, Void
   | Id(str) ->
@@ -21,6 +49,7 @@ let rec check_expr (env : symbol_table) (expr : Ast.expr) = match expr with
   | Double_lit(d) -> Sast.Double_lit(d), Sast.Double
   | String_lit(s) -> Sast.String_lit(s), Sast.String
   | Bool_lit(b) -> Sast.Bool_lit(b), Sast.Boolean
+  | Unop(_, _) as u -> check_unop env u
   | Binop(_, _, _) as b -> check_binop env b
   | Assign(_, _) as a -> check_assign env a
   | _ -> raise(Failure "invalid expression")
@@ -29,25 +58,51 @@ and check_id (env : symbol_table) id =
   let (_, decl, t) = List.find(fun (name, _, _) -> name = id) env.vars in
   decl, t
 
+and check_unop (env : symbol_table) unop = match unop with
+	Ast.Unop(op, e) ->
+		(match op with
+			Not ->
+				let expr = check_expr env e in
+				let (_, t) = expr in
+				if (t <> Boolean)
+          then op_error op
+        else Sast.Unop(op, expr), t
+			| _ -> raise (Failure "Invalid unary operator"))
+	| _ -> raise (Failure "Invalid unary operator")
+
 and check_binop (env : symbol_table) binop = match binop with
   Ast.Binop(ex1, op, ex2) ->
     let e1 = check_expr env ex1 and e2 = check_expr env ex2 in
     let (_, t1) = e1 and (_, t2) = e2 in
     let t = match op with
-      Add ->
-        if (t1 <> Int || t2 <> Int) then
-          if (t1 <> String || t2 <> String) then raise (Failure "Incorrect types for +")
-          else String
-        else Int
-      | Sub -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for -") else Sast.Int
-      | Mult -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for *") else Sast.Int
-      | Div -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for /") else Sast.Int
-      | Equal -> if (t1 <> t2) then raise (Failure "Incorrect types for = ") else Sast.Boolean
-      | Neq -> if (t1 <> t2) then raise (Failure "Incorrect types for != ") else Sast.Boolean
-      | Less -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for <") else Sast.Boolean
-      | Leq -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for <=") else Sast.Boolean
-      | Greater -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for >") else Sast.Boolean
-      | Geq -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for >=") else Sast.Boolean
+        Add ->
+          if (t1 <> Int || t2 <> Int) then
+            if (t1 <> Double || t2 <> Double) then
+              if (t1 <> String || t2 <> String)
+                then op_error op
+              else Sast.String
+            else Sast.Double
+          else Sast.Int
+      | Sub | Mult | Div | Mod ->
+          if (t1 <> Int || t2 <> Int) then
+            if (t1 <> Double || t2 <> Double)
+              then op_error op
+            else Sast.Double
+          else Sast.Int
+      | Greater | Less | Leq | Geq ->
+          if (t1 <> Int || t2 <> Int) then
+            if (t1 <> Double || t2 <> Double)
+              then op_error op
+            else Sast.Boolean
+          else Sast.Boolean
+      | And | Or ->
+          if (t1 <> Boolean || t2 <> Boolean)
+            then op_error op
+          else Sast.Boolean
+      | Equal | Neq ->
+          if (t1 <> t2)
+            then op_error op
+          else Sast.Boolean
     in Sast.Binop(e1, op, e2), t
   | _ -> raise (Failure "Not a binary operator")
 
@@ -89,6 +144,23 @@ let rec check_stmt (env : symbol_table) (s : Ast.stmt) = match s with
     Block(sl) -> Sast.Block(check_stmt_list env sl)
   | Expr(e) -> Sast.Expr(check_expr env e)
   | Return(e) -> Sast.Return(check_expr env e)
+  | If(e, s1, s2) ->
+		let expr = check_expr env e in
+		let (_, t) = expr in
+		if t <> Sast.Boolean then
+			raise (Failure "If statement uses a boolean expression")
+		else
+			let stmt1 = check_stmt env s1 in
+			let stmt2 = check_stmt env s2 in
+			Sast.If(expr, stmt1, stmt2)
+  | While(e, s) ->
+		let expr = check_expr env e in
+		let (_, t) = expr in
+		if t <> Sast.Boolean then
+			raise (Failure "While statement uses a boolean expression")
+		else
+			let stmt = check_stmt env s in
+			Sast.While(expr, stmt)
 
 and check_stmt_list (env : symbol_table) (sl : Ast.stmt list) = match sl with
     [] -> []

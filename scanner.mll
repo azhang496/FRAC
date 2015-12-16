@@ -23,11 +23,13 @@ rule token = parse
 (* Arithmetic Operators *)
 | '+'      { PLUS }   | '-'      { MINUS }
 | '*'      { TIMES }  | '/'      { DIVIDE }
-| '='      { ASSIGN }
+| '%'      { MOD }    | '='      { ASSIGN }
 (* Logical Operators *)
 | "=="     { EQ }     | "!="     { NEQ }
 | '<'      { LT }     | "<="     { LEQ }
 | ">"      { GT }     | ">="     { GEQ }
+| "||"     { OR }     | "&&"     { AND }
+| '!'      { NOT }
 
 | "->"     { ARROW }
 
