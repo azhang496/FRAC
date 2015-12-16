@@ -41,6 +41,7 @@ var_type:
 
 vdecl:
     var_type ID SEMI              { Var($1, $2)}
+  | var_type ID                   { Var($1, $2)}
   | var_type ID ASSIGN expr SEMI  { Var_Init($1, $2, $4)}
 
   /* variable declaration without assignment
@@ -76,7 +77,7 @@ formals_opt:
   | formal_list   { List.rev $1 }
 
 formal_list:
-    vdecl             { [$1] }
+    vdecl                  { [$1] }
   | formal_list COMMA vdecl { $3 :: $1 }
 
 /* STATEMENTS */

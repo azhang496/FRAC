@@ -1,3 +1,10 @@
+foo(int x, string y) {
+    double z = 39.5845345345345345;
+    int y = 2;
+}
+
 main() {
-    x + " hi";
+    string x = "";
+    string y = "hi";
+    x + y;
 }

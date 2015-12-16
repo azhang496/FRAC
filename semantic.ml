@@ -102,7 +102,6 @@ let rec find_rtype (env : symbol_table) (body : Ast.stmt list) (rtype : Sast.var
     | _ -> find_rtype env tl rtype)
 
 let sast_fdecl (env : symbol_table) (f : Ast.func_decl) =
-  (*let new_env = check_vdecl_list f.locals*)
   let checked_formals = check_vdecl_list env f.formals in
   let checked_locals = check_vdecl_list env f.locals in
   let new_env = { vars = checked_formals @ checked_locals; funcs = env.funcs } in
