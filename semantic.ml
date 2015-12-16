@@ -153,6 +153,16 @@ let rec check_stmt (env : symbol_table) (s : Ast.stmt) = match s with
 			let stmt1 = check_stmt env s1 in
 			let stmt2 = check_stmt env s2 in
 			Sast.If(expr, stmt1, stmt2)
+  | For(e1, e2, e3, s) ->
+  	let ex1 = check_expr env e1 in
+  	let ex2 = check_expr env e2 in
+  	let (_, t) = ex2 in
+  	if t <> Sast.Boolean then
+  		raise (Failure "For statment uses a boolean expression")
+  	else
+  		let ex3 = check_expr env e3 in
+  		let stmt = check_stmt env s in
+  		Sast.For(ex1, ex2, ex3, stmt)
   | While(e, s) ->
 		let expr = check_expr env e in
 		let (_, t) = expr in

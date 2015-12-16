@@ -27,6 +27,7 @@ type stmt =
   | Block of stmt list
   | Return of expr
   | If of expr * stmt * stmt
+  | For of expr * expr * expr * stmt
   | While of expr * stmt
 
 (* Variable Declarations *)

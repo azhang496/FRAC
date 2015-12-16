@@ -8,6 +8,14 @@ foo(int x, string y) {
     }
 }
 
+bar(int z) {
+  int a;
+  for(z = 0; z == 5; z = z + 1) {
+    a = z - 1;
+    a = 100;
+  }
+}
+
 main() {
     int x = 1;
     int y = 2;

@@ -35,6 +35,7 @@ rule token = parse
 
 | "if"     { IF }
 | "else"   { ELSE }
+| "for"    { FOR }
 | "while"  { WHILE }
 | "return" { RETURN }
 (* Type Names *)

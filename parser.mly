@@ -6,7 +6,7 @@
 %token EQ NEQ LT LEQ GT GEQ
 %token OR AND NOT
 %token ARROW
-%token RETURN IF ELSE WHILE
+%token RETURN IF ELSE FOR WHILE
 %token INT DOUBLE STRING BOOL
 %token <string> ID
 %token <int> INT_LIT
@@ -34,7 +34,7 @@ program:
   fdecl_list EOF { $1 }
 
 
- /* VARIABLES */
+/* VARIABLES */
 
 var_type:
     INT { Int }
@@ -86,12 +86,13 @@ formal_list:
 /* STATEMENTS */
 
 stmt:
-    expr SEMI { Expr($1) }
-  | RETURN expr SEMI { Return($2) }
-  | LBRACE stmt_list RBRACE { Block(List.rev $2) }
-  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
-  | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
-  | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
+    expr SEMI                                                     { Expr($1) }
+  | RETURN expr SEMI                                              { Return($2) }
+  | LBRACE stmt_list RBRACE                                       { Block(List.rev $2) }
+  | IF LPAREN expr RPAREN stmt %prec NOELSE                       { If($3, $5, Block([])) }
+  | IF LPAREN expr RPAREN stmt ELSE stmt                          { If($3, $5, $7) }
+  | FOR LPAREN expr SEMI expr SEMI expr RPAREN stmt 	            { For($3, $5, $7, $9) }
+  | WHILE LPAREN expr RPAREN stmt                                 { While($3, $5) }
 
 stmt_list:
     /* nothing */  { [] }

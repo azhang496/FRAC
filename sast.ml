@@ -51,6 +51,7 @@ and stmt =
   | Block of stmt list
   | Return of expression
   | If of expression * stmt * stmt
+  | For of expression * expression * expression * stmt
   | While of expression * stmt
 
 
