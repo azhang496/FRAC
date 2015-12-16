@@ -9,7 +9,7 @@ type var_type =
   | Boolean
 
 (* Variable Declarations*)
-and var_decl_checked =
+and var_decl =
     Var of var_type * string
   | Var_Init of var_type * string * expression
 
@@ -25,8 +25,8 @@ and var_decl = {
 and func_decl = {
   fname: string;
   rtype: var_type;
-  formals: string list;
-  locals: var_decl list;
+  formals: (var_decl * var_type) list;
+  locals: (var_decl * var_type) list;
   body: stmt list;
 }
 
@@ -35,12 +35,12 @@ and expr =
     Noexpr
   | Int_lit of int
   | Double_lit of float
-  | Id of var_decl_checked
+  | Id of var_decl
   | String_lit of string
   | Bool_lit of bool
   | Unop of op * expression
   | Binop of expression * op * expression
-  | Assign of var_decl_checked * expression
+  | Assign of var_decl * expression
   | Call of string * expression list
 
 and expression = expr * var_type

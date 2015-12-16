@@ -44,7 +44,7 @@ type var_decl = {
 (* Function Declarations *)
 type func_decl = {
   fname : string;
-  formals : string list;
+  formals : var_decl list;
   locals : var_decl list;
   body : stmt list;
 }

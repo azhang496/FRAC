@@ -1,4 +1,4 @@
-OBJS = scanner.cmo ast.cmo parser.cmo semantic.cmo compile.cmo frac.cmo
+OBJS = scanner.cmo ast.cmo parser.cmo semantic.cmo frac.cmo #compile.cmo
 LIBS=str.cma
 YACC = ocamlyacc
 

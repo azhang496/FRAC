@@ -1,4 +1,5 @@
 open Ast
+open Sast
 
 let rec expr = function
     Int_lit i -> string_of_int i

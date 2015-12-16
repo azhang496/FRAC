@@ -2,7 +2,7 @@ open Ast
 open Sast
 
 type symbol_table = {
-  mutable vars: (string * var_decl_checked * var_type) list;
+  mutable vars: (string * var_decl * var_type) list;
   mutable funcs: func_decl list;
 }
 
@@ -26,7 +26,7 @@ let rec check_expr (env : symbol_table) (expr : Ast.expr) = match expr with
   | _ -> raise(Failure "invalid expression")
 
 and check_id (env : symbol_table) id =
-	let (_, decl, t) = List.find(fun (n, _, _) -> n = id) env.vars in
+	let (_, decl, t) = List.find(fun (name, _, _) -> name = id) env.vars in
 	decl, t
 
 and check_binop (env : symbol_table) binop = match binop with
@@ -78,10 +78,14 @@ let check_vdecl (env : symbol_table) (v : Ast.var_decl) =
 
   let (_, decl, t) = declaration in
 	if t = Void then
-		raise (Failure "Var cannot be type void.")
+		raise (Failure "Variables cannot be type void.")
 	else
-		(env.vars <- declaration :: env.vars; (decl, t))
+		(env.vars <- declaration :: env.vars;
+    (decl, t))
 
+let rec check_vdecl_list (env : symbol_table) (vl : Ast.var_decl list) = match vl with
+    [] -> []
+  | hd :: tl -> (check_vdecl env hd) :: (check_vdecl_list env tl)
 
 (*TODO*)
 let check_stmt (env : symbol_table) (s : Ast.stmt) = match s with
@@ -100,7 +104,10 @@ let rec find_rtype (env : symbol_table) (body : Ast.stmt list) = match body with
     | _ -> find_rtype env tl)
 
 let sast_fdecl (env : symbol_table) (f : Ast.func_decl) (r : Sast.var_type) =
-  { fname = f.fname; rtype = r; formals = f.formals; locals = f.locals; body = (check_stmt_list env f.body) }
+  let checked_formals = check_vdecl_list env f.formals in
+  let checked_vdecls = check_vdecl_list env f.locals in
+  let new_env = { vars = List.concat (checked_formals checked_vdecls); funcs = env.funcs } in
+  { fname = f.fname; rtype = r; formals = checked_formals; locals = checked_vdecls; body = (check_stmt_list new_env f.body) }
 
 (* returns an updated func_decl with return type *)
 let check_fdecl (env : symbol_table) (f : Ast.func_decl) = match f.fname with

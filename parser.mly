@@ -76,8 +76,8 @@ formals_opt:
   | formal_list   { List.rev $1 }
 
 formal_list:
-    ID                   { [$1] }
-  | formal_list COMMA ID { $3 :: $1 }
+    vdecl             { [$1] }
+  | formal_list COMMA vdecl { $3 :: $1 }
 
 /* STATEMENTS */
 
