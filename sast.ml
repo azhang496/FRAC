@@ -25,8 +25,8 @@ and var_decl = {
 and func_decl = {
   fname: string;
   rtype: var_type;
-  formals: (var_decl * var_type) list;
-  locals: (var_decl * var_type) list;
+  formals: (string * var_decl * var_type) list;
+  locals: (string * var_decl * var_type) list;
   body: stmt list;
 }
 

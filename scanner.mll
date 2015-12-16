@@ -6,8 +6,8 @@ todo:
 
 { open Parser }
 
-let num = ['0'-'9']+
-let dbl = ['0'-'9']+'.'['0'-'9']+ | '.'num
+let num = ('-')?['0'-'9']+
+let dbl = ('-')?(['0'-'9']+'.'['0'-'9']+ | '.'num)
 let boolean = "true" | "false"
 
 rule token = parse

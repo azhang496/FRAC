@@ -14,9 +14,9 @@ let rec print_list = function
 let rec check_expr (env : symbol_table) (expr : Ast.expr) = match expr with
     Noexpr -> Sast.Noexpr, Void
   | Id(str) ->
-		(try
-			let (decl, t) = check_id env str in Sast.Id(decl), t
-		with Not_found -> raise (Failure ("Variable '" ^ str ^ "' not found")))
+    (try
+      let (decl, t) = check_id env str in Sast.Id(decl), t
+    with Not_found -> raise (Failure ("Variable '" ^ str ^ "' not found")))
   | Int_lit(i) -> Sast.Int_lit(i), Sast.Int
   | Double_lit(d) -> Sast.Double_lit(d), Sast.Double
   | String_lit(s) -> Sast.String_lit(s), Sast.String
@@ -26,30 +26,30 @@ let rec check_expr (env : symbol_table) (expr : Ast.expr) = match expr with
   | _ -> raise(Failure "invalid expression")
 
 and check_id (env : symbol_table) id =
-	let (_, decl, t) = List.find(fun (name, _, _) -> name = id) env.vars in
-	decl, t
+  let (_, decl, t) = List.find(fun (name, _, _) -> name = id) env.vars in
+  decl, t
 
 and check_binop (env : symbol_table) binop = match binop with
-	Ast.Binop(ex1, op, ex2) ->
-		let e1 = check_expr env ex1 and e2 = check_expr env ex2 in
-		let (_, t1) = e1 and (_, t2) = e2 in
-		let t = match op with
-			Add ->
-				if (t1 <> Int || t2 <> Int) then
-					if (t1 <> String || t2 <> String) then raise (Failure "Incorrect types for +")
-					else String
-				else Int
-			| Sub -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for -") else Sast.Int
-			| Mult -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for *") else Sast.Int
-			| Div -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for /") else Sast.Int
-			| Equal -> if (t1 <> t2) then raise (Failure "Incorrect types for = ") else Sast.Boolean
-			| Neq -> if (t1 <> t2) then raise (Failure "Incorrect types for != ") else Sast.Boolean
-			| Less -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for <") else Sast.Boolean
-			| Leq -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for <=") else Sast.Boolean
-			| Greater -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for >") else Sast.Boolean
-			| Geq -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for >=") else Sast.Boolean
-		in Sast.Binop(e1, op, e2), t
-	| _ -> raise (Failure "Not a binary operator")
+  Ast.Binop(ex1, op, ex2) ->
+    let e1 = check_expr env ex1 and e2 = check_expr env ex2 in
+    let (_, t1) = e1 and (_, t2) = e2 in
+    let t = match op with
+      Add ->
+        if (t1 <> Int || t2 <> Int) then
+          if (t1 <> String || t2 <> String) then raise (Failure "Incorrect types for +")
+          else String
+        else Int
+      | Sub -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for -") else Sast.Int
+      | Mult -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for *") else Sast.Int
+      | Div -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for /") else Sast.Int
+      | Equal -> if (t1 <> t2) then raise (Failure "Incorrect types for = ") else Sast.Boolean
+      | Neq -> if (t1 <> t2) then raise (Failure "Incorrect types for != ") else Sast.Boolean
+      | Less -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for <") else Sast.Boolean
+      | Leq -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for <=") else Sast.Boolean
+      | Greater -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for >") else Sast.Boolean
+      | Geq -> if (t1 <> Int || t2 <> Int) then raise (Failure "Incorrect types for >=") else Sast.Boolean
+    in Sast.Binop(e1, op, e2), t
+  | _ -> raise (Failure "Not a binary operator")
 
 and check_assign (env : symbol_table) a = match a with
   Ast.Assign(id, expr) ->
@@ -60,61 +60,60 @@ and check_assign (env : symbol_table) a = match a with
   | _ -> raise (Failure "Not a valid assignment")
 
 let check_vtype (t : Ast.var_type) = match t with
-	  Int -> Sast.Int
+    Int -> Sast.Int
   | Double -> Sast.Double
-	| String -> Sast.String
-	| Bool -> Sast.Boolean
+  | String -> Sast.String
+  | Bool -> Sast.Boolean
 
 let check_vdecl (env : symbol_table) (v : Ast.var_decl) =
-	let declaration = match v with
-		Var(t, name) ->
-			let t = check_vtype t in
-			(name, Sast.Var(t, name), t)
-	| Var_Init(t, name, expr) ->
-			let t = check_vtype t in
-			let expr = check_expr env expr in
-			let (_, t2 ) = expr in
-			if t <> t2 then raise (Failure "Incorrect type for variable initialization") else (name, Sast.Var_Init(t, name, expr), t) in
+  let declaration = match v with
+    Var(t, name) ->
+      let t = check_vtype t in
+      (name, Sast.Var(t, name), t)
+  | Var_Init(t, name, expr) ->
+      let t = check_vtype t in
+      let expr = check_expr env expr in
+      let (_, t2 ) = expr in
+      if t <> t2 then raise (Failure "Incorrect type for variable initialization") else (name, Sast.Var_Init(t, name, expr), t) in
 
-  let (_, decl, t) = declaration in
-	if t = Void then
-		raise (Failure "Variables cannot be type void.")
-	else
-		(env.vars <- declaration :: env.vars;
-    (decl, t))
+  let (_, _, t) = declaration in
+  if t = Void then
+    raise (Failure "Variables cannot be type void.")
+  else declaration
 
 let rec check_vdecl_list (env : symbol_table) (vl : Ast.var_decl list) = match vl with
     [] -> []
   | hd :: tl -> (check_vdecl env hd) :: (check_vdecl_list env tl)
 
-(*TODO*)
-let check_stmt (env : symbol_table) (s : Ast.stmt) = match s with
-    Expr(e) -> Sast.Expr(check_expr env e) (*
-  | Return(e) -> check_expr e
-  | Block(sl) -> check_stmt_list sl *)
+let rec check_stmt (env : symbol_table) (s : Ast.stmt) = match s with
+    Block(sl) -> Sast.Block(check_stmt_list env sl)
+  | Expr(e) -> Sast.Expr(check_expr env e)
+  | Return(e) -> Sast.Return(check_expr env e)
 
-let rec check_stmt_list (env : symbol_table) (sl : Ast.stmt list) = match sl with
+and check_stmt_list (env : symbol_table) (sl : Ast.stmt list) = match sl with
     [] -> []
   | hd :: tl -> (check_stmt env hd) :: (check_stmt_list env tl)
 
-let rec find_rtype (env : symbol_table) (body : Ast.stmt list) = match body with
-    [] -> raise(Failure "function does not return anything")
+let rec find_rtype (env : symbol_table) (body : Ast.stmt list) (rtype : Sast.var_type) = match body with
+    [] -> rtype
   | hd :: tl -> (match hd with
-      Return(e) -> let (_, t) = (check_expr env e) in t
-    | _ -> find_rtype env tl)
+      Return(e) -> if (rtype <> Sast.Void) then raise(Failure "function cannot have multiple return statements")
+                   else let (_, t) = (check_expr env e) in find_rtype env tl t
+    | _ -> find_rtype env tl rtype)
 
-let sast_fdecl (env : symbol_table) (f : Ast.func_decl) (r : Sast.var_type) =
+let sast_fdecl (env : symbol_table) (f : Ast.func_decl) =
   let checked_formals = check_vdecl_list env f.formals in
-  let checked_vdecls = check_vdecl_list env f.locals in
-  let new_env = { vars = List.concat (checked_formals checked_vdecls); funcs = env.funcs } in
-  { fname = f.fname; rtype = r; formals = checked_formals; locals = checked_vdecls; body = (check_stmt_list new_env f.body) }
+  let checked_locals = check_vdecl_list env f.locals in
+  let new_env = { vars = checked_formals @ checked_locals; funcs = env.funcs } in
+  { fname = f.fname; rtype = (find_rtype new_env f.body Sast.Void); formals = checked_formals; locals = checked_locals; body = (check_stmt_list new_env f.body) }
 
 (* returns an updated func_decl with return type *)
 let check_fdecl (env : symbol_table) (f : Ast.func_decl) = match f.fname with
     "main" -> (match f.formals with
-        [] -> sast_fdecl env f Sast.Void
+        [] -> let sast_main = sast_fdecl env f in if (sast_main.rtype <> Sast.Void) then raise(Failure "main function should not return anything")
+              else sast_main
       | _ -> raise(Failure "main function cannot have formal parameters"))
-  | _ -> sast_fdecl env f (find_rtype env f.body)
+  | _ -> sast_fdecl env f
 
 (* returns true if the function name is found in the current scope *)
 let rec find_fname (funcs : func_decl list) (f : string) = match funcs with
@@ -132,7 +131,7 @@ let rec check_fdecl_list (env : symbol_table ) (prog : Ast.program) = match prog
           "print" -> raise(Failure "reserved function name 'print'")
         | "draw" -> raise(Failure "reserved function name 'draw'")
         | "main" -> raise(Failure "main function can only be defined once")
-        | _ -> check_fdecl_list ({ vars = env.vars; funcs = ((check_fdecl env hd) :: env.funcs); }) tl
+        | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs } tl
 
 (* entry point *)
 let check_program (prog : Ast.program) =

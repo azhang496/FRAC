@@ -1,11 +1,13 @@
 annie() {
-    print("i am frustrated!");
+    8+8;
+    return -1;
 }
 
-foo() {
-    print("lolololol");
+func() {
+    return 1;
+    return 0;
 }
 
 main() {
-    print("lol");
+    8*9;
 }

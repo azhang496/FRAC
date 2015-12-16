@@ -50,13 +50,10 @@ type func_decl = {
 }
 
 (*Rules
-
 type rule =
     Rec of string * string
   | Term of string * expr
-
 Grammars
-
 type gram = {
   gname : string;
   init : string;
