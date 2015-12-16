@@ -16,12 +16,6 @@ let rec find_func (env : symbol_table) (f : string) =
   (try 
     List.find(fun func -> func.fname = f) env.funcs
   with Not_found -> raise(Failure ("function " ^ f ^ " not defined")))
-(*
- match funcs with
-    [] -> false, { fname = "", rtype = Sast.Void, }
-  | hd :: tl -> match hd.fname with
-      fname when fname = f -> true, hd
-    | _ -> find_func tl f*)
 
 let rec check_expr (env : symbol_table) (expr : Ast.expr) = match expr with
     Noexpr -> Sast.Noexpr, Void
@@ -73,9 +67,13 @@ and check_assign (env : symbol_table) a = match a with
   | _ -> raise (Failure "Not a valid assignment")
 
 and check_call (env : symbol_table) c = match c with
-  Ast.Call(f, actuals) -> 
-    let called_func = find_func env f in
-    Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype
+  Ast.Call(f, actuals) -> (match f with
+      "print" -> (match actuals with
+          [arg] -> Sast.Call(f, [check_expr env arg]), Sast.Void
+        | hd :: [_] -> raise(Failure "print() only takes one argument"))
+    (*| "draw" -> Sast.Call(f, actuals), Sast.Void (* PLACEHOLDER: actuals should be gram g and int n *)*)
+    | _ -> let called_func = find_func env f in
+           Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype)
   | _ -> raise (Failure "Not a valid function call")
 
 and check_args (env : symbol_table) ((formals : (string * var_decl * var_type) list), (actuals : Ast.expr list)) = match (formals, actuals) with

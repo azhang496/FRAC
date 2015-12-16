@@ -5,6 +5,7 @@ annie(string x) {
 
 func() {
     annie("hello");
+    print(2 + 3);
     return 1;
 }
 
