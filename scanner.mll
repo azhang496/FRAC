@@ -50,7 +50,7 @@ rule token = parse
 
 and read_string buf =
   parse
-  | '"'       { STRING (Buffer.contents buf) } (*
+  | '"'       { STRING_LIT (Buffer.contents buf) }
   | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
   | '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
   | '\\' 'b'  { Buffer.add_char buf '\b'; read_string buf lexbuf }
@@ -62,7 +62,7 @@ and read_string buf =
     { Buffer.add_string buf (Lexing.lexeme lexbuf);
       read_string buf lexbuf
     }
-  | _ { raise (Failure ("Illegal string character: " ^ Lexing.lexeme lexbuf)) } *)
+  | _ { raise (Failure ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
   | _ { Buffer.add_string buf (Lexing.lexeme lexbuf); read_string buf lexbuf}
   | eof { raise (Failure ("String is not terminated")) }
 
