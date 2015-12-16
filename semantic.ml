@@ -39,6 +39,12 @@ let op_error t = match t with
  * Checking *
 **************)
 
+(* returns true if the function name is found in the current scope *)
+let rec find_func (env : symbol_table) (f : string) =
+  (try
+    List.find(fun func -> func.fname = f) env.funcs
+  with Not_found -> raise(Failure ("function " ^ f ^ " not defined")))
+
 let rec check_expr (env : symbol_table) (expr : Ast.expr) = match expr with
     Noexpr -> Sast.Noexpr, Void
   | Id(str) ->
@@ -52,6 +58,7 @@ let rec check_expr (env : symbol_table) (expr : Ast.expr) = match expr with
   | Unop(_, _) as u -> check_unop env u
   | Binop(_, _, _) as b -> check_binop env b
   | Assign(_, _) as a -> check_assign env a
+  | Call(_, _) as c -> check_call env c
   | _ -> raise(Failure "invalid expression")
 
 and check_id (env : symbol_table) id =
@@ -113,6 +120,25 @@ and check_assign (env : symbol_table) a = match a with
     let (_, t2) = e in
     if t <> t2 then raise (Failure "Incorrect type for assignment") else Sast.Assign(decl, e), t
   | _ -> raise (Failure "Not a valid assignment")
+
+and check_call (env : symbol_table) c = match c with
+  Ast.Call(f, actuals) -> (match f with
+      "print" -> (match actuals with
+          [arg] -> Sast.Call(f, [check_expr env arg]), Sast.Void
+        | hd :: [_] -> raise(Failure "print() only takes one argument"))
+    (*| "draw" -> Sast.Call(f, actuals), Sast.Void (* PLACEHOLDER: actuals should be gram g and int n *)*)
+    | _ -> let called_func = find_func env f in
+           Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype)
+  | _ -> raise (Failure "Not a valid function call")
+
+and check_args (env : symbol_table) ((formals : (string * var_decl * var_type) list), (actuals : Ast.expr list)) = match (formals, actuals) with
+    ([], []) -> []
+  | (f_hd :: f_tl, a_hd :: a_tl) ->
+      let (_, _, f_type) = f_hd in
+      let (a_expr, a_type) = check_expr env a_hd in
+      if (f_type <> a_type) then raise (Failure "wrong argument type")
+      else (a_expr, a_type) :: check_args env (f_tl, a_tl)
+  | (_, _) -> raise (Failure "wrong number of arguments")
 
 let check_vtype (t : Ast.var_type) = match t with
     Int -> Sast.Int
@@ -197,18 +223,11 @@ let check_fdecl (env : symbol_table) (f : Ast.func_decl) = match f.fname with
       | _ -> raise(Failure "main function cannot have formal parameters"))
   | _ -> sast_fdecl env f
 
-(* returns true if the function name is found in the current scope *)
-let rec find_fname (funcs : func_decl list) (f : string) = match funcs with
-    [] -> false
-  | hd :: tl -> match hd.fname with
-      fname when fname = f -> true
-    | _ -> find_fname tl f
-
 (* checks the list of function declarations in the program *)
 let rec check_fdecl_list (env : symbol_table ) (prog : Ast.program) = match prog with
     hd :: [] -> if hd.fname <> "main" then raise(Failure "main function must be defined last")
       else check_fdecl env hd; env
-  | hd :: tl -> if (find_fname env.funcs hd.fname) then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
+  | hd :: tl -> if (List.exists (fun func -> func.fname = hd.fname) env.funcs) then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
       else match hd.fname with
           "print" -> raise(Failure "reserved function name 'print'")
         | "draw" -> raise(Failure "reserved function name 'draw'")
