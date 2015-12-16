@@ -1,4 +1,4 @@
-type action = Ast | Compile
+type action = Semantic | Compile
 
 (* Get the name of the program from the file name. *)
 let get_prog_name source_file_path =
@@ -8,8 +8,14 @@ let get_prog_name source_file_path =
 		List.nth split_name ((List.length split_name) - 2)
 
 let _ =
+  let action =
+		if Array.length Sys.argv > 1 then
+    	List.assoc Sys.argv.(2) [ ("-s", Semantic); ("-c", Compile) ]
+  	else Compile in
   let name = get_prog_name Sys.argv.(1) in
   let input = open_in Sys.argv.(1) in
   let lexbuf = Lexing.from_channel input in
   let program = Parser.program Scanner.token lexbuf in
-  Compile.generate program name
+	match action with
+			Semantic -> Semantic.check_program program
+		| Compile	-> Compile.generate (Semantic.check_program program) name

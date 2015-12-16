@@ -1,0 +1,30 @@
+foo(int x, string y) {
+    double z = 39.5845345345345345;
+    double a = 1.23223;
+    int w = 2;
+    while(!(w > 0)) {
+      z - a;
+      w - 1;
+    }
+}
+
+bar(int z) {
+  int a;
+  for(z = 0; z == 5; z = z + 1) {
+    a = z - 1;
+    a = 100;
+  }
+}
+
+main() {
+    int x = 1;
+    int y = 2;
+    x + y;
+    if (x < y) {
+      y - x;
+      y = 3;
+    }
+    else {
+      x = 10000;
+    }
+}

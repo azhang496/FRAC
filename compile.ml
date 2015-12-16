@@ -1,31 +1,56 @@
 open Ast
+open Sast
 
 let rec expr = function
-    Literal i -> string_of_int i
-  | Id s -> s
-  | String s -> "\"" ^ s ^ "\""
-  | Binop (e1, o, e2) -> (expr e1) ^ (match o with
-        Add -> " + " | Sub -> " - " | Mult -> " * " | Div -> " / "
-      | Equal -> " == " | Neq -> " != "
-      | Less -> " < " | Leq -> " <= " | Greater -> " > " | Geq -> " >= "
+    Int_lit(i) -> string_of_int i
+  | Id(decl) -> (match decl with
+		  Var(_, str) -> str
+		| Var_Init(_, str, _) -> str)
+  | String_lit(s) -> "\"" ^ s ^ "\""
+  | Unop(op, (e,_)) -> (match op with
+        Not -> " ! "
+      | _   -> ""
+    ) ^ (expr e)
+  | Binop ((e1,_), op, (e2,_)) -> (expr e1) ^ (match op with
+        Add     -> " + "
+      | Sub     -> " - "
+      | Mult    -> " * "
+      | Div     -> " / "
+      | Mod     -> " % "
+      | Equal   -> " == "
+      | Neq     -> " != "
+      | Less    -> " < "
+      | Leq     -> " <= "
+      | Greater -> " > "
+      | Geq     -> " >= "
+      | And     -> " && "
+      | Or      -> " || "
+      | _       -> ""
     ) ^ (expr e2)
-  | Assign (v, e) -> v ^ " = " ^ (expr e)
+  | Assign (decl, (e,_)) -> (match decl with
+		  Var(_, str) -> str
+		| Var_Init(_, str, _) -> str) ^ " = " ^ (expr e)
+
+
+    (* HAVING TROUBLE WITH CALL FUNCTION *) (*
   | Call (fname, actuals) -> (match fname with
     "print" -> "printf(\"%s\", " ^ (expr (List.hd actuals)) ^ ")"
-    | _     -> fname ^ "(" ^ (String.concat "," (List.map expr actuals)) ^ ")")
+    | _     -> fname ^ "(" ^ (String.concat "," (List.map expr actuals)) ^ ")") *)
   | Noexpr -> ""
 
 let rec stmt = function
     Block sl -> String.concat "" (List.map stmt sl)
-  | Expr e -> (expr e) ^ ";\n"
-  | Return e -> "return " ^ (expr e) ^ ";\n"
-  | If (e, st, Block[]) -> "if(" ^ (expr e) ^ ") {\n" ^ (stmt st) ^ "}\n"
-  | If (e, st1, st2) -> "if(" ^ (expr e) ^ ") {\n" ^ (stmt st1) ^ "}\n" ^
+  | Expr (e,_) -> (expr e) ^ ";\n"
+  | Return (e,_) -> "return " ^ (expr e) ^ ";\n"
+  | If ((e,_), st, Block[]) -> "if(" ^ (expr e) ^ ") {\n" ^ (stmt st) ^ "}\n"
+  | If ((e,_), st1, st2) -> "if(" ^ (expr e) ^ ") {\n" ^ (stmt st1) ^ "}\n" ^
       "else" ^ "{\n" ^ (stmt st2) ^ "}\n"
-  | While (e, st) -> "while(" ^ (expr e) ^ ") {\n" ^ (stmt st) ^ "}\n"
+  | While ((e,_), st) -> "while(" ^ (expr e) ^ ") {\n" ^ (stmt st) ^ "}\n"
 
 let add_type v = "type " ^ v
 
+
+(* HAVING TROUBLE HERE TOO *)
 let gen_fdecl fdecl =
   (match fdecl.fname with
       "main" -> "int main()"
