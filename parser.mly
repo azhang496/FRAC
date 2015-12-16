@@ -30,10 +30,6 @@
 program:
   fdecl_list EOF { $1 }
 
-/*decls:
-    nothing { [], [] }
- | decls vdecl { ($2 :: fst $1), snd $1 }
- | decls fdecl { fst $1, ($2 :: snd $1) }*/
 
  /* VARIABLES */
 
@@ -44,16 +40,19 @@ var_type:
   | BOOL { Bool }
 
 vdecl:
-  /* variable declaration without assignment */
+    var_type ID SEMI              { Var($1, $2)}
+  | var_type ID ASSIGN expr SEMI  { Var_Init($1, $2, $4)}
+
+  /* variable declaration without assignment
     var_type ID SEMI
       { { vtype = $1;
       vname = $2;
       value = Noexpr } }
-  /* variable declaration with assignment */
-  | var_type ID ASSIGN expr SEMI 
+  | var_type ID ASSIGN expr SEMI
       { { vtype = $1;
       vname = $2;
       value = $4 } }
+  */
 
 vdecl_list:
     /* nothing */    { [] }
@@ -77,8 +76,8 @@ formals_opt:
   | formal_list   { List.rev $1 }
 
 formal_list:
-    ID                   { [$1] }
-  | formal_list COMMA ID { $3 :: $1 }
+    vdecl             { [$1] }
+  | formal_list COMMA vdecl { $3 :: $1 }
 
 /* STATEMENTS */
 
@@ -95,6 +94,7 @@ stmt_list:
   | stmt_list stmt { $2 :: $1 }
 
 /* EXPRESSIONS */
+
 
 expr_opt:
     /* nothing */ { Noexpr }

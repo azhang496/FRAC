@@ -28,29 +28,32 @@ type stmt =
   | If of expr * stmt * stmt
   | While of expr * stmt
 
-(* Variable Declaration *)
+(* Variable Declarations *)
+type var_decl =
+    Var of var_type * string
+  | Var_Init of var_type * string * expr
+
+(*
 type var_decl = {
   vtype : var_type;
   vname : string;
   value : expr;
 }
+*)
 
-(* Function Declaration *)
+(* Function Declarations *)
 type func_decl = {
   fname : string;
-  formals : string list;
+  formals : var_decl list;
   locals : var_decl list;
   body : stmt list;
 }
 
 (*Rules
-
 type rule =
     Rec of string * string
   | Term of string * expr
-
 Grammars
-
 type gram = {
   gname : string;
   init : string;

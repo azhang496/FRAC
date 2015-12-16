@@ -1,4 +1,4 @@
-open Ast
+(*open Ast
 
 let rec expr = function
     Int_lit i -> string_of_int i
@@ -39,4 +39,4 @@ let generate funcs name =
   let outfile = open_out ("tests/" ^ name ^ "-NEW.c")
   in let translated_program =  "#include <stdio.h>\n" ^ String.concat "" (List.rev (List.map gen_fdecl funcs)) ^ "\n"
   in ignore(Printf.fprintf outfile "%s" translated_program);
-  close_out outfile;
+  close_out outfile;*)
