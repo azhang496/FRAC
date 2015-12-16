@@ -1,11 +1,11 @@
-annie() {
+annie(string x) {
     8+8;
     return -1;
 }
 
 func() {
+    annie("hello");
     return 1;
-    return 0;
 }
 
 main() {

@@ -53,5 +53,4 @@ and stmt =
   | If of expression * stmt * stmt
   | While of expression * stmt
 
-
 type program = func_decl list
