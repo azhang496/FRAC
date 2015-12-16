@@ -1,0 +1,11 @@
+annie() {
+    print("i am frustrated!");
+}
+
+foo() {
+    print("lolololol");
+}
+
+main() {
+    print("lol");
+}

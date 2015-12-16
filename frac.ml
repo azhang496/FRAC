@@ -1,4 +1,4 @@
-type action = Ast | Compile
+type action = Ast | Semantic | Compile
 
 (* Get the name of the program from the file name. *)
 let get_prog_name source_file_path =
@@ -12,4 +12,6 @@ let _ =
   let input = open_in Sys.argv.(1) in
   let lexbuf = Lexing.from_channel input in
   let program = Parser.program Scanner.token lexbuf in
-  Compile.generate program name
+  (*Compile.generate program name*)
+  (*Semantic.check_stmt_list (List.hd(program)).body*)
+	Semantic.check_program program
