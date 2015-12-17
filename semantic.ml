@@ -228,15 +228,13 @@ let check_fdecl (env : symbol_table) (f : Ast.func_decl) = match f.fname with
 let rec check_fdecl_list (env : symbol_table ) (prog : Ast.program) = match prog with
     []       -> raise(Failure "Valid FRAC program must have at least a main function")
   | hd :: [] -> if hd.fname <> "main" then raise(Failure "main function must be defined last")
-                else check_fdecl env hd; env
+                else { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs }
   | hd :: tl -> if (List.exists (fun func -> func.fname = hd.fname) env.funcs) then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
                 else match hd.fname with
                     "print" -> raise(Failure "reserved function name 'print'")
                   | "draw" -> raise(Failure "reserved function name 'draw'")
                   | "main" -> raise(Failure "main function can only be defined once")
                   | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs } tl
-
-
 
 (* entry point *)
 let check_program (prog : Ast.program) =
