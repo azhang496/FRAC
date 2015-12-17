@@ -35,6 +35,17 @@ type var_decl =
     Var of var_type * string
   | Var_Init of var_type * string * expr
 
+(*(* Rule Definitions *)
+type rule =
+    Rule of string * 
+
+(* Grammar Declarations *)
+type gram_decl = {
+  gname : string;
+  init : rule;
+  rules : rule list;
+}*)
+
 (* Function Declarations *)
 type func_decl = {
   fname : string;

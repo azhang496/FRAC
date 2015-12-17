@@ -11,18 +11,35 @@ void koch_flake(char var, int iter)
 	else {
 		if (var == 'F') {
 			koch_flake('F', iter - 1);
-			turtle_turn_left(60);
+			koch_flake('l', iter - 1);
 			koch_flake('F', iter - 1);
-			turtle_turn_right(60);
-			turtle_turn_right(60);
+			koch_flake('r', iter - 1);
+			koch_flake('r', iter - 1);
 			koch_flake('F', iter - 1);
-			turtle_turn_left(60);
+			koch_flake('l', iter - 1);
 			koch_flake('F', iter - 1);
 		}
+        if (var == 'r') {
+            turtle_turn_right(60);
+        }
+        if (var == 'l') {
+            turtle_turn_left(60);
+        }
 	}
 }	
 
 void koch_flake_start(int iter)
+{
+    koch_flake('F', iter);
+    koch_flake('r', iter);
+    koch_flake('r', iter);
+    koch_flake('F', iter);
+    koch_flake('r', iter);
+    koch_flake('r', iter);
+    koch_flake('F', iter);
+}
+
+/*void koch_flake_start(int iter)
 {
 	koch_flake('F', iter);
 	turtle_turn_right(60);
@@ -31,7 +48,7 @@ void koch_flake_start(int iter)
 	turtle_turn_right(60);
 	turtle_turn_right(60);
 	koch_flake('F', iter);
-}
+}*/
 
 void dragon(char var, int iter)
 {

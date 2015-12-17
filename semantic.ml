@@ -11,7 +11,6 @@ let rec print_list = function
     [] -> ()
   | hd :: tl -> print_endline hd.fname; print_list tl
 
-
 (**************
  * Exceptions *
 **************)
@@ -33,7 +32,6 @@ let op_error t = match t with
   | Ast.Greater -> raise (Except("Invalid types for binop: '>'"))
   | Ast.Leq -> raise (Except("Invalid types for binop: '<='"))
   | Ast.Geq -> raise (Except("Invalid types for binop: '>='"))
-
 
 (**************
  * Checking *
@@ -235,8 +233,6 @@ let rec check_fdecl_list (env : symbol_table ) (prog : Ast.program) = match prog
                   | "draw" -> raise(Failure "reserved function name 'draw'")
                   | "main" -> raise(Failure "main function can only be defined once")
                   | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs } tl
-
-
 
 (* entry point *)
 let check_program (prog : Ast.program) =

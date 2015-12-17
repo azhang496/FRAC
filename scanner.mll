@@ -31,7 +31,11 @@ rule token = parse
 | "||"     { OR }     | "&&"     { AND }
 | '!'      { NOT }
 
-| "->"     { ARROW }
+(*| "gram"   { GRAM }
+| "init"   { INIT }
+| "rules"  { RULES }
+| ":"      { COLON }
+| "->"     { ARROW }*)
 
 | "if"     { IF }
 | "else"   { ELSE }

@@ -5,9 +5,9 @@
 %token PLUS MINUS TIMES DIVIDE MOD ASSIGN
 %token EQ NEQ LT LEQ GT GEQ
 %token OR AND NOT
-%token ARROW
 %token RETURN IF ELSE FOR WHILE
 %token INT DOUBLE STRING BOOL
+/*%token GRAM INIT RULES ARROW*/
 %token <string> ID
 %token <int> INT_LIT
 %token <float> DOUBLE_LIT
@@ -47,20 +47,14 @@ vdecl:
   | var_type ID                   { Var($1, $2)}
   | var_type ID ASSIGN expr SEMI  { Var_Init($1, $2, $4)}
 
-  /* variable declaration without assignment
-    var_type ID SEMI
-      { { vtype = $1;
-      vname = $2;
-      value = Noexpr } }
-  | var_type ID ASSIGN expr SEMI
-      { { vtype = $1;
-      vname = $2;
-      value = $4 } }
-  */
-
 vdecl_list:
     /* nothing */    { [] }
   | vdecl_list vdecl { $2 :: $1 }
+
+/* GRAMS */
+
+/*gdecl:
+    GRAM */
 
  /* FUNCTIONS */
 

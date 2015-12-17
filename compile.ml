@@ -69,8 +69,13 @@ let rec gen_formals_list fl = match fl with
 let gen_fdecl fdecl =
   (match fdecl.fname with
       "main" -> "int main()"
-    | _      -> "return_type " ^ fdecl.fname ^ "(" ^ (gen_formals_list fdecl.formals) ^ ")")
-  ^ "{\n" ^ String.concat "" (List.map stmt fdecl.body) ^
+    | _      -> (match fdecl.rtype with
+                  Sast.Void -> "void "
+                | Sast.Int -> "int "
+                | Sast.Double -> "double "
+                | Sast.String -> "string " (* NEED TO CHANGE THIS TO CHAR STAR *)
+                | Sast.Boolean -> "bool ")
+  ^ fdecl.fname ^ "(" ^ (gen_formals_list fdecl.formals) ^ ")") ^ "{\n" ^ String.concat "" (List.map stmt fdecl.body) ^
   (match fdecl.fname with
       "main" -> "return 0;\n"
     | _      -> "" )
