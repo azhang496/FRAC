@@ -58,7 +58,7 @@ let rec check_expr (env : symbol_table) (expr : Ast.expr) = match expr with
   | Assign(_, _) as a -> check_assign env a
   | Call(_, _) as c -> check_call env c
 
-and check_id (env : symbol_table) id =
+and check_id (env : symbol_table) (id : string) =
   let (_, decl, t) = List.find(fun (name, _, _) -> name = id) env.vars in
   decl, t
 
@@ -183,7 +183,7 @@ let rec check_stmt (env : symbol_table) (s : Ast.stmt) = match s with
   	let ex2 = check_expr env e2 in
   	let (_, t) = ex2 in
   	if t <> Sast.Boolean then
-  		raise (Failure "For statment uses a boolean expression")
+  		raise (Failure "For statement uses a boolean expression")
   	else
   		let ex3 = check_expr env e3 in
   		let stmt = check_stmt env s in
@@ -210,8 +210,9 @@ let rec find_rtype (env : symbol_table) (body : Ast.stmt list) (rtype : Sast.var
 
 let sast_fdecl (env : symbol_table) (f : Ast.func_decl) =
   let checked_formals = check_vdecl_list env f.formals in
-  let checked_locals = check_vdecl_list env f.locals in
-  let new_env = { vars = checked_formals @ checked_locals; funcs = env.funcs } in
+  let formals_env = { vars = env.vars @ checked_formals; funcs = env.funcs } in
+  let checked_locals = check_vdecl_list formals_env f.locals in
+  let new_env = { vars = formals_env.vars @ checked_locals; funcs = env.funcs } in
   { fname = f.fname; rtype = (find_rtype new_env f.body Sast.Void); formals = checked_formals; locals = checked_locals; body = (check_stmt_list new_env f.body) }
 
 (* returns an updated func_decl with return type *)
@@ -220,7 +221,7 @@ let check_fdecl (env : symbol_table) (f : Ast.func_decl) = match f.fname with
         [] -> let sast_main = sast_fdecl env f in if (sast_main.rtype <> Sast.Void) then raise(Failure "main function should not return anything")
               else sast_main
       | _  -> raise(Failure "main function cannot have formal parameters"))
-  | _ -> sast_fdecl env f
+  | _ -> let checked_formals = check_vdecl_list env f.formals in sast_fdecl env f
 
 (* checks the list of function declarations in the program *)
 let rec check_fdecl_list (env : symbol_table ) (prog : Ast.program) = match prog with

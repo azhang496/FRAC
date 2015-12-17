@@ -1,11 +1,20 @@
 open Ast
 open Sast
 
+let c_print_types t = match t with
+    Void    -> ""
+  | Int     -> "\"%d\\n\""
+  | Double  -> "\"%f\\n\""
+  | String  -> "\"%s\\n\""
+  | Boolean -> "\"%d\\n\""
+
 let rec expr = function
     Int_lit(i) -> string_of_int i
+  | Bool_lit(b) -> string_of_bool b
+  | Double_lit(d) -> string_of_float d
   | Id(decl) -> (match decl with
-		  Var(_, str) -> str
-		| Var_Init(_, str, _) -> str)
+      Var(_, str) -> str
+    | Var_Init(_, str, _) -> str)
   | String_lit(s) -> "\"" ^ s ^ "\""
   | Unop(op, (e,_)) -> (match op with
         Not -> " ! "
@@ -28,12 +37,28 @@ let rec expr = function
       | _       -> ""
     ) ^ (expr e2)
   | Assign (decl, (e,_)) -> (match decl with
-		  Var(_, str) -> str
-		| Var_Init(_, str, _) -> str) ^ " = " ^ (expr e)
-    (* HAVING TROUBLE WITH CALL FUNCTION *) (*
+      Var(_, str) -> str
+    | Var_Init(_, str, _) -> str) ^ " = " ^ (expr e)
+  (* This DEFINITELY needs to be made more efficient *)
   | Call (fname, actuals) -> (match fname with
-    "print" -> "printf(\"%s\", " ^ (expr (List.hd actuals)) ^ ")"
-    | _     -> fname ^ "(" ^ (String.concat "," (List.map expr actuals)) ^ ")") *)
+      "print" -> "printf(" ^
+                 (let actuals_type = function
+                   [] ->  ""
+                   | (_,t)::[] -> c_print_types t
+                   | _ -> ""
+                   in actuals_type actuals)
+                 ^ ", " ^
+                 (let rec gen_actuals = function
+                    [] ->  ""
+                    | (e,_)::[] -> expr e
+                    | _ -> ""
+                    in gen_actuals actuals) ^ ")"
+    | _       -> fname ^ "(" ^
+                 (let rec gen_actuals = function
+                    [] ->  ""
+                    | (e,_)::[] -> expr e
+                    | (e,_)::tl -> expr e ^ ", " ^ gen_actuals tl
+                    in gen_actuals actuals) ^ ")")
   | Noexpr -> ""
 
 let rec stmt = function
@@ -43,46 +68,53 @@ let rec stmt = function
   | If ((e,_), st, Block[]) -> "if(" ^ (expr e) ^ ") {\n" ^ (stmt st) ^ "}\n"
   | If ((e,_), st1, st2) -> "if(" ^ (expr e) ^ ") {\n" ^ (stmt st1) ^ "}\n" ^
                             "else" ^ "{\n" ^ (stmt st2) ^ "}\n"
-  | For ((e1,_), (e2,_), (e3,_), st) -> "for(" ^ (expr e1) ^ "; " ^ (expr e2) ^ "; " ^ (expr e3) ^ ") {\n}" ^ (stmt st) ^ "}\n2"
+  | For ((e1,_), (e2,_), (e3,_), st) -> "for(" ^ (expr e1) ^ "; " ^ (expr e2) ^ "; " ^ (expr e3) ^ ") {\n" ^ (stmt st) ^ "}\n2"
   | While ((e,_), st) -> "while(" ^ (expr e) ^ ") {\n" ^ (stmt st) ^ "}\n"
 
-let add_type v = "type " ^ v
-
-
 let rec gen_var_types = function
-	  Void -> "void "
-	| Int -> "int "
+    Void -> "void "
+  | Int -> "int "
   | Double -> "double "
-	| String -> "string " (* STRINGS IN C AHHHHH!!!!*)
-	| Boolean -> "bool "
+  | String -> "string " (* STRINGS IN C AHHHHH!!!!*)
+  | Boolean -> "bool "
 
 let gen_formals v =
-	let (str, var_decl, var_type) = v in match var_decl with
-	   Var(var_type, str) -> gen_var_types var_type ^ str
-	 | Var_Init(var_types, str, _) -> gen_var_types var_type ^ str
+  let (str, var_decl, var_type) = v in match var_decl with
+     Var(var_type, str) -> gen_var_types var_type ^ str
+   | Var_Init(var_types, str, _) -> gen_var_types var_type ^ str
+
+ let gen_locals v =
+  let (str, var_decl, var_type) = v in match var_decl with
+     Var(var_type, str) -> gen_var_types var_type ^ str
+   | Var_Init(var_types, str, (e,_)) -> gen_var_types var_type ^ str ^ " = " ^ (expr e)
 
 let rec gen_formals_list fl = match fl with
-	[] -> ""
-	| hd::[] -> gen_formals hd
-	| hd::tl -> gen_formals hd ^ ", " ^ gen_formals_list tl
+  [] -> ""
+  | hd::[] -> gen_formals hd
+  | hd::tl -> gen_formals hd ^ ", " ^ gen_formals_list tl
+
+let rec gen_locals_list ll = match ll with
+  [] -> ""
+  | hd::[] -> gen_locals hd ^ ";\n"
+  | hd::tl -> gen_locals hd ^ ";\n" ^ gen_locals_list tl
 
 let gen_fdecl fdecl =
   (match fdecl.fname with
       "main" -> "int main()"
     | _      -> (match fdecl.rtype with
-                  Sast.Void -> "void "
-                | Sast.Int -> "int "
-                | Sast.Double -> "double "
-                | Sast.String -> "string " (* NEED TO CHANGE THIS TO CHAR STAR *)
-                | Sast.Boolean -> "bool ")
-  ^ fdecl.fname ^ "(" ^ (gen_formals_list fdecl.formals) ^ ")") ^ "{\n" ^ String.concat "" (List.map stmt fdecl.body) ^
+                    Sast.Void -> "void "
+                  | Sast.Int -> "int "
+                  | Sast.Double -> "double "
+                  | Sast.String -> "string " (* NEED TO CHANGE THIS TO CHAR STAR *)
+                  | Sast.Boolean -> "bool ")
+  ^ fdecl.fname ^ "(" ^ (gen_formals_list fdecl.formals) ^ ")") ^ "{\n" ^(gen_locals_list fdecl.locals) ^ String.concat "" (List.map stmt fdecl.body) ^
   (match fdecl.fname with
       "main" -> "return 0;\n"
     | _      -> "" )
   ^ "}\n"
 
 let generate funcs name =
-  let outfile = open_out (name ^ "-NEW.c") in
+  let outfile = open_out ("tests/" ^ name ^ "-NEW.c") in
   let translated_program =  "#include <stdio.h>\n" ^ String.concat "" (List.rev (List.map gen_fdecl funcs)) ^ "\n" in
   ignore(Printf.fprintf outfile "%s" translated_program);
   close_out outfile;

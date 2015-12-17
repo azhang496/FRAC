@@ -1,10 +1,13 @@
 main() {
-    if(x == 2) {
-        x = x * 5;
-        print("x is 2");
-    }
-    else {
-        x = x / 10;
-        print("x is not 2");
-    }
+  int x = 2;
+  if (x == 2) {
+    x = x * 5;
+    print("x is 2");
+    print(x);
+  }
+  else {
+    x = x / 10;
+    print("x is not 2");
+    print(x);
+  }
 }

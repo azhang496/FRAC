@@ -1,0 +1,11 @@
+annie(int x, string y) {
+    print("hello");
+}
+
+foo(double d) {
+    double x = d+2.0; // WRONG ERROR THROWN HERE
+}
+
+main() {
+    print("done");
+}

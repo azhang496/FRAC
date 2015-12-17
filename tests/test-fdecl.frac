@@ -1,7 +1,8 @@
-foo(x, y) {
+foo(int x, int y) {
     print("foo");
 }
 
 main() {
+    foo(2,4);
     print("main");
 }
