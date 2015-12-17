@@ -1,10 +1,11 @@
 #include <stdio.h>
 
-return_type foo(type x, type y) {
-    printf("%s", "foo");
+void foo(int x, int y) {
+    printf("%s\n", "foo");
 }
 
 int main() {
-    printf("%s", "main");
+    foo(2,4);
+    printf("%s\n", "main");
     return 0;
 }
