@@ -59,7 +59,6 @@ let rec check_expr (env : symbol_table) (expr : Ast.expr) = match expr with
   | Binop(_, _, _) as b -> check_binop env b
   | Assign(_, _) as a -> check_assign env a
   | Call(_, _) as c -> check_call env c
-  | _ -> raise(Failure "invalid expression")
 
 and check_id (env : symbol_table) id =
   let (_, decl, t) = List.find(fun (name, _, _) -> name = id) env.vars in
@@ -110,6 +109,7 @@ and check_binop (env : symbol_table) binop = match binop with
           if (t1 <> t2)
             then op_error op
           else Sast.Boolean
+      | _ -> raise (Failure "Invalid binary operator")
     in Sast.Binop(e1, op, e2), t
   | _ -> raise (Failure "Not a binary operator")
 
@@ -122,13 +122,14 @@ and check_assign (env : symbol_table) a = match a with
   | _ -> raise (Failure "Not a valid assignment")
 
 and check_call (env : symbol_table) c = match c with
-  Ast.Call(f, actuals) -> (match f with
-      "print" -> (match actuals with
-          [arg] -> Sast.Call(f, [check_expr env arg]), Sast.Void
-        | hd :: [_] -> raise(Failure "print() only takes one argument"))
-    (*| "draw" -> Sast.Call(f, actuals), Sast.Void (* PLACEHOLDER: actuals should be gram g and int n *)*)
-    | _ -> let called_func = find_func env f in
-           Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype)
+    Ast.Call(f, actuals) -> (match f with
+        "print" -> (match actuals with
+            []        -> raise(Failure "print() requires an argument")
+          | hd :: []     -> Sast.Call(f, [check_expr env hd]), Sast.Void
+          | hd :: tl -> raise(Failure "print() only takes one argument"))
+      (*| "draw" -> Sast.Call(f, actuals), Sast.Void (* PLACEHOLDER: actuals should be gram g and int n *)*)
+      | _ -> let called_func = find_func env f in
+             Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype)
   | _ -> raise (Failure "Not a valid function call")
 
 and check_args (env : symbol_table) ((formals : (string * var_decl * var_type) list), (actuals : Ast.expr list)) = match (formals, actuals) with
@@ -220,22 +221,26 @@ let check_fdecl (env : symbol_table) (f : Ast.func_decl) = match f.fname with
     "main" -> (match f.formals with
         [] -> let sast_main = sast_fdecl env f in if (sast_main.rtype <> Sast.Void) then raise(Failure "main function should not return anything")
               else sast_main
-      | _ -> raise(Failure "main function cannot have formal parameters"))
+      | _  -> raise(Failure "main function cannot have formal parameters"))
   | _ -> sast_fdecl env f
 
 (* checks the list of function declarations in the program *)
 let rec check_fdecl_list (env : symbol_table ) (prog : Ast.program) = match prog with
-    hd :: [] -> if hd.fname <> "main" then raise(Failure "main function must be defined last")
-      else check_fdecl env hd; env
+    []       -> raise(Failure "Valid FRAC program must have at least a main function")
+  | hd :: [] -> if hd.fname <> "main" then raise(Failure "main function must be defined last")
+                else check_fdecl env hd; env
   | hd :: tl -> if (List.exists (fun func -> func.fname = hd.fname) env.funcs) then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
-      else match hd.fname with
-          "print" -> raise(Failure "reserved function name 'print'")
-        | "draw" -> raise(Failure "reserved function name 'draw'")
-        | "main" -> raise(Failure "main function can only be defined once")
-        | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs } tl
+                else match hd.fname with
+                    "print" -> raise(Failure "reserved function name 'print'")
+                  | "draw" -> raise(Failure "reserved function name 'draw'")
+                  | "main" -> raise(Failure "main function can only be defined once")
+                  | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs } tl
+
+
 
 (* entry point *)
 let check_program (prog : Ast.program) =
   let env = { vars = []; funcs = [] } in
   let checked_fdecls = check_fdecl_list env (List.rev prog) in
-  print_list checked_fdecls.funcs; print_endline "checked func decls!";
+  (*print_list checked_fdecls.funcs; print_endline "checked func decls!"; *)
+  checked_fdecls.funcs

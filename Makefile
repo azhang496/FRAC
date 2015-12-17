@@ -1,5 +1,5 @@
-OBJS = scanner.cmo ast.cmo parser.cmo compile.cmo semantic.cmo frac.cmo
-LIBS=str.cma
+OBJS = scanner.cmo ast.cmo sast.cmo parser.cmo compile.cmo semantic.cmo frac.cmo
+LIBS = str.cma
 YACC = ocamlyacc
 
 default: frac

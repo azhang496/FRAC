@@ -9,7 +9,7 @@ let get_prog_name source_file_path =
 
 let _ =
   let action =
-		if Array.length Sys.argv > 1 then
+		if Array.length Sys.argv > 2 then
     	List.assoc Sys.argv.(2) [ ("-s", Semantic); ("-c", Compile) ]
   	else Compile in
   let name = get_prog_name Sys.argv.(1) in
@@ -17,5 +17,6 @@ let _ =
   let lexbuf = Lexing.from_channel input in
   let program = Parser.program Scanner.token lexbuf in
 	match action with
-			Semantic -> Semantic.check_program program
-		| Compile	-> Compile.generate (Semantic.check_program program) name
+			Semantic -> let sprogram = Semantic.check_program program in
+              print_string "Semantic in place" (* Pretty printer should go here. This is temp so that all patterns have unit return type *)
+		| Compile	 -> Compile.generate (Semantic.check_program program) name

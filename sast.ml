@@ -13,14 +13,6 @@ and var_decl =
     Var of var_type * string
   | Var_Init of var_type * string * expression
 
-(*
-and var_decl = {
-  vtype : var_type;
-  vname : string;
-  value : expr;
-}
-*)
-
 (* Function Declarations *)
 and func_decl = {
   fname: string;
