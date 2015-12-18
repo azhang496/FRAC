@@ -1,6 +1,8 @@
 open Ast
 open Sast
 
+module StringMap = Map.Make (String)
+
 type symbol_table = {
   mutable vars: (string * var_decl * var_type) list;
   mutable funcs: func_decl list;
@@ -37,12 +39,6 @@ let op_error t = match t with
 (**************
  * Checking *
 **************)
-
-(* returns true if the function name is found in the current scope *)
-let rec find_func (env : symbol_table) (f : string) =
-  (try
-    List.find(fun func -> func.fname = f) env.funcs
-  with Not_found -> raise(Failure ("function " ^ f ^ " not defined")))
 
 let rec check_expr (env : symbol_table) (expr : Ast.expr) = match expr with
     Noexpr -> Sast.Noexpr, Void
@@ -127,7 +123,9 @@ and check_call (env : symbol_table) c = match c with
           | hd :: []     -> Sast.Call(f, [check_expr env hd]), Sast.Void
           | hd :: tl -> raise(Failure "print() only takes one argument"))
       (*| "draw" -> Sast.Call(f, actuals), Sast.Void (* PLACEHOLDER: actuals should be gram g and int n *)*)
-      | _ -> let called_func = find_func env f in
+      | _ -> let called_func = (try
+                List.find(fun func -> func.fname = f) env.funcs
+              with Not_found -> raise(Failure ("function " ^ f ^ " not defined"))) in
              Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype)
   | _ -> raise (Failure "Not a valid function call")
 
@@ -211,9 +209,9 @@ let rec find_rtype (env : symbol_table) (body : Ast.stmt list) (rtype : Sast.var
 
 let sast_fdecl (env : symbol_table) (f : Ast.func_decl) =
   let checked_formals = check_vdecl_list env f.formals in
-  let formals_env = { vars = env.vars @ checked_formals; funcs = env.funcs } in
+  let formals_env = { vars = env.vars @ checked_formals; funcs = env.funcs; grams = env.grams } in
   let checked_locals = check_vdecl_list formals_env f.locals in
-  let new_env = { vars = formals_env.vars @ checked_locals; funcs = env.funcs } in
+  let new_env = { vars = formals_env.vars @ checked_locals; funcs = env.funcs; grams = env.grams } in
   { fname = f.fname; rtype = (find_rtype new_env f.body Sast.Void); formals = checked_formals; locals = checked_locals; body = (check_stmt_list new_env f.body) }
 
 (* returns an updated func_decl with return type *)
@@ -234,14 +232,43 @@ let rec check_fdecl_list (env : symbol_table ) (fdecls : Ast.func_decl list) = m
                     "print" -> raise(Failure "reserved function name 'print'")
                   | "draw" -> raise(Failure "reserved function name 'draw'")
                   | "main" -> raise(Failure "main function can only be defined once")
-                  | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs } tl
+                  | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs; grams = env.grams } tl
+
+let rec check_alphabet (ids : Ast.expr list) (checked : Sast.expr list) = match ids with
+    [] -> []
+  | hd :: tl -> let rule_id = (match hd with
+                    Rule_id(c) -> Sast.Rule_id(c)
+                  | _          -> raise(Failure "all rule names must be single characters")) in
+                (* LIST.EXISTS MAY NOT WORK HERE *)
+                if(List.exists checked) then raise(Failure "cannot have duplicates in alphabet")
+                else rule_id :: (check_rule_ids tl)
+
+let rec check_init (a : Sast.expr list) (i : Ast.expr list) = match i with
+    [] -> []
+  | hd :: tl -> let rule_id = (match hd with
+                  Rule_id(c) -> Sast.Rule_id(c)
+                | _          -> raise(Failure "all rule names must be single characters")) in
+                (try
+                  let checked_id = List.find rule_id a in check_init a i
+                with Not_found -> raise(Failure "init contains a rule name not defined in alphabet"))
+
+let rec check_rules recs terms (a : Ast.expr list) (rules : Ast.rule list) = match rules with
+    []       -> []
+  | hd :: tl -> (match hd with
+                    Rec(s, rl) -> []
+                  | Term(s, t) -> []
+                )
 
 let check_gdecl (env : symbol_table) (g : Ast.gram_decl) =
+  if(List.exists (fun gram -> gram.gname = g.gname) env.grams) then raise(Failure "cannot define multiple grams with the same name")
+  else let checked_alphabet = check_alphabet g.alphabet in
+  let checked_init = check_init checked_alphabet g.init in
+  let checked_rules = check_rules StringMap.empty StringMap.empty g.rules in []
 
 (* entry point *)
 let check_program (prog : Ast.program) =
   let (gdecls, fdecls) = prog in
-  let env = { vars = []; funcs = [] } in
+  let env = { vars = []; funcs = []; grams = [] } in
   let checked_gdecls = [] in (* PLACEHOLDER *)
   let checked_fdecls = check_fdecl_list env (List.rev fdecls) in
   checked_gdecls @ checked_fdecls

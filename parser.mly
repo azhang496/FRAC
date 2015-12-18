@@ -7,7 +7,8 @@
 %token OR AND NOT
 %token RETURN IF ELSE FOR WHILE
 %token INT DOUBLE STRING BOOL
-%token GRAM INIT RULES ARROW QUOTE
+%token GRAM ALPHABET INIT RULES 
+%token ARROW QUOTE
 %token <char> RULE_ID
 %token <string> ID
 %token <int> INT_LIT
@@ -56,25 +57,25 @@ vdecl_list:
 /* RULES */
 
 rule:
-    expr ARROW QUOTE expr_list QUOTE        { Rec($1, $4) }
-  | expr ARROW QUOTE expr_list QUOTE COMMA  { Rec($1, $4) }
-  | expr ARROW expr COMMA                   { Term($1, $3) }
-  | expr ARROW expr                         { Term($1, $3) }
+    expr ARROW expr                         { Term($1, $3) }
+  | expr ARROW QUOTE expr_list QUOTE        { Rec($1, $4) }
 
 rule_list:
-    /* nothing */   { [] }
-  | rule_list rule  { $2 :: $1 }
+    rule                  { [] }
+  | rule_list COMMA rule  { $3 :: $1 }
 
 /* GRAMS */
 
 gdecl:
     GRAM ID ASSIGN LBRACE
-      INIT COLON QUOTE rule QUOTE COMMA
+      ALPHABET COLON expr_list COMMA
+      INIT COLON QUOTE expr_list QUOTE COMMA
       RULES COLON LBRACE rule_list RBRACE
     RBRACE
     { { gname = $2;
-        init = $8;
-        rules = List.rev $14 } }
+        alphabet = $7;
+        init = $12;
+        rules = List.rev $18 } }
 
  /* FUNCTIONS */
 
@@ -115,8 +116,10 @@ expr_opt:
   | expr          { $1 }
 
 expr_list:
-    /* nothing */  { [] }
-  | expr_list expr { $2 :: $1 }
+    /* nothing */         { [] }
+  | expr                  { [$1] }
+  | expr_list expr        { $2 :: $1 }
+  | expr_list COMMA expr  { $3 :: $1 }
 
 expr:
     INT_LIT          { Int_lit($1) }

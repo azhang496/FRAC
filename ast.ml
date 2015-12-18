@@ -38,14 +38,14 @@ type var_decl =
 
 (* Rule Definitions *)
 type rule =
-    Init of expr list
-  | Rec of expr * expr list
+    Rec of expr * expr list
   | Term of expr * expr
 
 (* Grammar Declarations *)
 type gram_decl = {
   gname : string;
-  init : rule;
+  alphabet : expr list;
+  init : expr list;
   rules : rule list;
 }
 

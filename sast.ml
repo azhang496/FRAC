@@ -13,6 +13,19 @@ and var_decl =
     Var of var_type * string
   | Var_Init of var_type * string * expression
 
+(* Rule Definitions *)
+and rule =
+    Rec of expr * expr list
+  | Term of expr * expr
+
+(* Grammar Declarations *)
+and gram_decl = {
+  gname : string;
+  alphabet : expr list;
+  init : expr list;
+  rules : rule list;
+}
+
 (* Function Declarations *)
 and func_decl = {
   fname: string;
@@ -30,6 +43,7 @@ and expr =
   | Id of var_decl
   | String_lit of string
   | Bool_lit of bool
+  | Rule_id of char
   | Unop of op * expression
   | Binop of expression * op * expression
   | Assign of var_decl * expression
