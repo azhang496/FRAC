@@ -260,8 +260,7 @@ let rec check_rules (recs : Ast.rule list) (terms : Ast.rule list) (a : Sast.exp
                 )
 
 let check_gdecl (env : symbol_table) (g : Ast.gram_decl) =
-  if(List.exists (fun gram -> gram.gname = g.gname) env.grams) then raise(Failure "cannot define multiple grams with the same name")
-  else let checked_alphabet = check_alphabet g.alphabet [] in
+  let checked_alphabet = check_alphabet g.alphabet [] in
   let checked_init = check_init checked_alphabet g.init in
   let checked_rules = check_rules [] [] checked_alphabet g.rules in
   { gname = g.gname; alphabet = checked_alphabet; init = checked_init; rules = checked_rules }
