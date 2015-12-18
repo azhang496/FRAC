@@ -4,6 +4,7 @@ open Sast
 type symbol_table = {
   mutable vars: (string * var_decl * var_type) list;
   mutable funcs: func_decl list;
+  mutable grams: gram_decl list;
 }
 
 (* list printer for testing purposes *)
@@ -224,10 +225,10 @@ let check_fdecl (env : symbol_table) (f : Ast.func_decl) = match f.fname with
   | _ -> let checked_formals = check_vdecl_list env f.formals in sast_fdecl env f
 
 (* checks the list of function declarations in the program *)
-let rec check_fdecl_list (env : symbol_table ) (prog : Ast.program) = match prog with
+let rec check_fdecl_list (env : symbol_table ) (fdecls : Ast.func_decl list) = match fdecls with
     []       -> raise(Failure "Valid FRAC program must have at least a main function")
   | hd :: [] -> if hd.fname <> "main" then raise(Failure "main function must be defined last")
-                else { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs }
+                else (check_fdecl env hd) :: env.funcs
   | hd :: tl -> if (List.exists (fun func -> func.fname = hd.fname) env.funcs) then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
                 else match hd.fname with
                     "print" -> raise(Failure "reserved function name 'print'")
@@ -235,9 +236,12 @@ let rec check_fdecl_list (env : symbol_table ) (prog : Ast.program) = match prog
                   | "main" -> raise(Failure "main function can only be defined once")
                   | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs } tl
 
+let check_gdecl (env : symbol_table) (g : Ast.gram_decl) =
+
 (* entry point *)
 let check_program (prog : Ast.program) =
+  let (gdecls, fdecls) = prog in
   let env = { vars = []; funcs = [] } in
-  let checked_fdecls = check_fdecl_list env (List.rev prog) in
-  (*print_list checked_fdecls.funcs; print_endline "checked func decls!"; *)
-  checked_fdecls.funcs
+  let checked_gdecls = [] in (* PLACEHOLDER *)
+  let checked_fdecls = check_fdecl_list env (List.rev fdecls) in
+  checked_gdecls @ checked_fdecls

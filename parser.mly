@@ -7,7 +7,8 @@
 %token OR AND NOT
 %token RETURN IF ELSE FOR WHILE
 %token INT DOUBLE STRING BOOL
-/*%token GRAM INIT RULES ARROW*/
+%token GRAM INIT RULES ARROW QUOTE
+%token <char> RULE_ID
 %token <string> ID
 %token <int> INT_LIT
 %token <float> DOUBLE_LIT
@@ -31,8 +32,9 @@
 %%
 
 program:
-  fdecl_list EOF { $1 }
-
+    /* nothing */           { [], [] }
+  | program gdecl      { let (grams, funcs) = $1 in $2::grams, funcs }
+  | program fdecl      { let (grams, funcs) = $1 in grams, $2::funcs }
 
 /* VARIABLES */
 
@@ -51,10 +53,28 @@ vdecl_list:
     /* nothing */    { [] }
   | vdecl_list vdecl { $2 :: $1 }
 
+/* RULES */
+
+rule:
+    expr ARROW QUOTE expr_list QUOTE        { Rec($1, $4) }
+  | expr ARROW QUOTE expr_list QUOTE COMMA  { Rec($1, $4) }
+  | expr ARROW expr COMMA                   { Term($1, $3) }
+  | expr ARROW expr                         { Term($1, $3) }
+
+rule_list:
+    /* nothing */   { [] }
+  | rule_list rule  { $2 :: $1 }
+
 /* GRAMS */
 
-/*gdecl:
-    GRAM */
+gdecl:
+    GRAM ID ASSIGN LBRACE
+      INIT COLON QUOTE rule QUOTE COMMA
+      RULES COLON LBRACE rule_list RBRACE
+    RBRACE
+    { { gname = $2;
+        init = $8;
+        rules = List.rev $14 } }
 
  /* FUNCTIONS */
 
@@ -64,10 +84,6 @@ fdecl:
      formals = $3;
      locals = List.rev $6;
      body = List.rev $7 } }
-
-fdecl_list:
-     /* nothing */    { [] }
-   | fdecl_list fdecl { $2 :: $1 }
 
 formals_opt:
     /* nothing */ { [] }
@@ -94,15 +110,19 @@ stmt_list:
 
 /* EXPRESSIONS */
 
-
 expr_opt:
     /* nothing */ { Noexpr }
   | expr          { $1 }
+
+expr_list:
+    /* nothing */  { [] }
+  | expr_list expr { $2 :: $1 }
 
 expr:
     INT_LIT          { Int_lit($1) }
   | DOUBLE_LIT       { Double_lit($1) }
   | ID               { Id($1) }
+  | RULE_ID          { Rule_id($1) }
   | STRING_LIT       { String_lit($1) }
   | BOOL_LIT         { Bool_lit($1) }
   | NOT expr  			 { Unop(Not, $2) }

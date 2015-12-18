@@ -13,6 +13,7 @@ type expr =
     Int_lit of int
   | Double_lit of float
   | Id of string
+  | Rule_id of char
   | String_lit of string
   | Bool_lit of bool
   | Unop of op * expr
@@ -35,16 +36,18 @@ type var_decl =
     Var of var_type * string
   | Var_Init of var_type * string * expr
 
-(*(* Rule Definitions *)
+(* Rule Definitions *)
 type rule =
-    Rule of string * 
+    Init of expr list
+  | Rec of expr * expr list
+  | Term of expr * expr
 
 (* Grammar Declarations *)
 type gram_decl = {
   gname : string;
   init : rule;
   rules : rule list;
-}*)
+}
 
 (* Function Declarations *)
 type func_decl = {
@@ -54,16 +57,5 @@ type func_decl = {
   body : stmt list;
 }
 
-(*Rules
-type rule =
-    Rec of string * string
-  | Term of string * expr
-Grammars
-type gram = {
-  gname : string;
-  init : string;
-  rules : rule list;
-} *)
-
 (* Program entry point *)
-type program = func_decl list
+type program = gram_decl list * func_decl list

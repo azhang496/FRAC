@@ -31,17 +31,19 @@ rule token = parse
 | "||"     { OR }     | "&&"     { AND }
 | '!'      { NOT }
 
-(*| "gram"   { GRAM }
-| "init"   { INIT }
-| "rules"  { RULES }
-| ":"      { COLON }
-| "->"     { ARROW }*)
+(* Grammar Syntax *)
+| "gram"   { GRAM }  | "rules"  { RULES }
+| "init"   { INIT }  | ":"      { COLON }
+| "->"     { ARROW } | "'"      { QUOTE }
+(*| ['a'-'z' 'A'-'Z'] as lxm { RULE_ID (lxm) }*)
 
+(* Statements *)
 | "if"     { IF }
 | "else"   { ELSE }
 | "for"    { FOR }
 | "while"  { WHILE }
 | "return" { RETURN }
+
 (* Type Names *)
 | "int"    { INT }
 | "double" { DOUBLE }
