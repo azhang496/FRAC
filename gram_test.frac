@@ -1,0 +1,12 @@
+gram my_gram {
+    alphabet: [a],
+    init: 'a'
+    rules: {
+        'a' -> 'a',
+        'a' -> turn(60)
+    }
+}
+
+main() {
+    print("done");
+}

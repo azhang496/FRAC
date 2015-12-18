@@ -8,7 +8,7 @@
 %token RETURN IF ELSE FOR WHILE
 %token INT DOUBLE STRING BOOL
 %token GRAM ALPHABET INIT RULES 
-%token ARROW QUOTE
+%token LSQUARE RSQUARE ARROW QUOTE
 %token <char> RULE_ID
 %token <string> ID
 %token <int> INT_LIT
@@ -68,14 +68,14 @@ rule_list:
 
 gdecl:
     GRAM ID ASSIGN LBRACE
-      ALPHABET COLON expr_list COMMA
+      ALPHABET COLON LSQUARE expr_list RSQUARE COMMA
       INIT COLON QUOTE expr_list QUOTE COMMA
       RULES COLON LBRACE rule_list RBRACE
     RBRACE
     { { gname = $2;
-        alphabet = $7;
-        init = $12;
-        rules = List.rev $18 } }
+        alphabet = $8;
+        init = $14;
+        rules = List.rev $20 } }
 
  /* FUNCTIONS */
 
@@ -117,9 +117,9 @@ expr_opt:
 
 expr_list:
     /* nothing */         { [] }
-  | expr                  { [$1] }
+  /*| expr                  { [$1] }*/
   | expr_list expr        { $2 :: $1 }
-  | expr_list COMMA expr  { $3 :: $1 }
+  /*| expr_list COMMA expr  { $3 :: $1 }*/
 
 expr:
     INT_LIT          { Int_lit($1) }
