@@ -43,7 +43,7 @@ and expr =
   | Id of var_decl
   | String_lit of string
   | Bool_lit of bool
-  | Rule_id of char
+  | Rule_id of string
   | Unop of op * expression
   | Binop of expression * op * expression
   | Assign of var_decl * expression

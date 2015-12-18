@@ -36,7 +36,7 @@ rule token = parse
 | "init"   { INIT }  | "alphabet" { ALPHABET }
 | ":"      { COLON } | "'"        { QUOTE }
 | "["      { LSQUARE } | "]"      { RSQUARE }
-| "->"     { ARROW } 
+| "->"     { ARROW } | "-"        { HYPHEN }
 | ['a'-'z' 'A'-'Z'] as lxm { RULE_ID (lxm) }
 
 (* Statements *)

@@ -1,10 +1,14 @@
-gram my_gram {
-    alphabet: [a],
-    init: 'a'
+gram my_gram = {
+    alphabet: [a, b],
+    init: 'a-b',
     rules: {
-        'a' -> 'a',
-        'a' -> turn(60)
+        'a' -> 'a-a-a',
+        'b' -> 'a-b'
     }
+}
+
+foo() {
+    
 }
 
 main() {

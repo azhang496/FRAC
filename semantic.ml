@@ -234,7 +234,7 @@ let rec check_fdecl_list (env : symbol_table ) (fdecls : Ast.func_decl list) = m
                   | "main" -> raise(Failure "main function can only be defined once")
                   | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs; grams = env.grams } tl
 
-let rec check_alphabet (ids : Ast.expr list) (checked : Sast.expr list) = match ids with
+(*let rec check_alphabet (ids : Ast.expr list) (checked : Sast.expr list) = match ids with
     [] -> checked
   | hd :: tl -> let rule_id = (match hd with
                     Rule_id(c) -> Sast.Rule_id(c)
@@ -257,13 +257,13 @@ let rec check_rules (recs : Ast.rule list) (terms : Ast.rule list) (a : Sast.exp
   | hd :: tl -> (match hd with
                     Rec(s, rl) -> []
                   | Term(s, t) -> []
-                )
+                )*)
 
 let check_gdecl (env : symbol_table) (g : Ast.gram_decl) =
-  if(List.exists (fun gram -> gram.gname = g.gname) env.grams) then raise(Failure "cannot define multiple grams with the same name")
+  (*if(List.exists (fun gram -> gram.gname = g.gname) env.grams) then raise(Failure "cannot define multiple grams with the same name")
   else let checked_alphabet = check_alphabet g.alphabet [] in
   let checked_init = check_init checked_alphabet g.init in
-  let checked_rules = check_rules [] [] checked_alphabet g.rules in []
+  let checked_rules = check_rules [] [] checked_alphabet g.rules in*) []
 
 (* entry point *)
 let check_program (prog : Ast.program) =

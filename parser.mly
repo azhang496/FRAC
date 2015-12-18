@@ -8,7 +8,7 @@
 %token RETURN IF ELSE FOR WHILE
 %token INT DOUBLE STRING BOOL
 %token GRAM ALPHABET INIT RULES 
-%token LSQUARE RSQUARE ARROW QUOTE
+%token LSQUARE RSQUARE ARROW QUOTE HYPHEN
 %token <char> RULE_ID
 %token <string> ID
 %token <int> INT_LIT
@@ -33,7 +33,7 @@
 %%
 
 program:
-    /* nothing */           { [], [] }
+    /* nothing */      { [], [] }
   | program gdecl      { let (grams, funcs) = $1 in $2::grams, funcs }
   | program fdecl      { let (grams, funcs) = $1 in grams, $2::funcs }
 
@@ -57,19 +57,19 @@ vdecl_list:
 /* RULES */
 
 rule:
-    expr ARROW expr                         { Term($1, $3) }
-  | expr ARROW QUOTE expr_list QUOTE        { Rec($1, $4) }
+    QUOTE expr QUOTE ARROW expr                         { Term($2, $5) }
+  | QUOTE expr QUOTE ARROW QUOTE hyphen_list QUOTE        { Rec($2, $6) }
 
 rule_list:
-    rule                  { [] }
+    rule                  { [$1] }
   | rule_list COMMA rule  { $3 :: $1 }
 
 /* GRAMS */
 
 gdecl:
     GRAM ID ASSIGN LBRACE
-      ALPHABET COLON LSQUARE expr_list RSQUARE COMMA
-      INIT COLON QUOTE expr_list QUOTE COMMA
+      ALPHABET COLON LSQUARE comma_list RSQUARE COMMA
+      INIT COLON QUOTE hyphen_list QUOTE COMMA
       RULES COLON LBRACE rule_list RBRACE
     RBRACE
     { { gname = $2;
@@ -115,11 +115,13 @@ expr_opt:
     /* nothing */ { Noexpr }
   | expr          { $1 }
 
-expr_list:
-    /* nothing */         { [] }
-  /*| expr                  { [$1] }*/
-  | expr_list expr        { $2 :: $1 }
-  /*| expr_list COMMA expr  { $3 :: $1 }*/
+comma_list:
+    expr                  { [$1] }
+  | comma_list COMMA expr  { $3 :: $1 }
+
+hyphen_list:
+    expr                  { [$1] }
+  | comma_list HYPHEN expr  { $3 :: $1 }
 
 expr:
     INT_LIT          { Int_lit($1) }
