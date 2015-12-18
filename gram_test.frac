@@ -7,6 +7,15 @@ gram my_gram = {
     }
 }
 
+gram my_gram = {
+    alphabet: [a, b],
+    init: 'a-b',
+    rules: {
+        'a' -> 'a-a-a',
+        'b' -> 'a-b'
+    }
+}
+
 foo() {
     
 }

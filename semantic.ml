@@ -234,7 +234,7 @@ let rec check_fdecl_list (env : symbol_table ) (fdecls : Ast.func_decl list) = m
                   | "main" -> raise(Failure "main function can only be defined once")
                   | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs; grams = env.grams } tl
 
-(*let rec check_alphabet (ids : Ast.expr list) (checked : Sast.expr list) = match ids with
+let rec check_alphabet (ids : Ast.expr list) (checked : Sast.expr list) = match ids with
     [] -> checked
   | hd :: tl -> let rule_id = (match hd with
                     Rule_id(c) -> Sast.Rule_id(c)
@@ -257,18 +257,25 @@ let rec check_rules (recs : Ast.rule list) (terms : Ast.rule list) (a : Sast.exp
   | hd :: tl -> (match hd with
                     Rec(s, rl) -> []
                   | Term(s, t) -> []
-                )*)
+                )
 
 let check_gdecl (env : symbol_table) (g : Ast.gram_decl) =
-  (*if(List.exists (fun gram -> gram.gname = g.gname) env.grams) then raise(Failure "cannot define multiple grams with the same name")
+  if(List.exists (fun gram -> gram.gname = g.gname) env.grams) then raise(Failure "cannot define multiple grams with the same name")
   else let checked_alphabet = check_alphabet g.alphabet [] in
   let checked_init = check_init checked_alphabet g.init in
-  let checked_rules = check_rules [] [] checked_alphabet g.rules in*) []
+  let checked_rules = check_rules [] [] checked_alphabet g.rules in
+  { gname = g.gname; alphabet = checked_alphabet; init = checked_init; rules = checked_rules }
+
+let rec check_gdecl_list (env : symbol_table) (gdecls : Ast.gram_decl list) = match gdecls with
+    [] -> []
+  | hd :: tl -> if (List.exists (fun gram -> gram.gname = hd.gname) env.grams) then raise(Failure("gram " ^ hd.gname ^ "() defined twice"))
+                (* PLACEHOLDER *)
+                else hd :: (check_gdecl_list { vars = env.vars; funcs = env.funcs; grams = env.grams } tl)
 
 (* entry point *)
 let check_program (prog : Ast.program) =
   let (gdecls, fdecls) = prog in
   let env = { vars = []; funcs = []; grams = [] } in
-  let checked_gdecls = [] in (* PLACEHOLDER *)
+  let checked_gdecls = check_gdecl_list env (List.rev gdecls) in (* PLACEHOLDER *)
   let checked_fdecls = check_fdecl_list env (List.rev fdecls) in
   checked_gdecls @ checked_fdecls
