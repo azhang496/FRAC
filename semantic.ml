@@ -126,19 +126,19 @@ and check_call (env : symbol_table) c = match c with
             []        -> raise(Failure "print() requires an argument")
           | hd :: []     -> Sast.Call(f, [check_expr env hd]), Sast.Void
           | hd :: tl -> raise(Failure "print() only takes one argument"))
-      (*| "draw" -> (match actuals with
+      | "draw" -> (match actuals with
             [g; i] -> (match (g, i) with
                           (Id(s), Int_lit(n)) -> (try
                             List.find(fun gram -> gram.gname = s) env.grams
                           with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
-                          Sast.Call(f, [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
+                          Sast.Call(f, [Sast.Id(Sast.Var((Sast.String), s)), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
                         | _ -> raise(Failure "draw takes a gram g and int n as arguments"))
-          | _      -> raise(Failure "draw() requires two arguments")*)
+          | _      -> raise(Failure "draw() requires two arguments")
       | _ -> let called_func = (try
                 List.find(fun func -> func.fname = f) env.funcs
               with Not_found -> raise(Failure ("function " ^ f ^ " not defined"))) in
              Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype)
-  | _ -> raise (Failure "Not a valid function call")
+  | _ -> raise (Failure "Not a valid function call"))
 
 and check_args (env : symbol_table) ((formals : (string * var_decl * var_type) list), (actuals : Ast.expr list)) = match (formals, actuals) with
     ([], []) -> []
@@ -285,22 +285,22 @@ let rec check_rules (recs : Sast.rule list) (terms : Sast.rule list) (a : char l
                       checked_term :: (check_rules recs (checked_term :: terms) a tl)
                 )
 
-let check_gdecl (env : symbol_table) (g : Ast.gram_decl) =
+let check_gdecl (g : Ast.gram_decl) =
   let checked_alphabet = check_alphabet [] g.rules g.alphabet in
   let checked_rules = check_rules [] [] checked_alphabet g.rules in
   let checked_init = check_rule checked_alphabet g.init in
   { gname = g.gname; alphabet = checked_alphabet; init = checked_init; rules = checked_rules }
 
-let rec check_gdecl_list (env : symbol_table) (gdecls : Ast.gram_decl list) = match gdecls with
-    [] -> env.grams 
-  | hd :: tl -> if (List.exists (fun gram -> gram.gname = hd.gname) env.grams) then raise(Failure("gram " ^ hd.gname ^ " defined twice"))
-                else check_gdecl_list { vars = env.vars; funcs = env.funcs; grams = (check_gdecl env hd) :: env.grams } tl
+let rec check_gdecl_list (checked_gdecls : Sast.gram_decl list) (gdecls : Ast.gram_decl list) = match gdecls with
+    [] -> checked_gdecls
+  | hd :: tl -> if (List.exists (fun gram -> gram.gname = hd.gname) checked_gdecls) then raise(Failure("gram " ^ hd.gname ^ " defined twice"))
+                else check_gdecl_list ((check_gdecl hd) :: checked_gdecls) tl
 
 (* entry point *)
 let check_program (prog : Ast.program) =
   let (gdecls, fdecls) = prog in
   let env = { vars = []; funcs = []; grams = [] } in
-  let checked_gdecls = check_gdecl_list env (List.rev gdecls) in
+  let checked_gdecls = check_gdecl_list [] (List.rev gdecls) in
   let grams_env = { vars = env.vars; funcs = env.funcs; grams = checked_gdecls } in
   let checked_fdecls = check_fdecl_list grams_env (List.rev fdecls) in
   checked_gdecls, checked_fdecls

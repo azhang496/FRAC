@@ -1,9 +1,9 @@
 gram my_gram = {
-    alphabet: [a, b, c],
+    alphabet: [a, b],
     init: 'a b',
     rules: {
-        'a' -> 'a b c',
-        'c' -> move(1)
+        'a' -> 'a b',
+        'b' -> move(1)
     }
 }
 
@@ -12,5 +12,5 @@ foo() {
 }
 
 main() {
-    print("done");
+
 }
