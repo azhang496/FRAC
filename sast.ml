@@ -17,8 +17,8 @@ and var_decl =
 and func_decl = {
   fname: string;
   rtype: var_type;
-  formals: (string * var_decl * var_type) list;
-  locals: (string * var_decl * var_type) list;
+  formals: var_decl list;
+  locals: var_decl list;
   body: stmt list;
 }
 
@@ -27,13 +27,13 @@ and expr =
     Noexpr
   | Int_lit of int
   | Double_lit of float
-  | Id of var_decl
+  | Id of string
   | String_lit of string
   | Bool_lit of bool
   | ParenExpr of expression
   | Unop of op * expression
   | Binop of expression * op * expression
-  | Assign of var_decl * expression
+  | Assign of string * expression
   | Call of string * expression list
 
 and expression = expr * var_type

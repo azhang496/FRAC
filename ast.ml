@@ -3,7 +3,8 @@ type op = Add | Sub | Mult | Div | Mod | Equal | Neq | Less | Leq | Greater | Ge
 
 (* Variable types *)
 type var_type =
-    Int
+    Void
+  | Int
   | Double
   | String
   | Bool
