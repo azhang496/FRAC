@@ -43,16 +43,5 @@ type func_decl = {
   body : stmt list;
 }
 
-(*Rules
-type rule =
-    Rec of string * string
-  | Term of string * expr
-Grammars
-type gram = {
-  gname : string;
-  init : string;
-  rules : rule list;
-} *)
-
 (* Program entry point *)
 type program = func_decl list

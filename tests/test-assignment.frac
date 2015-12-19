@@ -1,0 +1,29 @@
+main() {
+  int x;
+  double y;
+  double z;
+  string s;
+  bool b;
+  bool c;
+
+  x = 4;
+  x = 5;
+  print(x);
+
+  y = 9.0;
+  y = 10.0;
+  print(y);
+
+  z = y + 2.0;
+  print(z);
+
+  s = "test";
+  s = "new";
+  print(s);
+
+  b = true;
+  print(b);
+
+  c = false;
+  print(c);
+}

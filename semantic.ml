@@ -81,15 +81,11 @@ and check_binop (env : symbol_table) binop = match binop with
     let e1 = check_expr env ex1 and e2 = check_expr env ex2 in
     let (_, t1) = e1 and (_, t2) = e2 in
     let t = match op with
-        Add ->
-          if (t1 <> Int || t2 <> Int) then
-            if (t1 <> Double || t2 <> Double) then
-              if (t1 <> String || t2 <> String)
+        Mod ->
+          if (t1 <> Int || t2 <> Int)
                 then op_error op
-              else Sast.String
-            else Sast.Double
           else Sast.Int
-      | Sub | Mult | Div | Mod ->
+      | Add | Sub | Mult | Div ->
           if (t1 <> Int || t2 <> Int) then
             if (t1 <> Double || t2 <> Double)
               then op_error op

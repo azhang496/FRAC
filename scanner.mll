@@ -7,7 +7,7 @@ todo:
 { open Parser }
 
 let num = ('-')?['0'-'9']+
-let dbl = ('-')?(['0'-'9']+'.'['0'-'9']+ | '.'num)
+let dbl = ('-')?(['0'-'9']+'.'['0'-'9']+ | '.'['0'-'9']+)
 let boolean = "true" | "false"
 
 rule token = parse
@@ -46,8 +46,8 @@ rule token = parse
 | '"'      { read_string (Buffer.create 17) lexbuf }
 | num as lxm { INT_LIT (int_of_string lxm) }
 | dbl as lxm { DOUBLE_LIT (float_of_string lxm) }
-| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID (lxm) }
 | boolean as lxm  { BOOL_LIT (bool_of_string lxm) }
+| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID (lxm) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 

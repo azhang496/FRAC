@@ -1,17 +1,21 @@
 open Ast
 open Sast
 
+let suffix_char s c = s ^ String.make 1 c
+
 let c_print_types t = match t with
     Void    -> ""
   | Int     -> "\"%d\\n\""
-  | Double  -> "\"%f\\n\""
+  | Double  -> "\"%.2f\\n\""
   | String  -> "\"%s\\n\""
   | Boolean -> "\"%d\\n\""
 
 let rec expr = function
     Int_lit(i) -> string_of_int i
-  | Bool_lit(b) -> string_of_bool b
-  | Double_lit(d) -> string_of_float d
+  | Bool_lit(b) -> if b == true then "1" else "0"
+  | Double_lit(d) -> if String.get (string_of_float d) (String.length (string_of_float d) - 1) == '.'
+                        then suffix_char (string_of_float d) '0'
+                     else string_of_float d
   | Id(decl) -> (match decl with
 		  Var(_, str) -> str
 		| Var_Init(_, str, _) -> str)
@@ -75,8 +79,8 @@ let rec gen_var_types = function
 	  Void -> "void "
 	| Int -> "int "
   | Double -> "double "
-	| String -> "string " (* STRINGS IN C AHHHHH!!!!*)
-	| Boolean -> "bool "
+	| String -> "char *"
+	| Boolean -> "int "
 
 let gen_formals v =
 	let (str, var_decl, var_type) = v in match var_decl with
@@ -105,8 +109,8 @@ let gen_fdecl fdecl =
                     Sast.Void -> "void "
                   | Sast.Int -> "int "
                   | Sast.Double -> "double "
-                  | Sast.String -> "string " (* NEED TO CHANGE THIS TO CHAR STAR *)
-                  | Sast.Boolean -> "bool ")
+                  | Sast.String -> "char *"
+                  | Sast.Boolean -> "int ")
   ^ fdecl.fname ^ "(" ^ (gen_formals_list fdecl.formals) ^ ")") ^ "{\n" ^(gen_locals_list fdecl.locals) ^ String.concat "" (List.map stmt fdecl.body) ^
   (match fdecl.fname with
       "main" -> "return 0;\n"
