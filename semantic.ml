@@ -243,21 +243,30 @@ let rec check_alphabet (checked : char list) (a : char list) = match a with
   | hd :: tl -> if(List.mem hd checked) then raise(Failure "cannot have duplicates in alphabet")
                 else hd :: (check_alphabet (hd :: checked) tl)
 
-let rec check_init (a : char list) (i : char list) = match i with
+let rec check_rule (a : char list) (i : char list) = match i with
     [] -> []
-  | hd :: tl -> (try List.find (fun id -> id = hd) a with Not_found -> raise(Failure "init contains a rule not found in alphabet"));
-                hd :: (check_init a tl)
+  | hd :: tl -> (try List.find (fun id -> id = hd) a with Not_found -> raise(Failure "contains a rule not found in alphabet"));
+                hd :: (check_rule a tl)
 
-let rec check_rules (recs : Ast.rule list) (terms : Ast.rule list) (a : char list) (rules : Ast.rule list) = match rules with
+(*let check_term (a : char list) (r : Ast.rule) = *)
+
+
+let rec check_rules (recs : Sast.rule list) (terms : Sast.rule list) (a : char list) (rules : Ast.rule list) = match rules with
     []       -> []
   | hd :: tl -> (match hd with
-                    Rec(c, rl) -> (try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet")); []
-                  | Term(c, t) -> []
+                    Rec(c, rl) -> (try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet"));
+                      if(List.exists (fun (Sast.Rec(id, _)) -> id = c) recs) then raise(Failure "multiple recursive rules of the same name")
+                      else check_rule a rl; let checked_rec = Sast.Rec(c, rl) in
+                      checked_rec :: (check_rules (checked_rec :: recs) terms a tl)
+                  | Term(c, t) -> (try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet"));
+                      if(List.exists (fun (Sast.Term(id, _)) -> id = c) terms) then raise(Failure "multiple terminal rules of the same name")
+                      else let checked_term = Sast.Term(c, Move(Int_lit(1))) in
+                      checked_term :: (check_rules recs (checked_term :: terms) a tl)
                 )
 
 let check_gdecl (env : symbol_table) (g : Ast.gram_decl) =
   let checked_alphabet = check_alphabet [] g.alphabet in
-  let checked_init = check_init checked_alphabet g.init in
+  let checked_init = check_rule checked_alphabet g.init in
   let checked_rules = check_rules [] [] checked_alphabet g.rules in
   { gname = g.gname; alphabet = checked_alphabet; init = checked_init; rules = checked_rules }
 

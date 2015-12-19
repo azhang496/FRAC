@@ -2,7 +2,8 @@ gram my_gram = {
     alphabet: [a, b],
     init: 'a b',
     rules: {
-        'a' -> 'a a a'
+        'a' -> 'a a',
+        'a' -> move(1)
     }
 }
 
