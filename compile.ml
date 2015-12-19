@@ -20,6 +20,7 @@ let rec expr = function
 		  Var(_, str) -> str
 		| Var_Init(_, str, _) -> str)
   | String_lit(s) -> "\"" ^ s ^ "\""
+  | ParenExpr((e,_)) -> "(" ^ (expr e) ^ ")"
   | Unop(op, (e,_)) -> (match op with
         Not -> " ! "
       | _   -> ""

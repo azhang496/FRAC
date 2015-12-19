@@ -1,0 +1,9 @@
+main() {
+  int x;
+  int y;
+  print((x = 10) == (y = 10));
+  print(y);
+  x = (y = 9);
+  print(x);
+  print(y);
+}

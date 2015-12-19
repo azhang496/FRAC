@@ -15,6 +15,7 @@ type expr =
   | Id of string
   | String_lit of string
   | Bool_lit of bool
+  | ParenExpr of expr
   | Unop of op * expr
   | Binop of expr * op * expr
   | Assign of string * expr

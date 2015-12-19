@@ -8,6 +8,7 @@ int main() {
   printf("%d\n", 4 / 2);
   printf("%d\n", 10 % 8);
   printf("%d\n", 11 + -1);
+  printf("%d\n", 11 * -1);
 
   printf("%.2f\n", 1.2 + 1.3);
   printf("%.2f\n", 1.2 - 1.2);

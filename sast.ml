@@ -30,6 +30,7 @@ and expr =
   | Id of var_decl
   | String_lit of string
   | Bool_lit of bool
+  | ParenExpr of expression
   | Unop of op * expression
   | Binop of expression * op * expression
   | Assign of var_decl * expression

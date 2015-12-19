@@ -55,10 +55,16 @@ let rec check_expr (env : symbol_table) (expr : Ast.expr) = match expr with
   | Double_lit(d) -> Sast.Double_lit(d), Sast.Double
   | String_lit(s) -> Sast.String_lit(s), Sast.String
   | Bool_lit(b) -> Sast.Bool_lit(b), Sast.Boolean
+  | ParenExpr(e) -> check_paren_expr env e
   | Unop(_, _) as u -> check_unop env u
   | Binop(_, _, _) as b -> check_binop env b
   | Assign(_, _) as a -> check_assign env a
   | Call(_, _) as c -> check_call env c
+
+and check_paren_expr (env : symbol_table) pe =
+  let e = check_expr env pe in
+  let (_, t) = e in
+  Sast.ParenExpr(e), t
 
 and check_id (env : symbol_table) id =
   let (_, decl, t) = List.find(fun (name, _, _) -> name = id) env.vars in
