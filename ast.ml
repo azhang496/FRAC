@@ -36,16 +36,20 @@ type var_decl =
     Var of var_type * string
   | Var_Init of var_type * string * expr
 
+type term =
+    Turn of expr
+  | Move of expr
+
 (* Rule Definitions *)
 type rule =
-    Rec of expr * expr list
-  | Term of expr * expr
+    Rec of char * char list
+  | Term of char * term
 
 (* Grammar Declarations *)
 type gram_decl = {
   gname : string;
-  alphabet : expr list;
-  init : expr list;
+  alphabet : char list;
+  init : char list;
   rules : rule list;
 }
 

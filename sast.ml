@@ -13,16 +13,20 @@ and var_decl =
     Var of var_type * string
   | Var_Init of var_type * string * expression
 
+and term =
+    Turn of expr
+  | Move of expr
+
 (* Rule Definitions *)
 and rule =
-    Rec of expr * expr list
-  | Term of expr * expr
+    Rec of char * char list
+  | Term of char * term
 
 (* Grammar Declarations *)
 and gram_decl = {
   gname : string;
-  alphabet : expr list;
-  init : expr list;
+  alphabet : char list;
+  init : char list;
   rules : rule list;
 }
 
@@ -61,4 +65,4 @@ and stmt =
   | While of expression * stmt
 
 
-type program = func_decl list
+type program = gram_decl list * func_decl list

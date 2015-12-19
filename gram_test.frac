@@ -1,18 +1,8 @@
 gram my_gram = {
     alphabet: [a, b],
-    init: 'a-b',
+    init: 'a b',
     rules: {
-        'a' -> 'a-a-a',
-        'b' -> 'a-b'
-    }
-}
-
-gram my_gram = {
-    alphabet: [a, b],
-    init: 'a-b',
-    rules: {
-        'a' -> 'a-a-a',
-        'b' -> 'a-b'
+        'a' -> 'a a a'
     }
 }
 

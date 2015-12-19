@@ -32,11 +32,12 @@ rule token = parse
 | '!'      { NOT }
 
 (* Grammar Syntax *)
-| "gram"   { GRAM }  | "rules"    { RULES }
-| "init"   { INIT }  | "alphabet" { ALPHABET }
-| ":"      { COLON } | "'"        { QUOTE }
-| "["      { LSQUARE } | "]"      { RSQUARE }
-| "->"     { ARROW } | "-"        { HYPHEN }
+| "gram"   { GRAM }    | "rules"    { RULES }
+| "init"   { INIT }    | "alphabet" { ALPHABET }
+| ':'      { COLON }   | '''        { QUOTE }
+| '['      { LSQUARE } | ']'        { RSQUARE }
+| "->"     { ARROW }   | '-'        { HYPHEN }
+| "turn"   { TURN }    | "move"     { MOVE }
 | ['a'-'z' 'A'-'Z'] as lxm { RULE_ID (lxm) }
 
 (* Statements *)

@@ -14,6 +14,10 @@ let rec print_list = function
     [] -> ()
   | hd :: tl -> print_endline hd.fname; print_list tl
 
+let rec print_num_list = function
+    [] -> print_string ""
+  | hd :: tl -> print_endline "stuff"; print_num_list tl
+
 (**************
  * Exceptions *
 **************)
@@ -234,47 +238,40 @@ let rec check_fdecl_list (env : symbol_table ) (fdecls : Ast.func_decl list) = m
                   | "main" -> raise(Failure "main function can only be defined once")
                   | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs; grams = env.grams } tl
 
-let rec check_alphabet (ids : Ast.expr list) (checked : Sast.expr list) = match ids with
-    [] -> checked
-  | hd :: tl -> let rule_id = (match hd with
-                    Rule_id(c) -> Sast.Rule_id(c)
-                  | _          -> raise(Failure "all rule names must be single characters")) in
-                (* THIS LIST SEARCHING MIGHT NOT WORK *)
-                if(List.mem rule_id checked) then raise(Failure "cannot have duplicates in alphabet")
-                else check_alphabet tl (rule_id :: checked)
-
-let rec check_init (a : Sast.expr list) (i : Ast.expr list) = match i with
+let rec check_alphabet (checked : char list) (a : char list) = match a with
     [] -> []
-  | hd :: tl -> let rule_id = (match hd with
-                  Rule_id(c) -> Sast.Rule_id(c)
-                | _          -> raise(Failure "all rule names must be single characters")) in
-                (try
-                  let checked_id = List.find (fun r -> r = rule_id) a in check_init a i
-                with Not_found -> raise(Failure "init contains a rule name not defined in alphabet"))
+  | hd :: tl -> if(List.mem hd checked) then raise(Failure "cannot have duplicates in alphabet")
+                else hd :: (check_alphabet (hd :: checked) tl)
 
-let rec check_rules (recs : Ast.rule list) (terms : Ast.rule list) (a : Sast.expr list) (rules : Ast.rule list) = match rules with
+let rec check_init (a : char list) (i : char list) = match i with
+    [] -> []
+  | hd :: tl -> (try List.find (fun id -> id = hd) a with Not_found -> raise(Failure "init contains a rule not found in alphabet"));
+                hd :: (check_init a tl)
+
+let rec check_rules (recs : Ast.rule list) (terms : Ast.rule list) (a : char list) (rules : Ast.rule list) = match rules with
     []       -> []
   | hd :: tl -> (match hd with
-                    Rec(s, rl) -> []
-                  | Term(s, t) -> []
+                    Rec(c, rl) -> (try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet")); []
+                  | Term(c, t) -> []
                 )
 
 let check_gdecl (env : symbol_table) (g : Ast.gram_decl) =
-  let checked_alphabet = check_alphabet g.alphabet [] in
+  let checked_alphabet = check_alphabet [] g.alphabet in
   let checked_init = check_init checked_alphabet g.init in
   let checked_rules = check_rules [] [] checked_alphabet g.rules in
   { gname = g.gname; alphabet = checked_alphabet; init = checked_init; rules = checked_rules }
 
 let rec check_gdecl_list (env : symbol_table) (gdecls : Ast.gram_decl list) = match gdecls with
-    [] -> []
-  | hd :: tl -> if (List.exists (fun gram -> gram.gname = hd.gname) env.grams) then raise(Failure("gram " ^ hd.gname ^ "() defined twice"))
+    [] -> env.grams 
+  | hd :: tl -> if (List.exists (fun gram -> gram.gname = hd.gname) env.grams) then raise(Failure("gram " ^ hd.gname ^ " defined twice"))
                 (* PLACEHOLDER *)
-                else hd :: (check_gdecl_list { vars = env.vars; funcs = env.funcs; grams = env.grams } tl)
+                else check_gdecl_list { vars = env.vars; funcs = env.funcs; grams = (check_gdecl env hd) :: env.grams } tl
 
 (* entry point *)
 let check_program (prog : Ast.program) =
   let (gdecls, fdecls) = prog in
   let env = { vars = []; funcs = []; grams = [] } in
-  let checked_gdecls = check_gdecl_list env (List.rev gdecls) in (* PLACEHOLDER *)
-  let checked_fdecls = check_fdecl_list env (List.rev fdecls) in
-  checked_gdecls @ checked_fdecls
+  let checked_gdecls = check_gdecl_list env (List.rev gdecls) in
+  let grams_env = { vars = env.vars; funcs = env.funcs; grams = checked_gdecls } in
+  let checked_fdecls = check_fdecl_list grams_env (List.rev fdecls) in
+  checked_gdecls, checked_fdecls

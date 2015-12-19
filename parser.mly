@@ -9,6 +9,7 @@
 %token INT DOUBLE STRING BOOL
 %token GRAM ALPHABET INIT RULES 
 %token LSQUARE RSQUARE ARROW QUOTE HYPHEN
+%token TURN MOVE
 %token <char> RULE_ID
 %token <string> ID
 %token <int> INT_LIT
@@ -56,9 +57,18 @@ vdecl_list:
 
 /* RULES */
 
+hyphen_list:
+    RULE_ID                     { [$1] }
+  | hyphen_list RULE_ID  { $2 :: $1 }
+
+comma_list:
+    RULE_ID                     { [$1] }
+  | comma_list COMMA RULE_ID  { $3 :: $1 }
+
 rule:
-    QUOTE expr QUOTE ARROW expr                         { Term($2, $5) }
-  | QUOTE expr QUOTE ARROW QUOTE hyphen_list QUOTE        { Rec($2, $6) }
+    QUOTE RULE_ID QUOTE ARROW TURN LPAREN expr RPAREN    { Term($2, Turn($7)) }
+  | QUOTE RULE_ID QUOTE ARROW MOVE LPAREN expr RPAREN    { Term($2, Move($7)) }
+  | QUOTE RULE_ID QUOTE ARROW QUOTE hyphen_list QUOTE    { Rec($2, $6) }
 
 rule_list:
     rule                  { [$1] }
@@ -115,19 +125,11 @@ expr_opt:
     /* nothing */ { Noexpr }
   | expr          { $1 }
 
-comma_list:
-    expr                  { [$1] }
-  | comma_list COMMA expr  { $3 :: $1 }
-
-hyphen_list:
-    expr                  { [$1] }
-  | comma_list HYPHEN expr  { $3 :: $1 }
-
 expr:
     INT_LIT          { Int_lit($1) }
   | DOUBLE_LIT       { Double_lit($1) }
   | ID               { Id($1) }
-  | RULE_ID          { Rule_id($1) }
+/*  | RULE_ID          { Rule_id($1) }*/
   | STRING_LIT       { String_lit($1) }
   | BOOL_LIT         { Bool_lit($1) }
   | NOT expr  			 { Unop(Not, $2) }
