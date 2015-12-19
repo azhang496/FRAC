@@ -248,8 +248,10 @@ let rec check_rule (a : char list) (i : char list) = match i with
   | hd :: tl -> (try List.find (fun id -> id = hd) a with Not_found -> raise(Failure "contains a rule not found in alphabet"));
                 hd :: (check_rule a tl)
 
-(*let check_term (a : char list) (r : Ast.rule) = *)
-
+let check_term_expr (e : Ast.expr) = match e with
+    Int_lit(i) -> Sast.Int_lit(i)
+  | Double_lit(d) -> Sast.Double_lit(d)
+  | _ -> raise(Failure "terminal functions must have argument of type int or double")
 
 let rec check_rules (recs : Sast.rule list) (terms : Sast.rule list) (a : char list) (rules : Ast.rule list) = match rules with
     []       -> []
@@ -260,7 +262,10 @@ let rec check_rules (recs : Sast.rule list) (terms : Sast.rule list) (a : char l
                       checked_rec :: (check_rules (checked_rec :: recs) terms a tl)
                   | Term(c, t) -> (try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet"));
                       if(List.exists (fun (Sast.Term(id, _)) -> id = c) terms) then raise(Failure "multiple terminal rules of the same name")
-                      else let checked_term = Sast.Term(c, Move(Int_lit(1))) in
+                      else let checked_t = (match t with
+                          Turn(e) -> Sast.Turn(check_term_expr e)
+                        | Move(e) -> Sast.Move(check_term_expr e)) in
+                      let checked_term = Sast.Term(c, checked_t) in
                       checked_term :: (check_rules recs (checked_term :: terms) a tl)
                 )
 
