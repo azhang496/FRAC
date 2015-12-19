@@ -17,8 +17,8 @@ let rec expr = function
                         then suffix_char (string_of_float d) '0'
                      else string_of_float d
   | Id(decl) -> (match decl with
-		  Var(_, str) -> str
-		| Var_Init(_, str, _) -> str)
+      Var(_, str) -> str
+    | Var_Init(_, str, _) -> str)
   | String_lit(s) -> "\"" ^ s ^ "\""
   | ParenExpr((e,_)) -> "(" ^ (expr e) ^ ")"
   | Unop(op, (e,_)) -> (match op with
@@ -42,8 +42,8 @@ let rec expr = function
       | _       -> ""
     ) ^ (expr e2)
   | Assign (decl, (e,_)) -> (match decl with
-		  Var(_, str) -> str
-		| Var_Init(_, str, _) -> str) ^ " = " ^ (expr e)
+      Var(_, str) -> str
+    | Var_Init(_, str, _) -> str) ^ " = " ^ (expr e)
   (* This DEFINITELY needs to be made more efficient *)
   | Call (fname, actuals) -> (match fname with
       "print" -> "printf(" ^
@@ -77,31 +77,31 @@ let rec stmt = function
   | While ((e,_), st) -> "while(" ^ (expr e) ^ ") {\n" ^ (stmt st) ^ "}\n"
 
 let rec gen_var_types = function
-	  Void -> "void "
-	| Int -> "int "
+    Void -> "void "
+  | Int -> "int "
   | Double -> "double "
 	| String -> "char *"
 	| Boolean -> "int "
 
 let gen_formals v =
-	let (str, var_decl, var_type) = v in match var_decl with
-	   Var(var_type, str) -> gen_var_types var_type ^ str
-	 | Var_Init(var_types, str, _) -> gen_var_types var_type ^ str
+  let (str, var_decl, var_type) = v in match var_decl with
+     Var(var_type, str) -> gen_var_types var_type ^ str
+   | Var_Init(var_types, str, _) -> gen_var_types var_type ^ str
 
  let gen_locals v =
- 	let (str, var_decl, var_type) = v in match var_decl with
- 	   Var(var_type, str) -> gen_var_types var_type ^ str
- 	 | Var_Init(var_types, str, (e,_)) -> gen_var_types var_type ^ str ^ " = " ^ (expr e)
+  let (str, var_decl, var_type) = v in match var_decl with
+     Var(var_type, str) -> gen_var_types var_type ^ str
+   | Var_Init(var_types, str, (e,_)) -> gen_var_types var_type ^ str ^ " = " ^ (expr e)
 
 let rec gen_formals_list fl = match fl with
-	[] -> ""
-	| hd::[] -> gen_formals hd
-	| hd::tl -> gen_formals hd ^ ", " ^ gen_formals_list tl
+  [] -> ""
+  | hd::[] -> gen_formals hd
+  | hd::tl -> gen_formals hd ^ ", " ^ gen_formals_list tl
 
 let rec gen_locals_list ll = match ll with
-	[] -> ""
-	| hd::[] -> gen_locals hd ^ ";\n"
-	| hd::tl -> gen_locals hd ^ ";\n" ^ gen_locals_list tl
+  [] -> ""
+  | hd::[] -> gen_locals hd ^ ";\n"
+  | hd::tl -> gen_locals hd ^ ";\n" ^ gen_locals_list tl
 
 let gen_fdecl fdecl =
   (match fdecl.fname with

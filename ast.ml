@@ -7,12 +7,14 @@ type var_type =
   | Double
   | String
   | Bool
+  | Gram
 
 (* Expressions *)
 type expr =
     Int_lit of int
   | Double_lit of float
   | Id of string
+  | Rule_id of char
   | String_lit of string
   | Bool_lit of bool
   | ParenExpr of expr
@@ -36,6 +38,23 @@ type var_decl =
     Var of var_type * string
   | Var_Init of var_type * string * expr
 
+type term =
+    Turn of expr
+  | Move of expr
+
+(* Rule Definitions *)
+type rule =
+    Rec of char * char list
+  | Term of char * term
+
+(* Grammar Declarations *)
+type gram_decl = {
+  gname : string;
+  alphabet : char list;
+  init : char list;
+  rules : rule list;
+}
+
 (* Function Declarations *)
 type func_decl = {
   fname : string;
@@ -45,4 +64,4 @@ type func_decl = {
 }
 
 (* Program entry point *)
-type program = func_decl list
+type program = gram_decl list * func_decl list

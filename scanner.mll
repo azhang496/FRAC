@@ -31,13 +31,22 @@ rule token = parse
 | "||"     { OR }     | "&&"     { AND }
 | '!'      { NOT }
 
-| "->"     { ARROW }
+(* Grammar Syntax *)
+| "gram"   { GRAM }    | "rules"    { RULES }
+| "init"   { INIT }    | "alphabet" { ALPHABET }
+| ':'      { COLON }   | '''        { QUOTE }
+| '['      { LSQUARE } | ']'        { RSQUARE }
+| "->"     { ARROW }   | '-'        { HYPHEN }
+| "turn"   { TURN }    | "move"     { MOVE }
+| ['a'-'z' 'A'-'Z'] as lxm { RULE_ID (lxm) }
 
+(* Statements *)
 | "if"     { IF }
 | "else"   { ELSE }
 | "for"    { FOR }
 | "while"  { WHILE }
 | "return" { RETURN }
+
 (* Type Names *)
 | "int"    { INT }
 | "double" { DOUBLE }
