@@ -7,6 +7,7 @@ type var_type =
   | Double
   | String
   | Boolean
+  | Gram
 
 (* Variable Declarations*)
 and var_decl =

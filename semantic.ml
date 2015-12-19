@@ -126,7 +126,14 @@ and check_call (env : symbol_table) c = match c with
             []        -> raise(Failure "print() requires an argument")
           | hd :: []     -> Sast.Call(f, [check_expr env hd]), Sast.Void
           | hd :: tl -> raise(Failure "print() only takes one argument"))
-      (*| "draw" -> Sast.Call(f, actuals), Sast.Void (* PLACEHOLDER: actuals should be gram g and int n *)*)
+      (*| "draw" -> (match actuals with
+            [g; i] -> (match (g, i) with
+                          (Id(s), Int_lit(n)) -> (try
+                            List.find(fun gram -> gram.gname = s) env.grams
+                          with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
+                          Sast.Call(f, [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
+                        | _ -> raise(Failure "draw takes a gram g and int n as arguments"))
+          | _      -> raise(Failure "draw() requires two arguments")*)
       | _ -> let called_func = (try
                 List.find(fun func -> func.fname = f) env.funcs
               with Not_found -> raise(Failure ("function " ^ f ^ " not defined"))) in
@@ -238,10 +245,19 @@ let rec check_fdecl_list (env : symbol_table ) (fdecls : Ast.func_decl list) = m
                   | "main" -> raise(Failure "main function can only be defined once")
                   | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs; grams = env.grams } tl
 
-let rec check_alphabet (checked : char list) (a : char list) = match a with
+let rec find_rule (id : char) (rules : Ast.rule list) = match rules with
+    [] -> raise(Failure "all elements of the alphabet must have corresponding rules")
+  | hd :: tl -> (match hd with
+                    Rec(c, rl) -> if(c = id) then c
+                                  else find_rule id tl
+                  | Term(c, t) -> if(c = id) then c
+                                  else find_rule id tl)
+
+let rec check_alphabet (checked : char list) (rules : Ast.rule list) (a : char list) = match a with
     [] -> []
   | hd :: tl -> if(List.mem hd checked) then raise(Failure "cannot have duplicates in alphabet")
-                else hd :: (check_alphabet (hd :: checked) tl)
+                else let checked_c = find_rule hd rules in
+                checked_c :: (check_alphabet (checked_c :: checked) rules tl)
 
 let rec check_rule (a : char list) (i : char list) = match i with
     [] -> []
@@ -270,15 +286,14 @@ let rec check_rules (recs : Sast.rule list) (terms : Sast.rule list) (a : char l
                 )
 
 let check_gdecl (env : symbol_table) (g : Ast.gram_decl) =
-  let checked_alphabet = check_alphabet [] g.alphabet in
-  let checked_init = check_rule checked_alphabet g.init in
+  let checked_alphabet = check_alphabet [] g.rules g.alphabet in
   let checked_rules = check_rules [] [] checked_alphabet g.rules in
+  let checked_init = check_rule checked_alphabet g.init in
   { gname = g.gname; alphabet = checked_alphabet; init = checked_init; rules = checked_rules }
 
 let rec check_gdecl_list (env : symbol_table) (gdecls : Ast.gram_decl list) = match gdecls with
     [] -> env.grams 
   | hd :: tl -> if (List.exists (fun gram -> gram.gname = hd.gname) env.grams) then raise(Failure("gram " ^ hd.gname ^ " defined twice"))
-                (* PLACEHOLDER *)
                 else check_gdecl_list { vars = env.vars; funcs = env.funcs; grams = (check_gdecl env hd) :: env.grams } tl
 
 (* entry point *)

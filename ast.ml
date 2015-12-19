@@ -7,6 +7,7 @@ type var_type =
   | Double
   | String
   | Bool
+  | Gram
 
 (* Expressions *)
 type expr =
