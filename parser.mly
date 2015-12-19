@@ -5,9 +5,12 @@
 %token PLUS MINUS TIMES DIVIDE MOD ASSIGN
 %token EQ NEQ LT LEQ GT GEQ
 %token OR AND NOT
-%token ARROW
 %token RETURN IF ELSE FOR WHILE
 %token INT DOUBLE STRING BOOL
+%token GRAM ALPHABET INIT RULES 
+%token LSQUARE RSQUARE ARROW QUOTE HYPHEN
+%token TURN MOVE
+%token <char> RULE_ID
 %token <string> ID
 %token <int> INT_LIT
 %token <float> DOUBLE_LIT
@@ -31,8 +34,9 @@
 %%
 
 program:
-  fdecl_list EOF { $1 }
-
+    /* nothing */      { [], [] }
+  | program gdecl      { let (grams, funcs) = $1 in $2::grams, funcs }
+  | program fdecl      { let (grams, funcs) = $1 in grams, $2::funcs }
 
 /* VARIABLES */
 
@@ -47,20 +51,41 @@ vdecl:
   | var_type ID                   { Var($1, $2)}
   | var_type ID ASSIGN expr SEMI  { Var_Init($1, $2, $4)}
 
-  /* variable declaration without assignment
-    var_type ID SEMI
-      { { vtype = $1;
-      vname = $2;
-      value = Noexpr } }
-  | var_type ID ASSIGN expr SEMI
-      { { vtype = $1;
-      vname = $2;
-      value = $4 } }
-  */
-
 vdecl_list:
     /* nothing */    { [] }
   | vdecl_list vdecl { $2 :: $1 }
+
+/* RULES */
+
+hyphen_list:
+    RULE_ID                     { [$1] }
+  | hyphen_list RULE_ID  { $2 :: $1 }
+
+comma_list:
+    RULE_ID                     { [$1] }
+  | comma_list COMMA RULE_ID  { $3 :: $1 }
+
+rule:
+    QUOTE RULE_ID QUOTE ARROW TURN LPAREN expr RPAREN    { Term($2, Turn($7)) }
+  | QUOTE RULE_ID QUOTE ARROW MOVE LPAREN expr RPAREN    { Term($2, Move($7)) }
+  | QUOTE RULE_ID QUOTE ARROW QUOTE hyphen_list QUOTE    { Rec($2, $6) }
+
+rule_list:
+    rule                  { [$1] }
+  | rule_list COMMA rule  { $3 :: $1 }
+
+/* GRAMS */
+
+gdecl:
+    GRAM ID ASSIGN LBRACE
+      ALPHABET COLON LSQUARE comma_list RSQUARE COMMA
+      INIT COLON QUOTE hyphen_list QUOTE COMMA
+      RULES COLON LBRACE rule_list RBRACE
+    RBRACE
+    { { gname = $2;
+        alphabet = $8;
+        init = $14;
+        rules = List.rev $20 } }
 
  /* FUNCTIONS */
 
@@ -70,10 +95,6 @@ fdecl:
      formals = $3;
      locals = List.rev $6;
      body = List.rev $7 } }
-
-fdecl_list:
-     /* nothing */    { [] }
-   | fdecl_list fdecl { $2 :: $1 }
 
 formals_opt:
     /* nothing */ { [] }
@@ -100,7 +121,6 @@ stmt_list:
 
 /* EXPRESSIONS */
 
-
 expr_opt:
     /* nothing */ { Noexpr }
   | expr          { $1 }
@@ -109,6 +129,7 @@ expr:
     INT_LIT          { Int_lit($1) }
   | DOUBLE_LIT       { Double_lit($1) }
   | ID               { Id($1) }
+/*  | RULE_ID          { Rule_id($1) }*/
   | STRING_LIT       { String_lit($1) }
   | BOOL_LIT         { Bool_lit($1) }
   | LPAREN expr RPAREN { ParenExpr($2) }

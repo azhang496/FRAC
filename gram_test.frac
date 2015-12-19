@@ -1,0 +1,16 @@
+gram my_gram = {
+    alphabet: [a, b],
+    init: 'a b',
+    rules: {
+        'a' -> 'a b',
+        'b' -> move(1)
+    }
+}
+
+foo() {
+    
+}
+
+main() {
+
+}

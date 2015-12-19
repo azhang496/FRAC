@@ -90,14 +90,14 @@ let gen_formals v =
  	 | Var_Init(var_type, str, (e,_)) -> gen_var_types var_type ^ str ^ " = " ^ (expr e))
 
 let rec gen_formals_list fl = match fl with
-	[] -> ""
-	| hd::[] -> gen_formals hd
-	| hd::tl -> gen_formals hd ^ ", " ^ gen_formals_list tl
+  [] -> ""
+  | hd::[] -> gen_formals hd
+  | hd::tl -> gen_formals hd ^ ", " ^ gen_formals_list tl
 
 let rec gen_locals_list ll = match ll with
-	[] -> ""
-	| hd::[] -> gen_locals hd ^ ";\n"
-	| hd::tl -> gen_locals hd ^ ";\n" ^ gen_locals_list tl
+  [] -> ""
+  | hd::[] -> gen_locals hd ^ ";\n"
+  | hd::tl -> gen_locals hd ^ ";\n" ^ gen_locals_list tl
 
 let gen_fdecl fdecl =
   (match fdecl.fname with
