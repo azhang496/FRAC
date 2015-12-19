@@ -1,16 +1,17 @@
 gram my_gram = {
     alphabet: [a, b],
-    init: 'a b',
+    init: 'a b b b a',
     rules: {
-        'a' -> 'a b',
+        'a' -> 'a b a a a b',
+        'a' -> lturn(1),
         'b' -> move(1)
     }
 }
 
 foo() {
-    
+
 }
 
 main() {
-
+    
 }

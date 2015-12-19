@@ -114,8 +114,44 @@ let gen_fdecl fdecl =
     | _      -> "" )
   ^ "}\n"
 
-let generate funcs name =
+let rec divide_term_rules (tm, rtm) (recs : Sast.rule list) (terms : Sast.rule list) = match terms with
+    [] -> tm, rtm
+  | hd :: tl -> let Term(id, t) = hd in if(List.exists (fun (Rec(s, _)) -> s = id) recs)
+                then divide_term_rules (tm, hd :: rtm) recs tl
+                else divide_term_rules (hd :: tm, rtm) recs tl
+
+let gen_term_arg (e : Sast.expr) = match e with
+    Int_lit(i) -> string_of_int i
+  | Double_lit(d) -> string_of_float d
+
+let rec gen_term_rules (terms : Sast.rule list) = match terms with
+    [] -> ""
+  | hd :: tl -> let Term(id, t) = hd in "if (var == '" ^ id ^ "') {\n" ^
+                (match t with
+                    Rturn(e) -> "turtle_turn_right(" ^ (gen_term_arg e) ^ ");\n"
+                  | Lturn(e) -> "turtle_turn_left(" ^ (gen_term_arg e) ^ ");\n"
+                  | Move(e) -> "turtle_forward(" ^ (gen_term_arg e) ^ ");\n"
+                ) ^ "}\n" ^ gen_term_rules tl
+
+let rec gen_rule (gname : string) (rl : string list) = match (List.rev rl) with
+    [] -> ""
+  | hd :: tl -> gname ^ "('" ^ hd ^ "', iter - 1);\n" ^ gen_rule gname tl
+
+let rec gen_rec_rules (gname : string) (recs : Sast.rule list) = match recs with
+    [] -> ""
+  | hd :: tl -> let Rec(id, rl) = hd in "if(var == '" ^ id ^ "') {\n" ^ (gen_rule gname rl) ^ "}\n"
+
+let gen_gdecl (g : Sast.gram_decl) =
+  let (terms, rterms) = divide_term_rules ([], []) g.rec_rules g.term_rules in
+  "void " ^ g.gname ^ "(char var, int iter)\n{\n" ^ "if (iter < 0) {\n" ^ 
+  (gen_term_rules rterms) ^ "} else {\n" ^ (gen_rec_rules g.gname g.rec_rules) ^ (gen_term_rules terms) ^ "}\n}\n" ^
+  "void " ^ g.gname ^ "_start(int iter)\n{\n" ^ (gen_rule g.gname g.init) ^ "}\n"
+
+
+let generate (grams : Sast.gram_decl list) (funcs : Sast.func_decl list) (name : string) =
   let outfile = open_out ("tests/" ^ name ^ "-NEW.c") in
-  let translated_program =  "#include <stdio.h>\n" ^ String.concat "" (List.rev (List.map gen_fdecl funcs)) ^ "\n" in
+                          (* DO ESCAPED DOUBLE QUOTES WORK ??? *)
+  let translated_program =  "#include \"turtle.h\"\n#include <stdio.h>\n#include <string.h>\n\n" ^ 
+  String.concat "" (List.rev (List.map gen_gdecl grams)) ^ String.concat "" (List.rev (List.map gen_fdecl funcs)) ^ "\n" in
   ignore(Printf.fprintf outfile "%s" translated_program);
   close_out outfile;
