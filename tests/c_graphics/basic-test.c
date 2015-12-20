@@ -1,6 +1,6 @@
 #include "turtle.h"
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 void koch_flake(char var, int iter)
 {

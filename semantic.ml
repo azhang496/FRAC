@@ -7,6 +7,7 @@ type symbol_table = {
   mutable vars: var_decl list;
   mutable funcs: func_decl list;
   mutable grams: gram_decl list;
+  (*draw_found: bool;*)
 }
 
 (* list printer for testing purposes *)
