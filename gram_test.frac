@@ -8,10 +8,6 @@ gram my_gram = {
     }
 }
 
-foo() {
-
-}
-
 main() {
-    
+    draw(my_gram, 5);
 }

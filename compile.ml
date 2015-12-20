@@ -54,7 +54,10 @@ let rec expr = function
                     | (e,_)::[] -> expr e
                     | _ -> ""
                     in gen_actuals actuals) ^ ")"
-    | _       -> fname ^ "(" ^
+      | "draw" -> "turtle_init(2000, 2000);\n" ^
+                (let [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int] = actuals in
+                s ^ "_start(" ^ (string_of_int n) ^ ");\nturtle_save_bmp(\"" ^ s ^ ".bmp\");\nturtle_cleanup()")
+      | _       -> fname ^ "(" ^
                  (let rec gen_actuals = function
                     [] ->  ""
                     | (e,_)::[] -> expr e
@@ -110,7 +113,7 @@ let gen_fdecl fdecl =
                   | Sast.Boolean -> "int ")
   ^ fdecl.fname ^ "(" ^ (gen_formals_list fdecl.formals) ^ ")") ^ "{\n" ^(gen_locals_list fdecl.locals) ^ String.concat "" (List.map stmt fdecl.body) ^
   (match fdecl.fname with
-      "main" -> "return 0;\n"
+      "main" -> "turtle_init(2000, 2000);\nreturn 0;\n"
     | _      -> "" )
   ^ "}\n"
 
@@ -146,7 +149,6 @@ let gen_gdecl (g : Sast.gram_decl) =
   "void " ^ g.gname ^ "(char var, int iter)\n{\n" ^ "if (iter < 0) {\n" ^ 
   (gen_term_rules rterms) ^ "} else {\n" ^ (gen_rec_rules g.gname g.rec_rules) ^ (gen_term_rules terms) ^ "}\n}\n" ^
   "void " ^ g.gname ^ "_start(int iter)\n{\n" ^ (gen_rule g.gname g.init) ^ "}\n"
-
 
 let generate (grams : Sast.gram_decl list) (funcs : Sast.func_decl list) (name : string) =
   let outfile = open_out ("tests/" ^ name ^ "-NEW.c") in
