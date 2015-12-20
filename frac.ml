@@ -16,7 +16,7 @@ let _ =
   let input = open_in Sys.argv.(1) in
   let lexbuf = Lexing.from_channel input in
   let program = Parser.program Scanner.token lexbuf in
-  Semantic.check_program program
+  let (grams, funcs) = Semantic.check_program program in Compile.generate grams funcs name
 	(*match action with
 			Semantic -> let sprogram = Semantic.check_program program in
               print_string "Semantic in place" (* Pretty printer should go here. This is temp so that all patterns have unit return type *)

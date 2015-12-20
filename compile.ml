@@ -54,7 +54,10 @@ let rec expr = function
                     | (e,_)::[] -> expr e
                     | _ -> ""
                     in gen_actuals actuals) ^ ")"
-    | _       -> fname ^ "(" ^
+      | "draw" -> "turtle_init(2000, 2000);\n" ^
+                (let [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int] = actuals in
+                s ^ "_start(" ^ (string_of_int n) ^ ");\nturtle_save_bmp(\"" ^ s ^ ".bmp\");\nturtle_cleanup()")
+      | _       -> fname ^ "(" ^
                  (let rec gen_actuals = function
                     [] ->  ""
                     | (e,_)::[] -> expr e
@@ -110,12 +113,51 @@ let gen_fdecl fdecl =
                   | Sast.Boolean -> "int ")
   ^ fdecl.fname ^ "(" ^ (gen_formals_list fdecl.formals) ^ ")") ^ "{\n" ^(gen_locals_list fdecl.locals) ^ String.concat "" (List.map stmt fdecl.body) ^
   (match fdecl.fname with
-      "main" -> "return 0;\n"
+      "main" -> "turtle_init(2000, 2000);\nreturn 0;\n"
     | _      -> "" )
   ^ "}\n"
 
-let generate funcs name =
+(* list printer for testing purposes *)
+let rec print_list = function
+    [] -> ()
+  | hd :: tl -> let Term(id, t) = hd in print_endline id; print_list tl
+
+let rec divide_term_rules (tm, rtm) (recs : Sast.rule list) (terms : Sast.rule list) = match terms with
+    [] -> print_endline "terminal rules: "; print_list tm; print_endline "terminal & rec rules: "; print_list rtm; tm, rtm
+  | hd :: tl -> let Term(id, t) = hd in if(List.exists (fun (Rec(s, _)) -> s = id) recs)
+                then divide_term_rules (tm, hd :: rtm) recs tl
+                else divide_term_rules (hd :: tm, rtm) recs tl
+
+let gen_term_arg (e : Sast.expr) = match e with
+    Int_lit(i) -> string_of_int i
+  | Double_lit(d) -> string_of_float d
+
+let rec gen_term_rules (terms : Sast.rule list) = match terms with
+    [] -> ""
+  | hd :: tl -> let Term(id, t) = hd in "if (var == '" ^ id ^ "') {\n" ^
+                (match t with
+                    Rturn(e) -> "turtle_turn_right(" ^ (gen_term_arg e) ^ ");\n"
+                  | Lturn(e) -> "turtle_turn_left(" ^ (gen_term_arg e) ^ ");\n"
+                  | Move(e) -> "turtle_forward(" ^ (gen_term_arg e) ^ ");\n"
+                ) ^ "}\n" ^ gen_term_rules tl
+
+let rec gen_rule (gname : string) (rl : string list) = match rl with
+    [] -> ""
+  | hd :: tl -> gname ^ "('" ^ hd ^ "', iter - 1);\n" ^ gen_rule gname tl
+
+let rec gen_rec_rules (gname : string) (recs : Sast.rule list) = match recs with
+    [] -> ""
+  | hd :: tl -> let Rec(id, rl) = hd in "if(var == '" ^ id ^ "') {\n" ^ (gen_rule gname rl) ^ "}\n" ^ (gen_rec_rules gname tl)
+
+let gen_gdecl (g : Sast.gram_decl) =
+  let (terms, rterms) = divide_term_rules ([], []) g.rec_rules g.term_rules in
+  "void " ^ g.gname ^ "(char var, int iter)\n{\n" ^ "if (iter < 0) {\n" ^ 
+  (gen_term_rules rterms) ^ "} else {\n" ^ (gen_rec_rules g.gname g.rec_rules) ^ (gen_term_rules terms) ^ "}\n}\n" ^
+  "void " ^ g.gname ^ "_start(int iter)\n{\n" ^ (gen_rule g.gname (List.rev g.init)) ^ "}\n"
+
+let generate (grams : Sast.gram_decl list) (funcs : Sast.func_decl list) (name : string) =
   let outfile = open_out ("tests/" ^ name ^ "-NEW.c") in
-  let translated_program =  "#include <stdio.h>\n" ^ String.concat "" (List.rev (List.map gen_fdecl funcs)) ^ "\n" in
+  let translated_program =  "#include \"turtle.h\"\n#include <stdio.h>\n#include <string.h>\n\n" ^ 
+  String.concat "" (List.rev (List.map gen_gdecl grams)) ^ String.concat "" (List.rev (List.map gen_fdecl funcs)) ^ "\n" in
   ignore(Printf.fprintf outfile "%s" translated_program);
   close_out outfile;

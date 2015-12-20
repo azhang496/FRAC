@@ -15,7 +15,6 @@ type expr =
     Int_lit of int
   | Double_lit of float
   | Id of string
-  | Rule_id of char
   | String_lit of string
   | Bool_lit of bool
   | ParenExpr of expr
@@ -40,19 +39,20 @@ type var_decl =
   | Var_Init of var_type * string * expr
 
 type term =
-    Turn of expr
+    Rturn of expr
+  | Lturn of expr
   | Move of expr
 
 (* Rule Definitions *)
 type rule =
-    Rec of char * char list
-  | Term of char * term
+    Rec of string * string list
+  | Term of string * term
 
 (* Grammar Declarations *)
 type gram_decl = {
   gname : string;
-  alphabet : char list;
-  init : char list;
+  alphabet : string list;
+  init : string list;
   rules : rule list;
 }
 
