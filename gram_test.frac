@@ -1,14 +1,18 @@
 gram my_gram = {
-    alphabet: [a, b],
-    init: 'a b b b a a b a b a',
+    alphabet: [F, p, m],
+    init: 'F p p F p p F',
     rules: {
-        'a' -> 'a b b',
-        'b' -> 'b',
-        'a' -> lturn(1),
-        'b' -> lturn(2)
+        'F' -> 'F m F p p F m F',
+        'F' -> move(1),
+        'p' -> lturn(60),
+        'm' -> rturn(60)
     }
 }
 
+foo() {
+  draw(my_gram, 5);
+}
+
 main() {
-    draw(my_gram, 2);
+  foo();
 }

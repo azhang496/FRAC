@@ -1,0 +1,14 @@
+gram koch_flake = {
+    alphabet: [F, p, m],
+    init: 'F p p F p p F',
+    rules: {
+        'F' -> 'F m F p p F m F',
+        'F' -> move(1),
+        'p' -> lturn(60),
+        'm' -> rturn(60)
+    }
+}
+
+main() {
+  draw(koch_flake, 5);
+}

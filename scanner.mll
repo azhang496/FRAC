@@ -33,7 +33,6 @@ rule token = parse
 | "->"     { ARROW }
 | "rturn"  { RTURN }  | "lturn"    { LTURN }
 | "move"     { MOVE }
-| ['a'-'z' 'A'-'Z'] as lxm { RULE_ID (String.make 1 lxm) }
 
 (* Statements *)
 | "if"     { IF }

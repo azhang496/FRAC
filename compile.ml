@@ -113,17 +113,17 @@ let gen_fdecl fdecl =
                   | Sast.Boolean -> "int ")
   ^ fdecl.fname ^ "(" ^ (gen_formals_list fdecl.formals) ^ ")") ^ "{\n" ^(gen_locals_list fdecl.locals) ^ String.concat "" (List.map stmt fdecl.body) ^
   (match fdecl.fname with
-      "main" -> "turtle_init(2000, 2000);\nreturn 0;\n"
+      "main" -> "return 0;\n"
     | _      -> "" )
   ^ "}\n"
 
 (* list printer for testing purposes *)
 let rec print_list = function
     [] -> ()
-  | hd :: tl -> let Term(id, t) = hd in print_endline id; print_list tl
+  | hd :: tl -> let Term(id, t) = hd in print_list tl
 
 let rec divide_term_rules (tm, rtm) (recs : Sast.rule list) (terms : Sast.rule list) = match terms with
-    [] -> print_endline "terminal rules: "; print_list tm; print_endline "terminal & rec rules: "; print_list rtm; tm, rtm
+    [] -> print_list rtm; tm, rtm
   | hd :: tl -> let Term(id, t) = hd in if(List.exists (fun (Rec(s, _)) -> s = id) recs)
                 then divide_term_rules (tm, hd :: rtm) recs tl
                 else divide_term_rules (hd :: tm, rtm) recs tl
@@ -141,6 +141,10 @@ let rec gen_term_rules (terms : Sast.rule list) = match terms with
                   | Move(e) -> "turtle_forward(" ^ (gen_term_arg e) ^ ");\n"
                 ) ^ "}\n" ^ gen_term_rules tl
 
+let rec gen_init (gname : string) (rl : string list) = match rl with
+    [] -> ""
+  | hd :: tl -> gname ^ "('" ^ hd ^ "', iter);\n" ^ gen_init gname tl
+
 let rec gen_rule (gname : string) (rl : string list) = match rl with
     [] -> ""
   | hd :: tl -> gname ^ "('" ^ hd ^ "', iter - 1);\n" ^ gen_rule gname tl
@@ -151,13 +155,13 @@ let rec gen_rec_rules (gname : string) (recs : Sast.rule list) = match recs with
 
 let gen_gdecl (g : Sast.gram_decl) =
   let (terms, rterms) = divide_term_rules ([], []) g.rec_rules g.term_rules in
-  "void " ^ g.gname ^ "(char var, int iter)\n{\n" ^ "if (iter < 0) {\n" ^ 
+  "void " ^ g.gname ^ "(char var, int iter) {\n" ^ "if (iter < 0) {\n" ^
   (gen_term_rules rterms) ^ "} else {\n" ^ (gen_rec_rules g.gname g.rec_rules) ^ (gen_term_rules terms) ^ "}\n}\n" ^
-  "void " ^ g.gname ^ "_start(int iter)\n{\n" ^ (gen_rule g.gname (List.rev g.init)) ^ "}\n"
+  "void " ^ g.gname ^ "_start(int iter) {\n" ^ (gen_init g.gname (List.rev g.init)) ^ "}\n"
 
 let generate (grams : Sast.gram_decl list) (funcs : Sast.func_decl list) (name : string) =
   let outfile = open_out ("tests/" ^ name ^ "-NEW.c") in
-  let translated_program =  "#include \"turtle.h\"\n#include <stdio.h>\n#include <string.h>\n\n" ^ 
+  let translated_program =  (if List.length grams > 0 then "#include \"turtle.h\"\n#include <string.h>\n" else "") ^ "#include <stdio.h>\n\n" ^
   String.concat "" (List.rev (List.map gen_gdecl grams)) ^ String.concat "" (List.rev (List.map gen_fdecl funcs)) ^ "\n" in
   ignore(Printf.fprintf outfile "%s" translated_program);
   close_out outfile;

@@ -138,15 +138,15 @@ and check_call (env : symbol_table) c = match c with
       | "draw" -> (match actuals with
             [g; i] -> (match (g, i) with
                           (Id(s), Int_lit(n)) -> (try
-                            List.find(fun gram -> gram.gname = s) env.grams
-                          with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
+                                                  List.find(fun gram -> gram.gname = s) env.grams
+                                                  with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
                           Sast.Call(f, [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
                         | _ -> raise(Failure "draw takes a gram g and int n as arguments"))
-          | _      -> raise(Failure "draw() requires two arguments")
+          | _      -> raise(Failure "draw() requires two arguments"))
       | _ -> let called_func = (try
                 List.find(fun func -> func.fname = f) env.funcs
-              with Not_found -> raise(Failure ("function " ^ f ^ " not defined"))) in
-             Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype)
+                with Not_found -> raise(Failure ("function " ^ f ^ " not defined"))) in
+             Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype
   | _ -> raise (Failure "Not a valid function call"))
 
 and check_args (env : symbol_table) ((formals : var_decl list), (actuals : Ast.expr list)) = match (formals, actuals) with
