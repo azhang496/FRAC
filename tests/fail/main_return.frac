@@ -1,0 +1,4 @@
+main() {
+    print(3);
+    return 0;
+}

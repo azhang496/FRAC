@@ -1,0 +1,16 @@
+foo(int x, int y) {
+    print(x+y);
+    return x + y;
+    return x;
+}
+
+bar(string s, bool b) {
+    print(s);
+    print(b);
+}
+main() {
+    int z;
+    bar("hello", 1 == 1);
+    z = foo(2,4);
+    print("main");
+}

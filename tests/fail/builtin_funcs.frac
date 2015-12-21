@@ -1,0 +1,8 @@
+print(int y) {
+  return y;
+}
+
+main() {
+  int x = 32;
+  print(x);
+}

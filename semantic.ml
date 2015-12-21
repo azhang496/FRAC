@@ -160,8 +160,8 @@ and check_args (env : symbol_table) ((formals : var_decl list), (actuals : Ast.e
                 Var(t, _) -> t
               | Var_Init(t, _, _) -> t) in
       let (a_expr, a_type) = check_expr env a_hd in
-      if (f_type <> a_type) then raise (Failure "wrong argument type")
-      else (a_expr, a_type) :: check_args env (f_tl, a_tl)
+                             if (f_type <> a_type) then raise (Failure "wrong argument type")
+                             else (a_expr, a_type) :: check_args env (f_tl, a_tl)
   | (_, _) -> raise (Failure "wrong number of arguments")
 
 let check_vtype (t : Ast.var_type) = match t with
@@ -169,6 +169,7 @@ let check_vtype (t : Ast.var_type) = match t with
   | Double -> Sast.Double
   | String -> Sast.String
   | Bool   -> Sast.Boolean
+  | Gram   -> Sast.Gram
   | _      -> raise (Failure "Variables cannot be of this type.")
 
 let rec check_dup_vdecl (vname : string) (vars : Sast.var_decl list) = match vars with

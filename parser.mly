@@ -102,7 +102,7 @@ formals_opt:
   | formal_list   { List.rev $1 }
 
 formal_list:
-    vdecl                  { [] }
+    vdecl                  { [$1] }
   | formal_list COMMA vdecl { $3 :: $1 }
 
 /* STATEMENTS */

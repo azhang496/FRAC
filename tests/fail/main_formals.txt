@@ -1,0 +1,1 @@
+Fatal error: exception Semantic.Failure("main function cannot have formal parameters")

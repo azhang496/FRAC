@@ -1,0 +1,1 @@
+Fatal error: exception Semantic.Failure("function cannot have multiple return statements")
