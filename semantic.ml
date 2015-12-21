@@ -294,7 +294,7 @@ let check_turn_expr (e : Ast.expr) = match e with
 
 let check_move_expr (e : Ast.expr) = match e with
     Int_lit(i) -> Sast.Int_lit(i)
-  | _ -> raise(Failure "turn functions must have argument of type int or double")
+  | _ -> raise(Failure "move functions must have argument of type int or double")
 
 let rec check_rules (recs : Sast.rule list) (terms : Sast.rule list) (a : string list) (rules : Ast.rule list) = match rules with
     []       -> recs, terms
