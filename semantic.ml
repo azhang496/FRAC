@@ -310,7 +310,7 @@ let rec check_rules (recs : Sast.rule list) (terms : Sast.rule list) (a : string
   | hd :: tl -> (match hd with
                     Rec(c, rl) -> ignore(try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet"));
                       ignore(if(List.exists (fun (rl : Sast.rule) -> match rl with
-                          Rec(id, _) -> if(id = c) then true else false 
+                          Rec(id, _) -> if(id = c) then true else false
                         | Term(_, _) -> false) recs) then raise(Failure "multiple recursive rules of the same name")
                       else check_rule a rl); let checked_rec = Sast.Rec(c, rl) in
                       check_rules (checked_rec :: recs) terms a tl
