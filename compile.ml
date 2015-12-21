@@ -11,13 +11,6 @@ let c_print_types t = match t with
   | Boolean -> "\"%d\\n\""
   | Gram    -> ""
 
-let rec gen_grow id n m str =
-    if(n = 0) then str
-    else if(n = m) then gen_grow id (n-1) m ("turtle_init(2000, 2000);\n" ^ id ^ "_start(" ^ (string_of_int n) ^ ");\nturtle_save_bmp(\""
-         ^ id ^ (string_of_int n) ^ ".bmp\");\nturtle_cleanup()" ^ str)
-    else gen_grow id (n-1) m ("turtle_init(2000, 2000);\n" ^ id ^ "_start(" ^ (string_of_int n) ^ ");\nturtle_save_bmp(\""
-         ^ id ^ (string_of_int n) ^ ".bmp\");\nturtle_cleanup();\n" ^ str)
-
 let rec expr = function
     Int_lit(i) -> string_of_int i
   | Bool_lit(b) -> if b == true then "1" else "0"
@@ -69,7 +62,7 @@ let rec expr = function
                   | _ -> raise(Failure "wrong argument types in draw()"))
       | "grow" -> (match actuals with
                     [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int] ->
-                      "char buf[1024];\nfor(int i = 0; i <" ^ (string_of_int n) ^ "; i++) {\nturtle_init(2000, 2000);\nmy_gram_start(i+1);"
+                      "char buf[1024];\nint i;\nfor(i = 0; i <" ^ (string_of_int n) ^ "; i++) {\nturtle_init(2000, 2000);\n" ^ s ^"_start(i+1);\n"
                       ^ "sprintf(buf, \"" ^ s ^ "%d.bmp\", i);\nturtle_save_bmp(buf);\nturtle_cleanup();\n}\n"
                   | _ -> raise(Failure "wrong argument types in grow()"))
       | _       -> fname ^ "(" ^
@@ -186,7 +179,7 @@ let gen_gdecl (g : Sast.gram_decl) =
   "void " ^ g.gname ^ "_start(int iter) {\n" ^ (gen_init g.gname (List.rev g.init)) ^ "}\n"
 
 let generate (grams : Sast.gram_decl list) (funcs : Sast.func_decl list) (name : string) =
-  let outfile = open_out (name ^ ".c") in
+  let outfile = open_out ("tests-gifs/" ^ name ^ ".c") in
   let translated_program =  (if List.length grams > 0 then "#include \"turtle.h\"\n#include <string.h>\n" else "") ^ "#include <stdio.h>\n\n" ^
   String.concat "" (List.rev (List.map gen_gdecl grams)) ^ String.concat "" (List.rev (List.map gen_fdecl funcs)) ^ "\n" in
   ignore(Printf.fprintf outfile "%s" translated_program);

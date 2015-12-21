@@ -1,0 +1,1 @@
+Fatal error: exception Semantic.Failure("gram koch defined twice")

@@ -2,7 +2,7 @@
 shopt -s nullglob
 arg=$1
 ./$arg
-files=( *.bmp )
+files=( *[0-9].bmp )
 num=${#files[@]}
 
 # NEED TO CHECK IF CORRECT PACKAGES ARE INSTALLED OR NOT
@@ -10,7 +10,7 @@ num=${#files[@]}
 if [ $num -gt 1 ]; then
   gm convert -adjoin ${files[@]} tmp.gif
   gifsicle --delay=50 --loop tmp.gif > $arg.gif
-  rm tmp.gif *.bmp
+  rm tmp.gif ${files[@]}
 fi
 open $arg.gif
 exit 0

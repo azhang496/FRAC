@@ -1,0 +1,15 @@
+gram koch = {
+    alphabet: [F, p, m],
+    init: 'F p p F p p F',
+    rules: {
+        'F' -> 'F m F p p F m F',
+        'F' -> move(1),
+        'm' -> rturn(60),
+        'p' -> lturn(60)
+    }
+}
+
+main() {
+    draw(koch, 5);
+    grow(koch, 5);
+}

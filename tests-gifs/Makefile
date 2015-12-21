@@ -3,9 +3,9 @@ CFLAGS = -g -Wall
 LDFLAGS = -g -lm
 LIBS=-lm
 
-koch: koch.o turtle.o
+test-gram_grow: test-gram_grow.o turtle.o
 
-koch.o: koch.c turtle.h
+test-gram_grow.o: test-gram_grow.c turtle.h
 
 turtle: turtle.c turtle.h
 

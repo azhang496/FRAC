@@ -1,13 +1,19 @@
 foo(int x, int y) {
     print(x+y);
+    return (x+y);
 }
 
 bar(string s, bool b) {
     print(s);
     print(b);
 }
+
+zzz(int z) {
+  print(z+1000);
+}
+
 main() {
     bar("hello", 1 == 1);
-    foo(2,4);
+    zzz(foo(2,4));
     print("main");
 }
