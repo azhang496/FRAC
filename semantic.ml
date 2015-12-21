@@ -111,8 +111,12 @@ and check_binop (env : symbol_table) binop = match binop with
             then op_error op
           else Sast.Boolean
       | Equal | Neq ->
-          if (t1 <> t2)
-            then op_error op
+          if (t1 <> Int || t2 <> Int) then
+            if (t1 <> Double || t2 <> Double) then
+              if (t1 <> Boolean || t2 <> Boolean)
+                then op_error op
+              else Sast.Boolean
+            else Sast.Boolean
           else Sast.Boolean
       | _ -> raise (Failure "Invalid binary operator")
     in Sast.Binop(e1, op, e2), t

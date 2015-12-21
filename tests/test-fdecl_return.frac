@@ -1,0 +1,15 @@
+foo(string x, bool b) {
+    print(x);
+    return b;
+}
+
+bar(double d) {
+  return d * 2.0;
+}
+
+main() {
+  print(bar(11.11));
+  if(foo("hello",100000 > -1) == true) {
+    print("sweet!");
+  }
+}

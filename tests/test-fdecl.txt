@@ -1,2 +1,4 @@
-foo
+hello
+1
+6
 main
