@@ -1,9 +1,3 @@
-(*
-todo:
-  + check single line comments working
-  + comment/organize this better it's ugly
-*)
-
 { open Parser }
 
 let num = ('-')?['0'-'9']+
@@ -36,9 +30,10 @@ rule token = parse
 | "init"   { INIT }    | "alphabet" { ALPHABET }
 | ':'      { COLON }   | '''        { QUOTE }
 | '['      { LSQUARE } | ']'        { RSQUARE }
-| "->"     { ARROW }   | '-'        { HYPHEN }
-| "turn"   { TURN }    | "move"     { MOVE }
-| ['a'-'z' 'A'-'Z'] as lxm { RULE_ID (lxm) }
+| "->"     { ARROW }
+| "rturn"  { RTURN }  | "lturn"    { LTURN }
+| "move"     { MOVE }
+| ['a'-'z' 'A'-'Z'] as lxm { RULE_ID (String.make 1 lxm) }
 
 (* Statements *)
 | "if"     { IF }

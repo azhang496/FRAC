@@ -132,21 +132,23 @@ and check_call (env : symbol_table) c = match c with
     Ast.Call(f, actuals) -> (match f with
         "print" -> (match actuals with
             []        -> raise(Failure "print() requires an argument")
-          | hd :: []     -> Sast.Call(f, [check_expr env hd]), Sast.Void
+          | hd :: []     -> let (id, t) = check_expr env hd in (match t with
+                                Sast.Gram -> raise(Failure "cannot print a gram")
+                              | _ -> Sast.Call(f, [(id, t)]), Sast.Void)
           | hd :: tl -> raise(Failure "print() only takes one argument"))
       | "draw" -> (match actuals with
             [g; i] -> (match (g, i) with
                           (Id(s), Int_lit(n)) -> (try
-                            List.find(fun gram -> gram.gname = s) env.grams
+                            List.exists(fun gram -> gram.gname = s) env.grams
                           with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
-                          Sast.Call(f, [Sast.Id(Sast.Var((Sast.String), s)), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
+                          Sast.Call(f, [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
                         | _ -> raise(Failure "draw takes a gram g and int n as arguments"))
-          | _      -> raise(Failure "draw() requires two arguments")
+          | _      -> raise(Failure "draw() requires two arguments"))
       | _ -> let called_func = (try
                 List.find(fun func -> func.fname = f) env.funcs
               with Not_found -> raise(Failure ("function " ^ f ^ " not defined"))) in
              Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype)
-  | _ -> raise (Failure "Not a valid function call"))
+  | _ -> raise (Failure "Not a valid function call")
 
 and check_args (env : symbol_table) ((formals : var_decl list), (actuals : Ast.expr list)) = match (formals, actuals) with
     ([], []) -> []
@@ -237,7 +239,7 @@ let check_fdecl (env : symbol_table) (f : Ast.func_decl) = match f.fname with
         [] -> let sast_main = sast_fdecl env f in if (sast_main.rtype <> Sast.Void) then raise(Failure "main function should not return anything")
               else sast_main
       | _  -> raise(Failure "main function cannot have formal parameters"))
-  | _ -> let checked_formals = check_vdecl_list env f.formals in sast_fdecl env f
+  | _ -> sast_fdecl env f
 
 (* checks the list of function declarations in the program *)
 let rec check_fdecl_list (env : symbol_table ) (fdecls : Ast.func_decl list) = match fdecls with
@@ -251,7 +253,7 @@ let rec check_fdecl_list (env : symbol_table ) (fdecls : Ast.func_decl list) = m
                   | "main" -> raise(Failure "main function can only be defined once")
                   | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs; grams = env.grams } tl
 
-let rec find_rule (id : char) (rules : Ast.rule list) = match rules with
+let rec find_rule (id : string) (rules : Ast.rule list) = match rules with
     [] -> raise(Failure "all elements of the alphabet must have corresponding rules")
   | hd :: tl -> (match hd with
                     Rec(c, rl) -> if(c = id) then c
@@ -259,43 +261,52 @@ let rec find_rule (id : char) (rules : Ast.rule list) = match rules with
                   | Term(c, t) -> if(c = id) then c
                                   else find_rule id tl)
 
-let rec check_alphabet (checked : char list) (rules : Ast.rule list) (a : char list) = match a with
+let rec check_alphabet (checked : string list) (rules : Ast.rule list) (a : string list) = match a with
     [] -> []
   | hd :: tl -> if(List.mem hd checked) then raise(Failure "cannot have duplicates in alphabet")
                 else let checked_c = find_rule hd rules in
                 checked_c :: (check_alphabet (checked_c :: checked) rules tl)
 
-let rec check_rule (a : char list) (i : char list) = match i with
+let rec check_rule (a : string list) (i : string list) = match i with
     [] -> []
   | hd :: tl -> (try List.find (fun id -> id = hd) a with Not_found -> raise(Failure "contains a rule not found in alphabet"));
                 hd :: (check_rule a tl)
 
-let check_term_expr (e : Ast.expr) = match e with
+let check_turn_expr (e : Ast.expr) = match e with
     Int_lit(i) -> Sast.Int_lit(i)
   | Double_lit(d) -> Sast.Double_lit(d)
-  | _ -> raise(Failure "terminal functions must have argument of type int or double")
+  | _ -> raise(Failure "turn functions must have argument of type int or double")
 
-let rec check_rules (recs : Sast.rule list) (terms : Sast.rule list) (a : char list) (rules : Ast.rule list) = match rules with
-    []       -> []
+let check_move_expr (e : Ast.expr) = match e with
+    Int_lit(i) -> Sast.Int_lit(i)
+  | _ -> raise(Failure "turn functions must have argument of type int or double")
+
+let rec check_rules (recs : Sast.rule list) (terms : Sast.rule list) (a : string list) (rules : Ast.rule list) = match rules with
+    []       -> recs, terms
   | hd :: tl -> (match hd with
                     Rec(c, rl) -> (try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet"));
-                      if(List.exists (fun (Sast.Rec(id, _)) -> id = c) recs) then raise(Failure "multiple recursive rules of the same name")
+                      if(List.exists (fun (rl : Sast.rule) -> match rl with
+                          Rec(id, _) -> if(id = c) then true else false 
+                        | Term(_, _) -> false) recs) then raise(Failure "multiple recursive rules of the same name")
                       else check_rule a rl; let checked_rec = Sast.Rec(c, rl) in
-                      checked_rec :: (check_rules (checked_rec :: recs) terms a tl)
+                      check_rules (checked_rec :: recs) terms a tl
                   | Term(c, t) -> (try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet"));
-                      if(List.exists (fun (Sast.Term(id, _)) -> id = c) terms) then raise(Failure "multiple terminal rules of the same name")
+                      if(List.exists (fun (t : Sast.rule) -> match t with
+                          Term(id, _) -> if(id = c) then true else false
+                        | Rec(_, _) -> false) terms) then raise(Failure "multiple terminal rules of the same name")
                       else let checked_t = (match t with
-                          Turn(e) -> Sast.Turn(check_term_expr e)
-                        | Move(e) -> Sast.Move(check_term_expr e)) in
+                          Rturn(e) -> Sast.Rturn(check_turn_expr e)
+                        | Lturn(e) -> Sast.Lturn(check_turn_expr e)
+                        | Move(e) -> Sast.Move(check_move_expr e)) in
                       let checked_term = Sast.Term(c, checked_t) in
-                      checked_term :: (check_rules recs (checked_term :: terms) a tl)
+                      check_rules recs (checked_term :: terms) a tl
                 )
 
 let check_gdecl (g : Ast.gram_decl) =
   let checked_alphabet = check_alphabet [] g.rules g.alphabet in
-  let checked_rules = check_rules [] [] checked_alphabet g.rules in
+  let (checked_recs, checked_terms) = check_rules [] [] checked_alphabet g.rules in
   let checked_init = check_rule checked_alphabet g.init in
-  { gname = g.gname; alphabet = checked_alphabet; init = checked_init; rules = checked_rules }
+  { gname = g.gname; alphabet = checked_alphabet; init = checked_init; rec_rules = checked_recs; term_rules = checked_terms }
 
 let rec check_gdecl_list (checked_gdecls : Sast.gram_decl list) (gdecls : Ast.gram_decl list) = match gdecls with
     [] -> checked_gdecls

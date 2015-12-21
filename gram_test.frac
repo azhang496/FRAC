@@ -1,16 +1,14 @@
 gram my_gram = {
     alphabet: [a, b],
-    init: 'a b',
+    init: 'a b b b a a b a b a',
     rules: {
-        'a' -> 'a b',
-        'b' -> move(1)
+        'a' -> 'a b b',
+        'b' -> 'b',
+        'a' -> lturn(1),
+        'b' -> lturn(2)
     }
 }
 
-foo() {
-    
-}
-
 main() {
-
+    draw(my_gram, 2);
 }

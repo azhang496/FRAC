@@ -9,8 +9,8 @@
 %token INT DOUBLE STRING BOOL
 %token GRAM ALPHABET INIT RULES 
 %token LSQUARE RSQUARE ARROW QUOTE HYPHEN
-%token TURN MOVE
-%token <char> RULE_ID
+%token RTURN LTURN MOVE
+%token <string> RULE_ID
 %token <string> ID
 %token <int> INT_LIT
 %token <float> DOUBLE_LIT
@@ -57,18 +57,19 @@ vdecl_list:
 
 /* RULES */
 
-hyphen_list:
+rule_id_list:
     RULE_ID                     { [$1] }
-  | hyphen_list RULE_ID  { $2 :: $1 }
+  | rule_id_list RULE_ID  { $2 :: $1 }
 
 comma_list:
     RULE_ID                     { [$1] }
   | comma_list COMMA RULE_ID  { $3 :: $1 }
 
 rule:
-    QUOTE RULE_ID QUOTE ARROW TURN LPAREN expr RPAREN    { Term($2, Turn($7)) }
+    QUOTE RULE_ID QUOTE ARROW RTURN LPAREN expr RPAREN   { Term($2, Rturn($7)) }
+  | QUOTE RULE_ID QUOTE ARROW LTURN LPAREN expr RPAREN   { Term($2, Lturn($7)) }
   | QUOTE RULE_ID QUOTE ARROW MOVE LPAREN expr RPAREN    { Term($2, Move($7)) }
-  | QUOTE RULE_ID QUOTE ARROW QUOTE hyphen_list QUOTE    { Rec($2, $6) }
+  | QUOTE RULE_ID QUOTE ARROW QUOTE rule_id_list QUOTE   { Rec($2, List.rev $6) }
 
 rule_list:
     rule                  { [$1] }
@@ -79,7 +80,7 @@ rule_list:
 gdecl:
     GRAM ID ASSIGN LBRACE
       ALPHABET COLON LSQUARE comma_list RSQUARE COMMA
-      INIT COLON QUOTE hyphen_list QUOTE COMMA
+      INIT COLON QUOTE rule_id_list QUOTE COMMA
       RULES COLON LBRACE rule_list RBRACE
     RBRACE
     { { gname = $2;
@@ -129,7 +130,6 @@ expr:
     INT_LIT          { Int_lit($1) }
   | DOUBLE_LIT       { Double_lit($1) }
   | ID               { Id($1) }
-/*  | RULE_ID          { Rule_id($1) }*/
   | STRING_LIT       { String_lit($1) }
   | BOOL_LIT         { Bool_lit($1) }
   | LPAREN expr RPAREN { ParenExpr($2) }
