@@ -203,7 +203,8 @@ let check_vdecl (env : symbol_table) (v : Ast.var_decl) =
 
 let rec check_vdecl_list (env : symbol_table) (vl : Ast.var_decl list) = match vl with
     [] -> []
-  | hd :: tl -> (check_vdecl env hd) :: (check_vdecl_list env tl)
+  | hd :: tl -> let checked_vdecl = check_vdecl env hd in 
+                checked_vdecl :: (check_vdecl_list { vars = (checked_vdecl :: env.vars); funcs = env.funcs; grams = env.grams } tl)
 
 let rec check_stmt (env : symbol_table) (s : Ast.stmt) = match s with
     Block(sl) -> Sast.Block(check_stmt_list env sl)
