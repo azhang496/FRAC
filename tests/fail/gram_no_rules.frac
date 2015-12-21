@@ -1,0 +1,10 @@
+gram koch = {
+    alphabet: [F, p],
+    init: 'F p p F p p F',
+    rules: {
+    }
+}
+
+main() {
+    draw(koch, 6);
+}

@@ -176,7 +176,7 @@ let rec gen_rec_rules (gname : string) (recs : Sast.rule list) = match recs with
     [] -> ""
   | hd :: tl -> let (id, rl) = (match hd with
                     Rec(name, rule) -> name, rule
-                  | Term(_, _) -> raise(Failure "should be a recursive rule")) in 
+                  | Term(_, _) -> raise(Failure "should be a recursive rule")) in
                 "if(var == '" ^ id ^ "') {\n" ^ (gen_rule gname rl) ^ "}\n" ^ (gen_rec_rules gname tl)
 
 let gen_gdecl (g : Sast.gram_decl) =
@@ -186,7 +186,7 @@ let gen_gdecl (g : Sast.gram_decl) =
   "void " ^ g.gname ^ "_start(int iter) {\n" ^ (gen_init g.gname (List.rev g.init)) ^ "}\n"
 
 let generate (grams : Sast.gram_decl list) (funcs : Sast.func_decl list) (name : string) =
-  let outfile = open_out ("tests/" ^ name ^ "-NEW.c") in
+  let outfile = open_out (name ^ ".c") in
   let translated_program =  (if List.length grams > 0 then "#include \"turtle.h\"\n#include <string.h>\n" else "") ^ "#include <stdio.h>\n\n" ^
   String.concat "" (List.rev (List.map gen_gdecl grams)) ^ String.concat "" (List.rev (List.map gen_fdecl funcs)) ^ "\n" in
   ignore(Printf.fprintf outfile "%s" translated_program);

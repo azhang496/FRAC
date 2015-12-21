@@ -1,0 +1,1 @@
+Fatal error: exception Semantic.Failure("cannot print an expression of type void")

@@ -1,0 +1,1 @@
+Fatal error: exception Semantic.Failure("all elements of the alphabet must have corresponding rules")

@@ -40,10 +40,11 @@ program:
 /* VARIABLES */
 
 var_type:
-    INT { Int }
+    INT    { Int }
   | DOUBLE { Double }
   | STRING { String }
-  | BOOL { Bool }
+  | BOOL   { Bool }
+  | GRAM   { Gram }
 
 vdecl:
     var_type ID SEMI              { Var($1, $2)}
