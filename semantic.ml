@@ -142,7 +142,7 @@ and check_call (env : symbol_table) c = match c with
           | hd :: tl -> raise(Failure "print() only takes one argument"))
       | "draw" -> (match actuals with
             [g; i] -> (match (g, i) with
-                          (Id(s), Int_lit(n)) -> (try
+                          (Id(s), Int_lit(n)) -> ignore(try
                                                   List.find(fun gram -> gram.gname = s) env.grams
                                                   with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
                           Sast.Call(f, [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
@@ -150,7 +150,7 @@ and check_call (env : symbol_table) c = match c with
           | _      -> raise(Failure "draw() requires two arguments"))
       | "grow" -> (match actuals with
             [g; i] -> (match (g, i) with
-                          (Id(s), Int_lit(n)) -> (try
+                          (Id(s), Int_lit(n)) -> ignore(try
                                                   List.find(fun gram -> gram.gname = s) env.grams
                                                   with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
                           Sast.Call(f, [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
@@ -159,8 +159,8 @@ and check_call (env : symbol_table) c = match c with
       | _ -> let called_func = (try
                 List.find(fun func -> func.fname = f) env.funcs
                 with Not_found -> raise(Failure ("function " ^ f ^ " not defined"))) in
-             Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype
-  | _ -> raise (Failure "Not a valid function call"))
+             Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype)
+  | _ -> raise (Failure "Not a valid function call")
 
 and check_args (env : symbol_table) ((formals : var_decl list), (actuals : Ast.expr list)) = match (formals, actuals) with
     ([], []) -> []
@@ -282,7 +282,7 @@ let rec check_alphabet (checked : string list) (rules : Ast.rule list) (a : stri
 
 let rec check_rule (a : string list) (i : string list) = match i with
     [] -> []
-  | hd :: tl -> (try List.find (fun id -> id = hd) a with Not_found -> raise(Failure "contains a rule not found in alphabet"));
+  | hd :: tl -> ignore(try List.find (fun id -> id = hd) a with Not_found -> raise(Failure "contains a rule not found in alphabet"));
                 hd :: (check_rule a tl)
 
 let check_turn_expr (e : Ast.expr) = match e with
@@ -297,13 +297,13 @@ let check_move_expr (e : Ast.expr) = match e with
 let rec check_rules (recs : Sast.rule list) (terms : Sast.rule list) (a : string list) (rules : Ast.rule list) = match rules with
     []       -> recs, terms
   | hd :: tl -> (match hd with
-                    Rec(c, rl) -> (try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet"));
-                      if(List.exists (fun (rl : Sast.rule) -> match rl with
+                    Rec(c, rl) -> ignore(try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet"));
+                      ignore(if(List.exists (fun (rl : Sast.rule) -> match rl with
                           Rec(id, _) -> if(id = c) then true else false 
                         | Term(_, _) -> false) recs) then raise(Failure "multiple recursive rules of the same name")
-                      else check_rule a rl; let checked_rec = Sast.Rec(c, rl) in
+                      else check_rule a rl); let checked_rec = Sast.Rec(c, rl) in
                       check_rules (checked_rec :: recs) terms a tl
-                  | Term(c, t) -> (try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet"));
+                  | Term(c, t) -> ignore(try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet"));
                       if(List.exists (fun (t : Sast.rule) -> match t with
                           Term(id, _) -> if(id = c) then true else false
                         | Rec(_, _) -> false) terms) then raise(Failure "multiple terminal rules of the same name")
