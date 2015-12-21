@@ -1,0 +1,1 @@
+Fatal error: exception Semantic.Failure("rule not found in alphabet")

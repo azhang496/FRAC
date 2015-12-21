@@ -1,0 +1,43 @@
+gram koch = {
+    alphabet: [F, p, m],
+    init: 'F p p F p p F',
+    rules: {
+        'F' -> 'F m F p p F m F',
+        'F' -> move(1),
+        'p' -> lturn(60),
+        'm' -> rturn(60)
+    }
+}
+
+gram sierp = {
+    alphabet: [A, B, p, m],
+    init: 'A',
+    rules: {
+        'A' -> 'p B m A m B p',
+        'A' -> move(1),
+        'B' -> 'm A p B p A m',
+        'B' -> move(1),
+        'p' -> lturn(60),
+        'm' -> rturn(60)
+    }
+}
+
+gram dragon = {
+    alphabet: [F, X, Y, p, m],
+    init: 'F X',
+    rules: {
+        'X' -> 'X p Y F',
+        'Y' -> 'F X m Y',
+        'F' -> move(5),
+        'p' -> lturn(90),
+        'm' -> rturn(90)
+    }
+}
+
+main() {
+  draw(koch, 5);
+  draw(sierp, 8);
+  draw(dragon, 15);
+  grow(dragon, 15);
+
+}
