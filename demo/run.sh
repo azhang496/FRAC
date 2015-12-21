@@ -1,7 +1,10 @@
 #!/bin/bash
 shopt -s nullglob
 arg=$1
-./$arg
+exe=${arg/.frac/}
+.././frac $arg
+make
+./$exe
 files=( *[0-9].bmp )
 num=${#files[@]}
 
@@ -11,6 +14,7 @@ if [ $num -gt 1 ]; then
   gm convert -adjoin ${files[@]} tmp.gif
   gifsicle --delay=50 --loop tmp.gif > $arg.gif
   rm tmp.gif ${files[@]}
+  open $arg.gif
 fi
-open $arg.gif
+open *.bmp
 exit 0

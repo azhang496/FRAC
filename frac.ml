@@ -9,8 +9,9 @@ let get_prog_name source_file_path =
 
 let _ =
   let name = get_prog_name Sys.argv.(1) in
+	let path = Sys.getcwd() ^ "/" ^ name in
   let input = open_in Sys.argv.(1) in
   let lexbuf = Lexing.from_channel input in
   let program = Parser.program Scanner.token lexbuf in
   let (grams, funcs) = Semantic.check_program program in
-	Compile.generate grams funcs name
+	Compile.generate grams funcs path

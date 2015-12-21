@@ -11,6 +11,12 @@ let c_print_types t = match t with
   | Boolean -> "\"%d\\n\""
   | Gram    -> ""
 
+let step_func n = match n with
+    5  -> "50,20,8,3,1"
+  | 8  -> "50,30,20,10,7,4,2,1"
+  | 15 -> "50,30,20,15,12,10,8,7,6,5,4,3,2,2,1"
+  | _ -> "undefined"
+
 let rec expr = function
     Int_lit(i) -> string_of_int i
   | Bool_lit(b) -> if b == true then "1" else "0"
@@ -58,12 +64,12 @@ let rec expr = function
       | "draw" -> "turtle_init(2000, 2000);\n" ^
                 (match actuals with
                     [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int] ->
-                      (s ^ "_start(" ^ (string_of_int n) ^ ");\nturtle_save_bmp(\"" ^ s ^ ".bmp\");\nturtle_cleanup()")
+                      (s ^ "_start(" ^ (string_of_int n) ^ ", 1);\nturtle_save_bmp(\"" ^ s ^ ".bmp\");\nturtle_cleanup()")
                   | _ -> raise(Failure "wrong argument types in draw()"))
       | "grow" -> (match actuals with
                     [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int] ->
-                      "char buf[1024];\nint i;\nfor(i = 0; i <" ^ (string_of_int n) ^ "; i++) {\nturtle_init(2000, 2000);\n" ^ s ^"_start(i+1);\n"
-                      ^ "sprintf(buf, \"" ^ s ^ "%d.bmp\", i);\nturtle_save_bmp(buf);\nturtle_cleanup();\n}\n"
+                      "char buf[1024];\nint i;\nint arr[] = {" ^ (step_func n) ^ "};\nfor(i = 0; i <" ^ (string_of_int n) ^ "; i++) {\nturtle_init(2000, 2000);\n" ^ s
+                      ^"_start(i+1, arr[i]);\n" ^ "sprintf(buf, \"" ^ s ^ "%d.bmp\", i);\nturtle_save_bmp(buf);\nturtle_cleanup();\n}\n"
                   | _ -> raise(Failure "wrong argument types in grow()"))
       | _       -> fname ^ "(" ^
                  (let rec gen_actuals = function
@@ -154,16 +160,16 @@ let rec gen_term_rules (terms : Sast.rule list) = match terms with
                 (match t with
                     Rturn(e) -> "turtle_turn_right(" ^ (gen_term_arg e) ^ ");\n"
                   | Lturn(e) -> "turtle_turn_left(" ^ (gen_term_arg e) ^ ");\n"
-                  | Move(e) -> "turtle_forward(" ^ (gen_term_arg e) ^ ");\n"
+                  | Move(e) -> "turtle_forward(step);\n"
                 ) ^ "}\n" ^ gen_term_rules tl
 
 let rec gen_init (gname : string) (rl : string list) = match rl with
     [] -> ""
-  | hd :: tl -> gname ^ "('" ^ hd ^ "', iter);\n" ^ gen_init gname tl
+  | hd :: tl -> gname ^ "('" ^ hd ^ "', iter, step);\n" ^ gen_init gname tl
 
 let rec gen_rule (gname : string) (rl : string list) = match rl with
     [] -> ""
-  | hd :: tl -> gname ^ "('" ^ hd ^ "', iter - 1);\n" ^ gen_rule gname tl
+  | hd :: tl -> gname ^ "('" ^ hd ^ "', iter - 1, step);\n" ^ gen_rule gname tl
 
 let rec gen_rec_rules (gname : string) (recs : Sast.rule list) = match recs with
     [] -> ""
@@ -174,12 +180,12 @@ let rec gen_rec_rules (gname : string) (recs : Sast.rule list) = match recs with
 
 let gen_gdecl (g : Sast.gram_decl) =
   let (terms, rterms) = divide_term_rules ([], []) g.rec_rules g.term_rules in
-  "void " ^ g.gname ^ "(char var, int iter) {\n" ^ "if (iter < 0) {\n" ^
+  "void " ^ g.gname ^ "(char var, int iter, int step) {\n" ^ "if (iter < 0) {\n" ^
   (gen_term_rules rterms) ^ "} else {\n" ^ (gen_rec_rules g.gname g.rec_rules) ^ (gen_term_rules terms) ^ "}\n}\n" ^
-  "void " ^ g.gname ^ "_start(int iter) {\n" ^ (gen_init g.gname (List.rev g.init)) ^ "}\n"
+  "void " ^ g.gname ^ "_start(int iter, int step) {\n" ^ (gen_init g.gname (List.rev g.init)) ^ "}\n"
 
 let generate (grams : Sast.gram_decl list) (funcs : Sast.func_decl list) (name : string) =
-  let outfile = open_out ("tests-gifs/" ^ name ^ ".c") in
+  let outfile = open_out (name ^ ".c") in
   let translated_program =  (if List.length grams > 0 then "#include \"turtle.h\"\n#include <string.h>\n" else "") ^ "#include <stdio.h>\n\n" ^
   String.concat "" (List.rev (List.map gen_gdecl grams)) ^ String.concat "" (List.rev (List.map gen_fdecl funcs)) ^ "\n" in
   ignore(Printf.fprintf outfile "%s" translated_program);

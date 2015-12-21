@@ -3,13 +3,13 @@ CFLAGS = -g -Wall
 LDFLAGS = -g -lm
 LIBS=-lm
 
-test: test.o turtle.o
+demo: demo.o turtle.o
 
-test.o: test.c turtle.h
+demo.o: demo.c turtle.h
 
 turtle: turtle.c turtle.h
 
 .PHONY: clean
 
 clean:
-	rm -f *.o a.out test *.out *.bmp
+	rm -f *.o a.out demo demo.c *.out *.bmp *.gif
