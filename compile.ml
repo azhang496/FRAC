@@ -87,7 +87,7 @@ let rec stmt = function
   | If ((e,_), st, Block[]) -> "if(" ^ (expr e) ^ ") {\n" ^ (stmt st) ^ "}\n"
   | If ((e,_), st1, st2) -> "if(" ^ (expr e) ^ ") {\n" ^ (stmt st1) ^ "}\n" ^
                             "else" ^ "{\n" ^ (stmt st2) ^ "}\n"
-  | For ((e1,_), (e2,_), (e3,_), st) -> "for(" ^ (expr e1) ^ "; " ^ (expr e2) ^ "; " ^ (expr e3) ^ ") {\n" ^ (stmt st) ^ "}\n2"
+  | For ((e1,_), (e2,_), (e3,_), st) -> "for(" ^ (expr e1) ^ "; " ^ (expr e2) ^ "; " ^ (expr e3) ^ ") {\n" ^ (stmt st) ^ "}\n"
   | While ((e,_), st) -> "while(" ^ (expr e) ^ ") {\n" ^ (stmt st) ^ "}\n"
 
 let rec gen_var_types = function

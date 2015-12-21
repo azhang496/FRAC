@@ -179,7 +179,6 @@ let check_vtype (t : Ast.var_type) = match t with
   | Bool   -> Sast.Boolean
   | _      -> raise (Failure "Variables cannot be of this type.")
 
-
 let check_vdecl (env : symbol_table) (v : Ast.var_decl) =
   (match v with
     Var(t, name) ->
