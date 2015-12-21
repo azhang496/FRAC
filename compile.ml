@@ -14,7 +14,7 @@ let c_print_types t = match t with
 let step_func n = match n with
     5  -> "50,20,8,3,1"
   | 8  -> "50,30,20,10,7,4,2,1"
-  | 15 -> "50,30,20,15,12,10,8,7,6,5,4,3,2,2,1"
+  | 15 -> "100,70,60,50,40,30,20,18,16,14,10,9,8,6,5"
   | _ -> "undefined"
 
 let rec expr = function
@@ -69,7 +69,7 @@ let rec expr = function
       | "grow" -> (match actuals with
                     [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int] ->
                       "char buf[1024];\nint i;\nint arr[] = {" ^ (step_func n) ^ "};\nfor(i = 0; i <" ^ (string_of_int n) ^ "; i++) {\nturtle_init(2000, 2000);\n" ^ s
-                      ^"_start(i+1, arr[i]);\n" ^ "sprintf(buf, \"" ^ s ^ "%d.bmp\", i);\nturtle_save_bmp(buf);\nturtle_cleanup();\n}\n"
+                      ^"_start(i+1, arr[i]);\n" ^ "sprintf(buf, \"" ^ s ^ "%02d.bmp\", i);\nturtle_save_bmp(buf);\nturtle_cleanup();\n}\n"
                   | _ -> raise(Failure "wrong argument types in grow()"))
       | _       -> fname ^ "(" ^
                  (let rec gen_actuals = function

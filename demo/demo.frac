@@ -36,8 +36,8 @@ gram dragon = {
 
 main() {
   draw(koch, 5);
-  draw(dragon, 15);
   draw(sierp, 8);
-  grow(sierp, 8);
+  draw(dragon, 15);
+  grow(dragon, 15);
 
 }
