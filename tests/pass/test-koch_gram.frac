@@ -1,4 +1,4 @@
-gram koch_flake = {
+gram koch = {
     alphabet: [F, p, m],
     init: 'F p p F p p F',
     rules: {
@@ -10,5 +10,5 @@ gram koch_flake = {
 }
 
 main() {
-  draw(koch_flake, 5);
+  draw(koch, 5);
 }
