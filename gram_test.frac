@@ -9,10 +9,6 @@ gram my_gram = {
     }
 }
 
-foo() {
-  draw(my_gram, 5);
-}
-
 main() {
-  foo();
+  grow(my_gram, 5);
 }

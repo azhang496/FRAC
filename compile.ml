@@ -9,6 +9,14 @@ let c_print_types t = match t with
   | Double  -> "\"%.2f\\n\""
   | String  -> "\"%s\\n\""
   | Boolean -> "\"%d\\n\""
+  | Gram    -> raise(Failure "grams cannot be printed")
+
+let rec gen_grow id n m str =
+    if(n = 0) then str
+    else if(n = m) then gen_grow id (n-1) m ("turtle_init(2000, 2000);\n" ^ id ^ "_start(" ^ (string_of_int n) ^ ");\nturtle_save_bmp(\""
+         ^ id ^ (string_of_int n) ^ ".bmp\");\nturtle_cleanup()" ^ str)
+    else gen_grow id (n-1) m ("turtle_init(2000, 2000);\n" ^ id ^ "_start(" ^ (string_of_int n) ^ ");\nturtle_save_bmp(\""
+         ^ id ^ (string_of_int n) ^ ".bmp\");\nturtle_cleanup();\n" ^ str)
 
 let rec expr = function
     Int_lit(i) -> string_of_int i
@@ -57,6 +65,9 @@ let rec expr = function
       | "draw" -> "turtle_init(2000, 2000);\n" ^
                 (let [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int] = actuals in
                 s ^ "_start(" ^ (string_of_int n) ^ ");\nturtle_save_bmp(\"" ^ s ^ ".bmp\");\nturtle_cleanup()")
+      | "grow" -> (let [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int] = actuals in
+                "char buf[1024];\nfor(int i = 0; i <" ^ (string_of_int n) ^ "; i++) {\nturtle_init(2000, 2000);\nmy_gram_start(i+1);"
+                ^ "sprintf(buf, \"" ^ s ^ "%d.bmp\", i);\nturtle_save_bmp(buf);\nturtle_cleanup();\n}\n")
       | _       -> fname ^ "(" ^
                  (let rec gen_actuals = function
                     [] ->  ""
@@ -67,7 +78,11 @@ let rec expr = function
 
 let rec stmt = function
     Block sl -> String.concat "" (List.map stmt sl)
-  | Expr (e,_) -> (expr e) ^ ";\n"
+  | Expr (e,_) -> (match e with
+                    Call(f, _) -> (match f with
+                                    "grow" -> (expr e)
+                                  | _      -> (expr e) ^ ";\n")
+                  | _          -> (expr e) ^ ";\n")
   | Return (e,_) -> "return " ^ (expr e) ^ ";\n"
   | If ((e,_), st, Block[]) -> "if(" ^ (expr e) ^ ") {\n" ^ (stmt st) ^ "}\n"
   | If ((e,_), st1, st2) -> "if(" ^ (expr e) ^ ") {\n" ^ (stmt st1) ^ "}\n" ^

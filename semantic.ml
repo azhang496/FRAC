@@ -143,6 +143,14 @@ and check_call (env : symbol_table) c = match c with
                           Sast.Call(f, [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
                         | _ -> raise(Failure "draw takes a gram g and int n as arguments"))
           | _      -> raise(Failure "draw() requires two arguments"))
+      | "grow" -> (match actuals with
+            [g; i] -> (match (g, i) with
+                          (Id(s), Int_lit(n)) -> (try
+                                                  List.find(fun gram -> gram.gname = s) env.grams
+                                                  with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
+                          Sast.Call(f, [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
+                        | _ -> raise(Failure "grow takes a gram g and int n as arguments"))
+          | _      -> raise(Failure "draw() requires two arguments"))
       | _ -> let called_func = (try
                 List.find(fun func -> func.fname = f) env.funcs
                 with Not_found -> raise(Failure ("function " ^ f ^ " not defined"))) in
@@ -248,8 +256,9 @@ let rec check_fdecl_list (env : symbol_table ) (fdecls : Ast.func_decl list) = m
   | hd :: tl -> if (List.exists (fun func -> func.fname = hd.fname) env.funcs) then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
                 else match hd.fname with
                     "print" -> raise(Failure "reserved function name 'print'")
-                  | "draw" -> raise(Failure "reserved function name 'draw'")
-                  | "main" -> raise(Failure "main function can only be defined once")
+                  | "draw"  -> raise(Failure "reserved function name 'draw'")
+                  | "grow"  -> raise(Failure "reserved function name 'grow'")
+                  | "main"  -> raise(Failure "main function can only be defined once")
                   | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs; grams = env.grams } tl
 
 let rec find_rule (id : string) (rules : Ast.rule list) = match rules with

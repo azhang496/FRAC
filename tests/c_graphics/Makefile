@@ -3,9 +3,9 @@ CFLAGS = -g -Wall
 LDFLAGS = -g -lm
 LIBS=-lm
 
-gram_test-NEW: gram_test-NEW.o turtle.o
+test: test.o turtle.o
 
-gram_test-NEW.o: gram_test-NEW.c turtle.h
+test.o: test.c turtle.h
 
 turtle: turtle.c turtle.h
 
