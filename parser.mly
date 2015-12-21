@@ -101,7 +101,7 @@ formals_opt:
   | formal_list   { List.rev $1 }
 
 formal_list:
-    vdecl                  { [$1] }
+    vdecl                  { [] }
   | formal_list COMMA vdecl { $3 :: $1 }
 
 /* STATEMENTS */
@@ -121,10 +121,6 @@ stmt_list:
 
 /* EXPRESSIONS */
 
-expr_opt:
-    /* nothing */ { Noexpr }
-  | expr          { $1 }
-
 expr:
     INT_LIT          { Int_lit($1) }
   | DOUBLE_LIT       { Double_lit($1) }
@@ -132,7 +128,7 @@ expr:
   | STRING_LIT       { String_lit($1) }
   | BOOL_LIT         { Bool_lit($1) }
   | LPAREN expr RPAREN { ParenExpr($2) }
-  | NOT expr  			 { Unop(Not, $2) }
+  | NOT expr  		   { Unop(Not, $2) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
@@ -148,7 +144,6 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
-
 
 actuals_opt:
     /* nothing */ { [] }
