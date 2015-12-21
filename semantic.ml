@@ -1,8 +1,6 @@
 open Ast
 open Sast
 
-module StringMap = Map.Make (String)
-
 type symbol_table = {
   mutable vars: var_decl list;
   mutable funcs: func_decl list;
