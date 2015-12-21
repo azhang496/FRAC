@@ -7,10 +7,9 @@
 %token OR AND NOT
 %token RETURN IF ELSE FOR WHILE
 %token INT DOUBLE STRING BOOL
-%token GRAM ALPHABET INIT RULES 
+%token GRAM ALPHABET INIT RULES
 %token LSQUARE RSQUARE ARROW QUOTE HYPHEN
 %token RTURN LTURN MOVE
-%token <string> RULE_ID
 %token <string> ID
 %token <int> INT_LIT
 %token <float> DOUBLE_LIT
@@ -58,18 +57,18 @@ vdecl_list:
 /* RULES */
 
 rule_id_list:
-    RULE_ID                     { [$1] }
-  | rule_id_list RULE_ID  { $2 :: $1 }
+    ID                     { [$1] }
+  | rule_id_list ID  { $2 :: $1 }
 
 comma_list:
-    RULE_ID                     { [$1] }
-  | comma_list COMMA RULE_ID  { $3 :: $1 }
+    ID                     { [$1] }
+  | comma_list COMMA ID  { $3 :: $1 }
 
 rule:
-    QUOTE RULE_ID QUOTE ARROW RTURN LPAREN expr RPAREN   { Term($2, Rturn($7)) }
-  | QUOTE RULE_ID QUOTE ARROW LTURN LPAREN expr RPAREN   { Term($2, Lturn($7)) }
-  | QUOTE RULE_ID QUOTE ARROW MOVE LPAREN expr RPAREN    { Term($2, Move($7)) }
-  | QUOTE RULE_ID QUOTE ARROW QUOTE rule_id_list QUOTE   { Rec($2, List.rev $6) }
+    QUOTE ID QUOTE ARROW RTURN LPAREN expr RPAREN   { Term($2, Rturn($7)) }
+  | QUOTE ID QUOTE ARROW LTURN LPAREN expr RPAREN   { Term($2, Lturn($7)) }
+  | QUOTE ID QUOTE ARROW MOVE LPAREN expr RPAREN    { Term($2, Move($7)) }
+  | QUOTE ID QUOTE ARROW QUOTE rule_id_list QUOTE   { Rec($2, List.rev $6) }
 
 rule_list:
     rule                  { [$1] }

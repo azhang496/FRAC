@@ -110,8 +110,12 @@ and check_binop (env : symbol_table) binop = match binop with
             then op_error op
           else Sast.Boolean
       | Equal | Neq ->
-          if (t1 <> t2)
-            then op_error op
+          if (t1 <> Int || t2 <> Int) then
+            if (t1 <> Double || t2 <> Double) then
+              if (t1 <> Boolean || t2 <> Boolean)
+                then op_error op
+              else Sast.Boolean
+            else Sast.Boolean
           else Sast.Boolean
       | _ -> raise (Failure "Invalid binary operator")
     in Sast.Binop(e1, op, e2), t
@@ -139,16 +143,24 @@ and check_call (env : symbol_table) c = match c with
       | "draw" -> (match actuals with
             [g; i] -> (match (g, i) with
                           (Id(s), Int_lit(n)) -> (try
-                            List.exists(fun gram -> gram.gname = s) env.grams
-                          with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
+                                                  List.find(fun gram -> gram.gname = s) env.grams
+                                                  with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
                           Sast.Call(f, [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
                         | _ -> raise(Failure "draw takes a gram g and int n as arguments"))
           | _      -> raise(Failure "draw() requires two arguments"))
+      | "grow" -> (match actuals with
+            [g; i] -> (match (g, i) with
+                          (Id(s), Int_lit(n)) -> (try
+                                                  List.find(fun gram -> gram.gname = s) env.grams
+                                                  with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
+                          Sast.Call(f, [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
+                        | _ -> raise(Failure "grow takes a gram g and int n as arguments"))
+          | _      -> raise(Failure "draw() requires two arguments"))
       | _ -> let called_func = (try
                 List.find(fun func -> func.fname = f) env.funcs
-              with Not_found -> raise(Failure ("function " ^ f ^ " not defined"))) in
-             Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype)
-  | _ -> raise (Failure "Not a valid function call")
+                with Not_found -> raise(Failure ("function " ^ f ^ " not defined"))) in
+             Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype
+  | _ -> raise (Failure "Not a valid function call"))
 
 and check_args (env : symbol_table) ((formals : var_decl list), (actuals : Ast.expr list)) = match (formals, actuals) with
     ([], []) -> []
@@ -249,8 +261,9 @@ let rec check_fdecl_list (env : symbol_table ) (fdecls : Ast.func_decl list) = m
   | hd :: tl -> if (List.exists (fun func -> func.fname = hd.fname) env.funcs) then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
                 else match hd.fname with
                     "print" -> raise(Failure "reserved function name 'print'")
-                  | "draw" -> raise(Failure "reserved function name 'draw'")
-                  | "main" -> raise(Failure "main function can only be defined once")
+                  | "draw"  -> raise(Failure "reserved function name 'draw'")
+                  | "grow"  -> raise(Failure "reserved function name 'grow'")
+                  | "main"  -> raise(Failure "main function can only be defined once")
                   | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs; grams = env.grams } tl
 
 let rec find_rule (id : string) (rules : Ast.rule list) = match rules with

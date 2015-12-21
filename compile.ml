@@ -72,7 +72,6 @@ let rec expr = function
                       "char buf[1024];\nfor(int i = 0; i <" ^ (string_of_int n) ^ "; i++) {\nturtle_init(2000, 2000);\nmy_gram_start(i+1);"
                       ^ "sprintf(buf, \"" ^ s ^ "%d.bmp\", i);\nturtle_save_bmp(buf);\nturtle_cleanup();\n}\n"
                   | _ -> raise(Failure "wrong argument types in grow()"))
-                
       | _       -> fname ^ "(" ^
                  (let rec gen_actuals = function
                     [] ->  ""

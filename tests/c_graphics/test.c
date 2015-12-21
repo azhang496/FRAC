@@ -5,7 +5,7 @@
 void koch_flake(char var, int iter)
 {
 	if (iter < 0) {
-		/* if a rule can evaluate to a non-terminal 
+		/* if a rule can evaluate to a non-terminal
 		AND a terminal, the terminal output ends up here
 		after all iterations have completed */
 		if (var == 'F') {
@@ -23,7 +23,7 @@ void koch_flake(char var, int iter)
 			koch_flake('-', iter - 1);
 			koch_flake('F', iter - 1);
 		}
-		/* these rules only evaluate to a terminal, so they 
+		/* these rules only evaluate to a terminal, so they
 		are executed here instead of waiting for iterations */
 		if (var == '-') {
 			turtle_turn_right(60);
@@ -32,7 +32,7 @@ void koch_flake(char var, int iter)
 			turtle_turn_left(60);
 		}
 	}
-}	
+}
 /* start state */
 void koch_flake_start(int iter)
 {
@@ -50,7 +50,7 @@ void dragon(char var, int iter)
 {
 	if (iter < 0) {
 		;
-	} else { 
+	} else {
 		if (var == 'X') {
 			dragon('X', iter - 1);
 			dragon('+', iter - 1);
@@ -115,7 +115,7 @@ void sierp_tri(char var, int iter)
 		if (var == '-') {
 			turtle_turn_right(60);
 		}
-	}								
+	}
 }
 
 void sierp_tri_start(int iter)
@@ -126,13 +126,13 @@ void sierp_tri_start(int iter)
 int main()
 {
 	turtle_init(2000,2000);
-	koch_flake_start(5);
+	koch_flake_start(6);
 	turtle_save_bmp("koch_flake.bmp");
 	turtle_cleanup();
 
 	turtle_init(2000, 2000);
 	dragon_start(15);
-	turtle_save_bmp("dragon.bmp");	
+	turtle_save_bmp("dragon.bmp");
 	turtle_cleanup();
 
 	turtle_init(2000, 2000);

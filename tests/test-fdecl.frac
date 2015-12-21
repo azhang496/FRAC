@@ -1,8 +1,13 @@
 foo(int x, int y) {
-    print("foo");
+    print(x+y);
 }
 
+bar(string s, bool b) {
+    print(s);
+    print(b);
+}
 main() {
+    bar("hello", 1 == 1);
     foo(2,4);
     print("main");
 }

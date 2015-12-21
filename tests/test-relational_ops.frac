@@ -1,0 +1,19 @@
+main() {
+  int x = 1;
+  int y = 2;
+
+  print(true);
+  print(!false);
+  print(x != y);
+  print(1.234 == 1.234);
+  print(y > x);
+  print(y >= x);
+  print(!(y < x));
+
+  print(false);
+  print(!true);
+  print(x == y);
+  print(y < x);
+  print(y <= x);
+  print(!(y > x));
+}
