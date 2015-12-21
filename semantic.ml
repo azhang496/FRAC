@@ -9,15 +9,6 @@ type symbol_table = {
   mutable grams: gram_decl list;
 }
 
-(* list printer for testing purposes *)
-let rec print_list = function
-    [] -> ()
-  | hd :: tl -> print_endline hd.fname; print_list tl
-
-let rec print_num_list = function
-    [] -> print_string ""
-  | hd :: tl -> print_endline "stuff"; print_num_list tl
-
 (**************
  * Exceptions *
 **************)
@@ -137,7 +128,7 @@ and check_call (env : symbol_table) c = match c with
         "print" -> (match actuals with
             []        -> raise(Failure "print() requires an argument")
           | hd :: []     -> let (id, t) = check_expr env hd in (match t with
-                                Sast.Gram -> raise(Failure "cannot print a gram")
+                                Sast.Void -> raise(Failure "cannot print an expression of type void")
                               | _ -> Sast.Call(f, [(id, t)]), Sast.Void)
           | hd :: tl -> raise(Failure "print() only takes one argument"))
       | "draw" -> (match actuals with
