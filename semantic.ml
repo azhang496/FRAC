@@ -180,12 +180,22 @@ let check_vtype (t : Ast.var_type) = match t with
   | Bool   -> Sast.Boolean
   | _      -> raise (Failure "Variables cannot be of this type.")
 
+let rec check_dup_vdecl (vname : string) (vars : Sast.var_decl list) = match vars with
+    [] -> vname
+  | hd :: tl -> (match hd with
+                    Var(_, name) -> if(name = vname) then raise(Failure ("variable " ^ vname ^ " already declared"))
+                                    else check_dup_vdecl vname tl
+                  | Var_Init(_, name, _) -> if(name = vname) then raise(Failure ("variable " ^ vname ^ " already declared"))
+                                            else check_dup_vdecl vname tl
+                )
 
 let check_vdecl (env : symbol_table) (v : Ast.var_decl) =
   (match v with
     Var(t, name) ->
+      ignore(check_dup_vdecl name env.vars);
       let t = check_vtype t in Sast.Var(t, name)
   | Var_Init(t, name, expr) ->
+      ignore(check_dup_vdecl name env.vars);
       let t = check_vtype t in
       let expr = check_expr env expr in
       let (_, t2 ) = expr in
