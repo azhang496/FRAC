@@ -1,0 +1,12 @@
+/*
+ * THIS IS A
+ * MULTI-LINE
+ * COMMENT
+ */
+
+ main() {
+  // This is a single line comment!
+  /* but this can be used here too I guess */
+  int x = 10;
+  print(x/* tricky tricky */);
+ }

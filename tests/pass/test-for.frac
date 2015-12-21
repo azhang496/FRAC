@@ -1,11 +1,12 @@
 main() {
   int x;
+  bool b;
   for(x = 0; x < 5; x = x + 1) {
     print(x);
   }
 
   x = 0;
-  for(; x < 5;) {
+  for(b = true; x < 5; b = false) {
     print(x);
     x = x + 1;
   }

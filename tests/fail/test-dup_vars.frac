@@ -1,0 +1,10 @@
+foo(int x, string y) {
+  string z = "yo";
+  print(x);
+}
+
+main() {
+  string x = "yo";
+  int x = 1;
+  print(x);
+}
