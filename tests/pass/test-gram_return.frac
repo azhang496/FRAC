@@ -1,3 +1,8 @@
+foo(int x, string y) {
+  print(x);
+  return y;
+}
+
 gram koch = {
     alphabet: [F, p, m],
     init: 'F p p F p p F',
@@ -10,5 +15,6 @@ gram koch = {
 }
 
 main() {
-    draw(koch, 6);
+    foo(3,"hello");
+    draw(koch, 5);
 }

@@ -22,23 +22,23 @@ let rec print_num_list = function
  * Exceptions *
 **************)
 
-exception Except of string
+exception Failure of string
 
 let op_error t = match t with
-    Ast.Not -> raise (Except("Invalid use of unop: '!'"))
-  | Ast.Add -> raise (Except("Invalid types for binop: '+'"))
-  | Ast.Sub -> raise (Except("Invalid types for binop: '-'"))
-  | Ast.Mult -> raise (Except("Invalid types for binop: '*'"))
-  | Ast.Div -> raise (Except("Invalid types for binop: '/'"))
-  | Ast.Mod -> raise (Except("Invalid types for binop: '%'"))
-  | Ast.Or -> raise (Except("Invalid types for binop: '||'"))
-  | Ast.And -> raise (Except("Invalid types for binop: '&&'"))
-  | Ast.Equal -> raise (Except("Invalid types for binop: '=='"))
-  | Ast.Neq -> raise (Except("Invalid types for binop: '!='"))
-  | Ast.Less -> raise (Except("Invalid types for binop: '<'"))
-  | Ast.Greater -> raise (Except("Invalid types for binop: '>'"))
-  | Ast.Leq -> raise (Except("Invalid types for binop: '<='"))
-  | Ast.Geq -> raise (Except("Invalid types for binop: '>='"))
+    Ast.Not -> raise (Failure("Invalid use of unop: '!'"))
+  | Ast.Add -> raise (Failure("Invalid types for binop: '+'"))
+  | Ast.Sub -> raise (Failure("Invalid types for binop: '-'"))
+  | Ast.Mult -> raise (Failure("Invalid types for binop: '*'"))
+  | Ast.Div -> raise (Failure("Invalid types for binop: '/'"))
+  | Ast.Mod -> raise (Failure("Invalid types for binop: '%'"))
+  | Ast.Or -> raise (Failure("Invalid types for binop: '||'"))
+  | Ast.And -> raise (Failure("Invalid types for binop: '&&'"))
+  | Ast.Equal -> raise (Failure("Invalid types for binop: '=='"))
+  | Ast.Neq -> raise (Failure("Invalid types for binop: '!='"))
+  | Ast.Less -> raise (Failure("Invalid types for binop: '<'"))
+  | Ast.Greater -> raise (Failure("Invalid types for binop: '>'"))
+  | Ast.Leq -> raise (Failure("Invalid types for binop: '<='"))
+  | Ast.Geq -> raise (Failure("Invalid types for binop: '>='"))
 
 (**************
  * Checking *
@@ -203,7 +203,7 @@ let check_vdecl (env : symbol_table) (v : Ast.var_decl) =
 
 let rec check_vdecl_list (env : symbol_table) (vl : Ast.var_decl list) = match vl with
     [] -> []
-  | hd :: tl -> let checked_vdecl = check_vdecl env hd in 
+  | hd :: tl -> let checked_vdecl = check_vdecl env hd in
                 checked_vdecl :: (check_vdecl_list { vars = (checked_vdecl :: env.vars); funcs = env.funcs; grams = env.grams } tl)
 
 let rec check_stmt (env : symbol_table) (s : Ast.stmt) = match s with

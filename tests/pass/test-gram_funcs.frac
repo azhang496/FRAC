@@ -10,5 +10,7 @@ gram koch = {
 }
 
 main() {
-    draw(koch, 6);
+    int koch = 3;
+    draw(koch, 5);
+    print(koch);
 }

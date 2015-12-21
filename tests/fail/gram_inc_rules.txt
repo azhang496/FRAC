@@ -1,0 +1,1 @@
+Fatal error: exception Semantic.Failure("multiple recursive rules of the same name")

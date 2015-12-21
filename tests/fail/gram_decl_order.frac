@@ -1,6 +1,6 @@
 gram koch = {
-    alphabet: [F, p, m],
     init: 'F p p F p p F',
+    alphabet: [F, p, m],
     rules: {
         'F' -> 'F m F p p F m F',
         'F' -> move(1),

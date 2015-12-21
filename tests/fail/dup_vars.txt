@@ -1,0 +1,1 @@
+Fatal error: exception Semantic.Failure("variable x already declared")

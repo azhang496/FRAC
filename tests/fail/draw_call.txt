@@ -1,0 +1,1 @@
+Fatal error: exception Semantic.Failure("draw takes a gram g and int n as arguments")
