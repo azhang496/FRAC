@@ -2,21 +2,21 @@
 #include <string.h>
 #include <stdio.h>
 
-void koch(char var, int iter, int step) {
+void koch(char var, int iter) {
   if (iter < 0) {
     if (var == 'F') {
-      turtle_forward(step);
+      turtle_forward(1);
     }
   } else {
     if(var == 'F') {
-      koch('F', iter - 1, step);
-      koch('m', iter - 1, step);
-      koch('F', iter - 1, step);
-      koch('p', iter - 1, step);
-      koch('p', iter - 1, step);
-      koch('F', iter - 1, step);
-      koch('m', iter - 1, step);
-      koch('F', iter - 1, step);
+      koch('F', iter - 1);
+      koch('m', iter - 1);
+      koch('F', iter - 1);
+      koch('p', iter - 1);
+      koch('p', iter - 1);
+      koch('F', iter - 1);
+      koch('m', iter - 1);
+      koch('F', iter - 1);
     }
     if (var == 'm') {
       turtle_turn_right(60);
@@ -27,27 +27,26 @@ void koch(char var, int iter, int step) {
   }
 }
 
-void koch_start(int iter, int step) {
-  koch('F', iter, step);
-  koch('p', iter, step);
-  koch('p', iter, step);
-  koch('F', iter, step);
-  koch('p', iter, step);
-  koch('p', iter, step);
-  koch('F', iter, step);
+void koch_start(int iter) {
+  koch('F', iter);
+  koch('p', iter);
+  koch('p', iter);
+  koch('F', iter);
+  koch('p', iter);
+  koch('p', iter);
+  koch('F', iter);
 }
 
 int main() {
   turtle_init(2000, 2000);
-  koch_start(5, 1);
+  koch_start(5);
   turtle_save_bmp("koch.bmp");
   turtle_cleanup();
   char buf[1024];
   int i;
-  int arr[] = {50,20,8,3,1};
   for(i = 0; i <5; i++) {
     turtle_init(2000, 2000);
-    koch_start(i+1, arr[i]);
+    koch_start(i+1);
     sprintf(buf, "koch%02d.bmp", i);
     turtle_save_bmp(buf);
     turtle_cleanup();
