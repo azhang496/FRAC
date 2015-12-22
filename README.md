@@ -24,12 +24,12 @@ in the top-level directory of both folders.
 
 
 
-To execute your FRAC program, simply run (in the frac directory):
+To execute your FRAC program, simply run (in the FRAC directory):
 
   `make`  
   `./run.sh <your_file.frac>`  
 
-To just compile your FRAC program into a C program, simply run (in the frac directory):
+To just compile your FRAC program into a C program, simply run (in the FRAC directory):
 
   `./frac <your_file.frac>`  
 
@@ -40,7 +40,7 @@ To just compile your FRAC program into a C program, simply run (in the frac dire
 Contains our demo presentation
 
 2. docs  
-Contains PDFs of our project proposal, LRM, and final report
+Contains PDFs of our final report and presentation slides
 
 3. images  
 Contains .bmp and .gif fractal examples generated in our language
