@@ -1,5 +1,4 @@
 # FRAC: Recursive Art Compiler
-------------------------------
 
 Group Members:
 - Kunal Kamath (kak2211)
@@ -17,20 +16,22 @@ Before you can create GIFs in FRAC, you will first need to install two GIF proce
 
 After downloading and unzipping, you will need to run:
 
-  ```
-  ./configure
-  make
-  make install
-  ```
+
+  `./configure`  
+  `make`  
+  `make install`  
 
 in the top-level directory of both folders.
 
 
-To execute your FRAC program, simply run:
+To execute your FRAC program, simply run (in the frac directory):
 
-  `make` in the FRAC directory and  
-  `./run.sh [your_file.frac]` for the output  
+  `make`  
+  `./run.sh [your_file.frac]`  
 
+To just compile your FRAC program into a C program, simply run (in the frac directory):
+
+  `./frac [your_file.frac]`  
 
 ##Other Folders:
 
