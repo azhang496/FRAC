@@ -21,17 +21,17 @@ After downloading and unzipping, you will need to run:
   `make`  
   `make install`  
 
-in the top-level directory of both folders.
+in the top-level directory of both folders.  
 
 
 To execute your FRAC program, simply run (in the frac directory):
 
   `make`  
-  `./run.sh [your_file.frac]`  
+  `./run.sh <your_file.frac>`  
 
 To just compile your FRAC program into a C program, simply run (in the frac directory):
 
-  `./frac [your_file.frac]`  
+  `./frac <your_file.frac>`  
 
 ##Other Folders:
 
@@ -45,7 +45,7 @@ Contains our project proposal, LRM, and final report in HTML files
 Contains .bmp and .gif fractal examples generated in our language
 
 4. lib  
-Contains the turtle graphics files we use to draw fractals. Credit to Mike Lam for the code.
+Contains the turtle graphics files we use to draw fractals. Credit goes to Mike Lam
 
 5. tests  
 Contains our test suite for the project. Run `./testing.sh` to check all available tests
