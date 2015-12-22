@@ -47,7 +47,7 @@ int main() {
   for(i = 0; i <5; i++) {
     turtle_init(2000, 2000);
     koch_start(i+1);
-    sprintf(buf, "koch%02d.bmp", i);
+    sprintf(buf, "koch%02d-GIF.bmp", i);
     turtle_save_bmp(buf);
     turtle_cleanup();
   }
