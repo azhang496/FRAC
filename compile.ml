@@ -63,7 +63,7 @@ let rec expr = function
       | "grow" -> (match actuals with
                     [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int] ->
                       "char buf[1024];\nint i;\nfor(i = 0; i <" ^ (string_of_int n) ^ "; i++) {\nturtle_init(2000, 2000);\n" ^ s
-                      ^"_start(i+1);\n" ^ "sprintf(buf, \"" ^ s ^ "%02d.bmp\", i);\nturtle_save_bmp(buf);\nturtle_cleanup();\n}\n"
+                      ^"_start(i+1);\n" ^ "sprintf(buf, \"" ^ s ^ "%02d-GIF.bmp\", i);\nturtle_save_bmp(buf);\nturtle_cleanup();\n}\n"
                   | _ -> raise(Failure "wrong argument types in grow()"))
       | _       -> fname ^ "(" ^
                  (let rec gen_actuals = function
