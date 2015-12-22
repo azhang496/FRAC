@@ -1,5 +1,4 @@
-# FRAC
-*FRAC: Recursive Art Compiler*
+# FRAC: Recursive Art Compiler
 ------------------------------
 
 Group Members:
@@ -18,32 +17,34 @@ Before you can create GIFs in FRAC, you will first need to install two GIF proce
 
 After downloading and unzipping, you will need to run:
 
-  `./configure`
-  `make`
-  `make install`
+  ```
+  ./configure
+  make
+  make install
+  ```
 
 in the top-level directory of both folders.
 
 
 To execute your FRAC program, simply run:
 
-  `make` in the FRAC directory and
-  `./run.sh [your_file.frac]` for the output
+  `make` in the FRAC directory and  
+  `./run.sh [your_file.frac]` for the output  
 
 
 ##Other Folders:
 
-1. demo :
+1. demo  
 Contains our demo presentation
 
-2. documentation :
+2. documentation  
 Contains our project proposal, LRM, and final report in HTML files
 
-3. images :
+3. images  
 Contains .bmp and .gif fractal examples generated in our language
 
-4. lib :
+4. lib  
 Contains the turtle graphics files we use to draw fractals. Credit to Mike Lam for the code.
 
-5. tests :
+5. tests  
 Contains our test suite for the project. Run `./testing.sh` to check all available tests
