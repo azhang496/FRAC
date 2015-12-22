@@ -64,12 +64,12 @@ let rec expr = function
       | "draw" -> "turtle_init(2000, 2000);\n" ^
                 (match actuals with
                     [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int] ->
-                      (s ^ "_start(" ^ (string_of_int n) ^ ", 1);\nturtle_save_bmp(\"" ^ s ^ ".bmp\");\nturtle_cleanup()")
+                      (s ^ "_start(" ^ (string_of_int n) ^ ", 1, colors);\nturtle_save_bmp(\"" ^ s ^ ".bmp\");\nturtle_cleanup()")
                   | _ -> raise(Failure "wrong argument types in draw()"))
       | "grow" -> (match actuals with
                     [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int] ->
                       "char buf[1024];\nint i;\nint arr[] = {" ^ (step_func n) ^ "};\nfor(i = 0; i <" ^ (string_of_int n) ^ "; i++) {\nturtle_init(2000, 2000);\n" ^ s
-                      ^"_start(i+1, arr[i]);\n" ^ "sprintf(buf, \"" ^ s ^ "%02d.bmp\", i);\nturtle_save_bmp(buf);\nturtle_cleanup();\n}\n"
+                      ^"_start(i+1, arr[i], colors);\n" ^ "sprintf(buf, \"" ^ s ^ "%02d.bmp\", i);\nturtle_save_bmp(buf);\nturtle_cleanup();\n}\n"
                   | _ -> raise(Failure "wrong argument types in grow()"))
       | _       -> fname ^ "(" ^
                  (let rec gen_actuals = function
@@ -131,7 +131,9 @@ let gen_fdecl fdecl =
                   | Sast.String  -> "char *"
                   | Sast.Boolean -> "int "
                   | Sast.Gram -> "")
-  ^ fdecl.fname ^ "(" ^ (gen_formals_list fdecl.formals) ^ ")") ^ "{\n" ^(gen_locals_list fdecl.locals) ^ String.concat "" (List.map stmt fdecl.body) ^
+            ^ fdecl.fname ^ "(" ^ (gen_formals_list fdecl.formals) ^ ")") ^
+  "{\n" ^ "int colors[][3] = {{0, 55, 219}, {0, 157, 255}, {148, 212, 255}};\n" ^
+  (gen_locals_list fdecl.locals) ^ String.concat "" (List.map stmt fdecl.body) ^
   (match fdecl.fname with
       "main" -> "return 0;\n"
     | _      -> "" )
@@ -165,11 +167,11 @@ let rec gen_term_rules (terms : Sast.rule list) = match terms with
 
 let rec gen_init (gname : string) (rl : string list) = match rl with
     [] -> ""
-  | hd :: tl -> gname ^ "('" ^ hd ^ "', iter, step);\n" ^ gen_init gname tl
+  | hd :: tl -> gname ^ "('" ^ hd ^ "', iter, step, colors);\n" ^ gen_init gname tl
 
 let rec gen_rule (gname : string) (rl : string list) = match rl with
     [] -> ""
-  | hd :: tl -> gname ^ "('" ^ hd ^ "', iter - 1, step);\n" ^ gen_rule gname tl
+  | hd :: tl -> gname ^ "('" ^ hd ^ "', iter - 1, step, colors);\n" ^ gen_rule gname tl
 
 let rec gen_rec_rules (gname : string) (recs : Sast.rule list) = match recs with
     [] -> ""
@@ -180,9 +182,10 @@ let rec gen_rec_rules (gname : string) (recs : Sast.rule list) = match recs with
 
 let gen_gdecl (g : Sast.gram_decl) =
   let (terms, rterms) = divide_term_rules ([], []) g.rec_rules g.term_rules in
-  "void " ^ g.gname ^ "(char var, int iter, int step) {\n" ^ "if (iter < 0) {\n" ^
+  "void " ^ g.gname ^ "(char var, int iter, int step, int colors[][3]) {\n" ^ "int rgb = iter % 3;\n" ^
+  "turtle_set_pen_color(colors[rgb][0], colors[rgb][1], colors[rgb][2]);\n" ^ "if (iter < 0) {\n" ^
   (gen_term_rules rterms) ^ "} else {\n" ^ (gen_rec_rules g.gname g.rec_rules) ^ (gen_term_rules terms) ^ "}\n}\n" ^
-  "void " ^ g.gname ^ "_start(int iter, int step) {\n" ^ (gen_init g.gname (List.rev g.init)) ^ "}\n"
+  "void " ^ g.gname ^ "_start(int iter, int step, int colors[][3]) {\n" ^ (gen_init g.gname (List.rev g.init)) ^ "}\n"
 
 let generate (grams : Sast.gram_decl list) (funcs : Sast.func_decl list) (name : string) =
   let outfile = open_out (name ^ ".c") in
