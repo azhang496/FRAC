@@ -26,18 +26,19 @@
     <h3>2.1 Compiling and Running</h3>
     <p>Run <code>make</code> in the top level directory of our source code to compile the <code>frac</code> compiler.  Then, simply run the shell script <code>gen.sh</code> with a filename argument to compile and run your FRAC code. The filename must have extension .frac.</p>
     <div class="highlight highlight-js"><pre>$ ./gen.sh test.frac</pre></div>
-    <p>If your FRAC program generates an image, it requires the turtle graphics C library (the <code>turtle.h</code> and <code>turtle.c</code> files). Additionally, if you are using the <code>grow()</code> function to generate an animated GIF, it requires the [SOMETHING] library. All of these files are included in our source code directory, and our shell script compiles and links them as necessary.</p>
+    <p>If your FRAC program generates an image, it requires the turtle graphics C library (the <code>turtle.h</code> and <code>turtle.c</code> files which can be manually downloaded <a href="https://w3.cs.jmu.edu/lam2mo/cs240_2015_08/turtle.html"/>here</a>). Additionally, if you are using the <code>grow()</code> function to generate an animated GIF, it requires the gifsicle tool. All of these files are included in our source code directory, and our shell script compiles and links them as necessary.</p>
+    <p> The idea of turtle graphics is that there is a “turtle” that walks around the screen with a pen, and it is given commands to move around, drawing an image based on its movement. On compilation, a C program is generated in which each gram is separated into two separate functions, one which determines the start state based on the init string, and one that recursively evaluates the rules based on the number of iterations and the symbol being used. The terminals of each rule map to one of three functions: <code>turtle_turn_right()</code>, <code>turtle_turn_left</code>, and <code>turtle_forward()</code>, corresponding to <code>rturn()</code>, <code>lturn()</code> and <code>move()</code> from FRAC, respectively. The main function generates a 2000x2000 grid of pixels by default, which should be enough space for most drawings. It also saves a static bmp image if <code>draw()</code> is called on the gram from the FRAC program, or it strings together multiple bmp files based on each iteration if <code>grow()</code> is called, in which case gifsicle is used to turn them into a GIF. Finally, it cleans up the memory used with <code>turtle_cleanup()</code>.
 
-    <h3>2.3 Writing a FRAC Program</h3>
+    <h3>2.2 Writing a FRAC Program</h3>
     
 
-    <h3>2.2 Example Programs</h3>
-      <h4>2.2.1 Hello World</h4>
+    <h3>2.3 Example Programs</h3>
+      <h4>2.3.1 Hello World</h4>
       <p>This simple program prints "hello world":</p>
       <div class="highlight highlight-js"><pre>main() {
       print("hello world");
 }</pre></div>
-      <h4>2.2.2 GCD</h4>
+      <h4>2.3.2 GCD</h4>
       <p>This program calculates and prints the greatest common divisor (GCD) of 8 and 12:</p>
       <div class="highlight highlight-js"><pre>gcd(int x, int y) {
     while(x != y) {
@@ -55,7 +56,7 @@ main() {
     int n = gcd(8, 12);
     print(n);
 }</pre></div>
-      <h4>2.2.3 Koch Snowflake</h4>
+      <h4>2.3.3 Koch Snowflake</h4>
       <p>As our language is designed to facilitate generation of fractals, the best way to program in FRAC is to define grammars and draw them! For example, you can create a Koch snowflake using the following FRAC program:</p>
       <div class="highlight highlight-js"><pre>gram koch = {
     alphabet: [F, p, m],
@@ -388,6 +389,15 @@ else {
     <h4>5. <code>print()</code></h4>
     <div class="highlight highlight-js"><pre>print(string s)</pre></div>
     <p>The function prints out the string <code>s</code> to the standard output. The same escape sequences as Java would be interpreted correspondingly (i.e. <code>\n</code> for newline).</p>
+
+    <h3>7. Lessons Learned</h3>
+
+    <h4>Calvin Li</h4>
+    <p>Like everyone says, don't wait until the last minute to do the work, and instead come up with
+      good concrete goals that your group can deliver incrementally. Also, periodically giving each team member
+      a clear idea of his/her task is a good way to ensure that everyone is at least doing something, even if
+      it's not just code. I had a tough semester, so I often found myself falling way behind my team, and sometimes I was afraid to admit it. However, my teammates were willing to help me catch up once I asked.
+      Even so, I really wish I could have contributed more. So, if you want to feel more useful, don't be afraid to ask your team to fill you in on what's going on if you feel behind.</p>
 
 </article>
 </body>
