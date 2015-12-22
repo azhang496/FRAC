@@ -20,3 +20,4 @@ if [ $num -gt 1 ]; then
 fi
 open *.bmp
 exit 0
+# Issue in that grow() can only be called once per function

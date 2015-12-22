@@ -1,0 +1,11 @@
+cd config/
+cd gifsicle/
+./configure
+make
+make install
+cd ..
+cd GraphicsMagick/
+./configure
+make
+make install
+cd ../..
