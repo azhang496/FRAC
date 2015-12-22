@@ -18,6 +18,85 @@
 
     </ul>
 
+  <h2>Table of Contents</h2>
+  <ul>
+    <li>1. Introduction</li>
+    <li>2. Language Tutorial</li>
+    <ul>
+      <li>2.1 Compiling and Running</li>
+      <li>2.2 Writing a FRAC Program</li>
+      <li>2.3 Example Programs</li>
+      <ul>
+        <li>2.3.1 Hello World</li>
+        <li>2.3.2 GCD</li>
+        <li>2.3.3 Koch Snowflake</li>
+        <li>2.3.4 Sierpinski Triangle</li>
+        <li>2.3.5 Heighway Dragon</li>
+      </ul>
+    </ul>
+    <li>3. Language Reference Manual</li>
+    <ul> 
+      <li>3.1 Data Types & Data Structures</li>
+      <ul>
+        <li>3.1.1 Primitive Types</li>
+        <li>3.1.2 Complex Types</li>
+      </ul>
+      <li>3.2 Lexical Conventions</li>
+      <ul>
+        <li>3.2.1 Identifiers</li>
+        <li>3.2.2 Keywords</li>
+        <li>3.2.3 Literals</li>
+        <li>3.2.4 Comments</li>
+        <li>3.2.5 Operators</li>
+        <li>3.2.6 Punctuators</li>
+      </ul>
+      <li>3.3 Syntax</li>
+      <ul>
+        <li>3.3.1 Program Structure</li>
+        <li>3.3.2 Expressions</li>
+        <li>3.3.3 Statements</li>
+      </ul>
+      <li>3.4 Special Functions</li>
+      <ul>
+        <li>3.4.1 Terminal Functions</li>
+        <li>3.4.2 System Functions</li>
+      </ul>
+    </ul>
+    <li>4. Project Plan</li>
+    <ul>
+      <li>4.1 Process & Timeline</li>
+      <li>4.2 Team Roles</li>
+      <li>4.3 Development Tools</li>
+    </ul>
+    <li>5. Architectural Design</li>
+    <ul>
+      <li>5.1 Compiler Structure</li>
+      <li>5.2 Turtle Graphics in C</li>
+      <li>5.3 GIF Generation</li>
+    </ul>
+    <li>6. Testing Plan</li>
+    <ul>
+      <li>6.1 ?
+    </ul>
+    <li>7. Lessons Learned</li>
+    <ul>
+      <li>Calvin Li</li>
+      <li>Anne Zhang</li>
+      <li>Kunal Kamath</li>
+      <li>Justin Chiang</li>
+    </ul>
+    <li>8. Appendix</li>
+    <ul>
+      <li>8.1 Scanner</li>
+      <li>8.2 Parser</li>
+      <li>8.3 AST</li>
+      <li>8.4 Semantic Checker</li>
+      <li>8.5 SAST</li>
+      <li>8.6 Code Generator</li>
+      <li>8.7 FRAC</li>
+    </ul>
+  </ul>
+
   <h2>1. Introduction</h2>
     <p>FRAC is a domain-specific programming language that enables the programmer to generate fractals in the form of bitmap image files (BMPs). The language is meant for those interested in the mathematical manipulation of recursively generated images like fractals. We designed this language to be simple, intuitive, and a joy to use!</p>
     <p>Our language uses the L-system method, which uses grammars (similar to those we learned in COMS W3261) to generate fractals. A basic FRAC program is composed of function and grammar declarations. The true power of FRAC is its ability to use simple L-system grammars to generate both static and dynamic fractal images. As you will see in examples of our compiled C code, the code for generating a fractal in C is incredibly verbose and repetitive. Grammar declarations in FRAC allow the programmer to easily play around with different rules and commands to see what fun new fractals they can generate.</p>
@@ -26,20 +105,21 @@
     <h3>2.1 Compiling and Running</h3>
     <p>Run <code>make</code> in the top level directory of our source code to compile the <code>frac</code> compiler.  Then, simply run the shell script <code>run.sh</code> with a filename argument to compile and run your FRAC code. The filename must have extension .frac.</p>
     <div class="highlight highlight-js"><pre>$ ./run.sh test.frac</pre></div>
-    <p>If your FRAC program generates an image, it requires the turtle graphics C library (the <code>turtle.h</code> and <code>turtle.c</code> files). Additionally, if you are using the <code>grow()</code> function to generate an animated GIF, it requires the <code>GraphicsMagick</code> and <code>gifsicle</code> libraries. All of these files are included in our source code directory, and our shell script compiles and links them as necessary.</p>
+    <p>If your FRAC program generates an image, it requires the turtle graphics C library (the necessary files, <code>turtle.c</code> and <code>turtle.h</code> are included in our source code directory). Additionally, if you are using the <code>grow()</code> function to generate an animated GIF, it requires the <code>GraphicsMagick</code> and <code>gifsicle</code> libraries. The GIF generation libraries are somewhat large, so we did not include them in our submitted directory. Please refer to our README to find instructions on downloading and installing those tools.</p>
+     <p> The idea of turtle graphics is that there is a “turtle” that walks around the screen with a pen, and it is given commands to move around, drawing an image based on its movement. On compilation, a C program is generated in which each gram is separated into two separate functions, one which determines the start state based on the init string, and one that recursively evaluates the rules based on the number of iterations and the symbol being used. The terminals of each rule map to one of three functions: <code>turtle_turn_right()</code>, <code>turtle_turn_left</code>, and <code>turtle_forward()</code>, corresponding to <code>rturn()</code>, <code>lturn()</code> and <code>move()</code> from FRAC, respectively. The main function generates a 2000x2000 grid of pixels by default, which should be enough space for most drawings. It also saves a static bmp image if <code>draw()</code> is called on the gram from the FRAC program, or it strings together multiple bmp files based on each iteration if <code>grow()</code> is called, in which case gifsicle is used to turn them into a GIF. Finally, it cleans up the memory used with <code>turtle_cleanup()</code>.</p>
 
-    <h3>2.3 Writing a FRAC Program</h3>
+    <h3>2.2 Writing a FRAC Program</h3>
     <p>At a high level, FRAC programs are composed of function and grammar declarations. A main function is required in every program. Grammars must be declared and defined outside of functions, thus giving every grammar a global scope. The main function is the entry point of the program.</p>
-    <p>The two system functions <code>draw(gram g, int n)</code> and <code>grow(gram g, int n)</code> are called on defined grammars to generate images. Grammars can be defined without being used in a system function call, but if you do that your grammar will be lost in the ether, which we do not recommend. <code>draw()</code> and <code>grow()</code> can be called multiple times, but they must only be called in the main function.  A call to the <code>draw(gram g, int n)</code> system function will generate a BMP image from the specified grammar g. The integer n specifies how many times the recursive rules defined in g are evaluated, which affects the size and complexity of the generated fractal. A call to the <code>grow(gram g, int n)</code> function will generate a series of BMPs that will be linked into a GIF, showing the growth of the fractal generated by grammar g. Each frame of the GIF is an image from iteration i of the fractal generation, where i <= n.</p>
+    <p>The two system functions <code>draw(gram g, int n)</code> and <code>grow(gram g, int n)</code> are called on defined grammars to generate images. Grammars can be defined without being used in a system function call, but if you do that your grammar will be lost in the ether, which we do not recommend. <code>draw()</code> can be called multiple times, but <code>grow()</code> must only be called once.  Both functions can only be called in the main function.  A call to the <code>draw(gram g, int n)</code> system function will generate a BMP image from the specified grammar g. The integer n specifies how many times the recursive rules defined in g are evaluated, which affects the size and complexity of the generated fractal. A call to the <code>grow(gram g, int n)</code> function will generate a series of BMPs that will be linked into a GIF, showing the growth of the fractal generated by grammar g. Each frame of the GIF is an image from iteration i of the fractal generation, where i <= n.</p>
     <p>Below are several example programs, from basic to somewhat complex, which will help give you a sense of how FRAC works.</p>
 
-    <h3>2.2 Example Programs</h3>
-      <h4>2.2.1 Hello World</h4>
+    <h3>2.3 Example Programs</h3>
+      <h4>2.3.1 Hello World</h4>
       <p>This simple program prints "hello world":</p>
       <div class="highlight highlight-js"><pre>main() {
       print("hello world");
 }</pre></div>
-      <h4>2.2.2 GCD</h4>
+      <h4>2.3.2 GCD</h4>
       <p>This program calculates and prints the greatest common divisor (GCD) of 8 and 12:</p>
       <div class="highlight highlight-js"><pre>gcd(int x, int y) {
     while(x != y) {
@@ -57,7 +137,7 @@ main() {
     int n = gcd(8, 12);
     print(n);
 }</pre></div>
-      <h4>2.2.3 Koch Snowflake</h4>
+      <h4>2.3.3 Koch Snowflake (Static BMP)</h4>
       <p>As our language is designed to facilitate generation of fractals, the best way to program in FRAC is to define grammars and draw them! For example, you can create a Koch snowflake using the following FRAC program:</p>
       <div class="highlight highlight-js"><pre>gram koch = {
     alphabet: [F, p, m],
@@ -74,7 +154,7 @@ main() {
     draw(koch, 6);
 }</pre></div>
       <img src="koch.bmp" style="width:256px;height:280px;">
-      <h4>2.2.4 Sierpinski Triangle</h4>
+      <h4>2.3.4 Sierpinski Triangle (Static BMP)</h4>
       <p>Another fun fractal is the Sierpinski triangle. The grammar for generating a Sierpinski triangle is somewhat more complex than the Koch snowflake (but still easy to write):</p>
       <div class="highlight highlight-js"><pre>gram sierp = {
     alphabet: [A, B, p, m],
@@ -95,37 +175,54 @@ main() {
       <img src="sierp.bmp" style="width:290px;height:256px;">
 
       <br>
-      <h2>GROW EXAMPLE HERE</h2>
-      <br>
+      <h4>2.3.5 Heighway Dragon (Animated GIF)</h4>
+      <p>One of the most exciting things that FRAC can do is create animated GIFs depicting the growth of the fractal that you are generating. Here is an example of a FRAC program that uses the <code>grow()</code> system function to create a dynamic GIF of the Heighway dragon fractal (one of our favorites!). Each frame of the resulting GIF is included here, but in our source code you can open up the GIF in a browser to view the animated version.</p>
+      <div class="highlight highlight-js"><pre>gram dragon = {
+    alphabet: [F, X, Y, p, m],
+    init: 'F X',
+    rules: {
+        'X' -> 'X p Y F',
+        'Y' -> 'F X m Y',
+        'F' -> move(5),
+        'p' -> lturn(90),
+        'm' -> rturn(90)
+    }
+}
+
+main() {
+  grow(dragon, 15);
+}</pre></div>
+  <div style="width:300px">
+  <img src="dragon/dragon00.bmp">
+  <img src="dragon/dragon01.bmp">
+  <img src="dragon/dragon02.bmp">
+  <img src="dragon/dragon03.bmp">
+  <img src="dragon/dragon04.bmp">
+  <img src="dragon/dragon05.bmp">
+  <img src="dragon/dragon06.bmp">
+  <img src="dragon/dragon07.bmp">
+  <img src="dragon/dragon08.bmp">
+  <img src="dragon/dragon09.bmp">
+  <img src="dragon/dragon10.bmp">
+  <img src="dragon/dragon11.bmp">
+  <img src="dragon/dragon12.bmp">
+  <img src="dragon/dragon13.bmp">
+  <img src="dragon/dragon14.bmp">
+  </div>
 
   <h2>3. Language Reference Manual</h2>
     <h3>3.1. Data Types & Data Structures</h3>
       <p>The language supports two categories of data types: primitive types and complex types.</p>
       <h4>3.1.1 Primitive types</h4>
-      <p>A primitive type requires a small and fixed amount of memory to store a single logical value. Typical primitive types include <code>int</code>, <code>double</code>, and <code>bool</code>. One exception is <code>string</code>, which requires a variable amount of memory storage.</p>
-      <p>Explicit and implicit type conversion between <code>int</code> and <code>double</code> is allowed, but no other type conversions are supported, with the exception of “reflexive conversions” (e.g. converting <code>double</code> to <code>double</code>). Explicit type conversion can be performed with the following syntax:</p>
-      <div class="highlight highlight-js"><pre>double x = 3.5;
-x = (double) x;  // reflexive conversions are permitted
-int y = (int) x;
-double z = (double) y;</pre></div>
-      <p>Alternatively, omitting the explicit parentheses-enclosed target type produces an identical outcome.</p>
-      <div class="highlight highlight-js"><pre>double x = 3.5;
-x = x;
-int y = x;
-double z = y;</pre></div>
-      <p>Note that explicit type conversion can operate on both variables and constants. Therefore, the following is permitted:</p>
-      <div class="highlight highlight-js"><pre>int a = (int) 3.5;</pre></div>
-      <p>Converting a double to an integer results in truncation of the fractional part, while converting an integer to a double results in the addition of a fractional part with a value of zero.</p>
-      <p>When performing an arithmetic operation between an integer and a double, the compiler automatically promotes the integer into a double. Thus, the following three statements are operationally equivalent:</p>
-      <div class="highlight highlight-js"><pre>double c = 3.5 + 3;  // c is 6.5
-
-double c = 3.5 + (double) 3;  // c is 6.5
-double c = 3.5 + 3.0;  // c is 6.5</pre></div>
+      <p>The primitive types in FRAC are <code>int</code>, <code>double</code>, <code>string</code>, and <code>bool</code>.</p>
+      <div class="highlight highlight-js"><pre>int x = 3.5;
+double y = x;
+string s = "Stephen";
+bool b = true;</pre></div>
       <h4>3.1.2 Complex types</h4>
       <p>A complex type contains multiple named fields and requires a larger and variable amount of memory to store a structured collection of values. A complex type is similar to the familiar object type in so far as it contains fields, but a complex type does not contain any methods. In fact, all instantiated complex types are immutable; operating on them requires the use of functions.</p>
       <p>Two complex types are supported in the language: <code>gram</code> and <code>rule</code>.</p>
-      <p>A <code>gram</code> represents a formal grammar that is used to specify a fractal that can be drawn. A <code>rule</code> represents a production rule that is a part of the formal grammar. Later sections expand on how such grammars and rules can be declared in code.</p>
-      <p>Just like in Java, // for single line and /* */ for multi line comments.</p>
+      <p>A <code>gram</code> represents a formal grammar that is used to specify a fractal that can be drawn. It contains an <code>alphabet</code>, an <code>init</code> string, and a set of <code>rules</code>. A <code>rule</code> represents a production rule that is a part of the formal grammar. A recursive rule consists of a rule symbol and a successor string, while a terminal rule consists of a rule symbol and a terminal function. Later sections expand on how such grammars and rules can be declared in code.</p>
 
   <h3>3.2. Lexical Conventions</h3>
     <h4>3.2.1 Identifiers</h4>
@@ -134,7 +231,6 @@ double c = 3.5 + 3.0;  // c is 6.5</pre></div>
     <p>The following are a list of reserved keywords in the language:</p>
     <div class="highlight highlight-js"><pre>rule
 gram
-func
 if
 else
 while
@@ -216,17 +312,18 @@ bool is_there = false;</pre></div>
       <li>conditional parameters</li></ul>
 
 
-  <h3>3.4. Syntax</h3>
-    <h4>3.4.1 Program Structure</h4>
+  <h3>3.3 Syntax</h3>
+    <h4>3.3.1 Program Structure</h4>
     <p>FRAC programs should be written in a single file.  A FRAC program consists of grammar definitions, function definitions, and a <code>main()</code> function.  Functions and grammars are defined first and subsequently used in the <code>main()</code> function, although they cannot be defined within the <code>main()</code> function itself.</p>
     <p>The <code>main()</code> function is the entry point for the program.  It may contain variable and literal declarations, expressions, and statements.  It may also use any previously defined functions and grammars.  In addition, the <code>main()</code> function must use one, and only one, of the following system functions: <code>draw()</code>, <code>grow()</code>.  This function specifies the type of image output that the program will create.</p>
     <p>The following is an example of a valid FRAC program:</p>
     <div class="highlight highlight-js"><pre>gram my_grammar = {
+    alphabet: [F, r, l],
     init: 'F r r F r r F',
     rules: {
         'F' -> 'F l F r r F l F',
-        'r' -> turn(60),
-        'l' -> turn(-60),
+        'r' -> rturn(60),
+        'l' -> lturn(-60),
         'F' -> move(1)
     }
 }
@@ -237,7 +334,7 @@ main() {
     <p>In this example, the program will construct a grammar given in the declaration of my_grammar. Then, it will output a GIF showing the growth of the fractal generated by that grammar (the fractal will have undergone 2 iterations, as specified by the second parameter to the <code>grow()</code> function).</p>
 
 
-    <h4>3.4.2 Expressions</h4>
+    <h4>3.3.2 Expressions</h4>
     <h5>Variable Declarations</h5>
     <p>Variables can be declared and assigned to a value simultaneously, or declared without assignment and assigned to a value later on. Declarations take the form:</p>
     <div class="highlight highlight-js"><pre>// declaration without assignment
@@ -250,14 +347,14 @@ var_type var_name = value;</pre></div>
 
     <h5>Function Definitions</h5>
     <p>Functions are declared and defined simultaneously - unlike variables, they cannot be declared without definition and defined later. All functions must return a value, although the return type is not be specified in the function declaration. Any function except for the <code>main()</code> function is defined as follows:</p>
-    <div class="highlight highlight-js"><pre>func my_name(params) {
+    <div class="highlight highlight-js"><pre>my_name(params) {
     // function body
 }</pre></div>
-    <p>while the <code>main()</code> function is defined without the keyword <code>func</code>:</p>
+    <p>while the <code>main()</code> function must not have any formal parameters:</p>
     <div class="highlight highlight-js"><pre>main() {
     // main function body
 }</pre></div>
-    <p>The <code>main()</code> function should not contain any return statements.</p>
+    <p>Additionally, the <code>main()</code> function should not contain any return statements.</p>
 
     <h5>Function Calls</h5>
     <p>All functions except for the <code>main()</code> function must be called explicitly, with the correct number of arguments as specified in the function definition. The <code>main()</code> function is called implicitly at the start of every program run, and calling <code>main()</code> explicitly in the program will throw an error.</p>
@@ -277,13 +374,17 @@ draw(my_func(args), 2);</pre></div>
     <h5>Grammar Definitions</h5>
     <p>Grammar definitions are similar to function definitions, but the grammars themselves are more similar to objects.  Grammars are defined as follows:</p>
     <div class="highlight highlight-js"><pre>gram my_gram {
+    alphabet: [// comma-separated symbol list]
     init: // init string here,
     rules: {
-      // start string -> end string
+      // symbol -> end string
+      // OR
+      // symbol -> terminal function
     }
 }</pre></div>
-    <p>Every grammar must contain at least one recursive (string-to-string) rule - it wouldn’t generate a fractal otherwise! Every character in the init string must have at least one and at most two corresponding rules. If a character has only one rule, that rule must be non-recursive and evaluate to a terminal. If a character has two rules, one rule must be recursive and the other must be non-recursive.  Any other combination of rules is ambiguous and will throw an error.</p>
-    <p>Grammars are evaluated when they are passed into a drawing system function (<code>draw()</code> or <code>grow()</code>). Grammar evaluations start with the <code>init</code> string, which is then evaluated recursively for the number of times specified in the second argument to the drawing function call. For every recursive evaluation, the compiler will look for a recursive rule for each character, and will only use a non-recursive rule for a character if there is no recursive rule for that character. When the recursive evaluations have been completed, the compiler uses non-recursive rules to generate a final string of terminals, which are used to draw the fractal.</p>
+    <p>Grammars are defined with three comma-separated fields: alphabet, init, and rules. The alphabet specifies the symbols that will be used in the rules. The init string specifies the start state of the grammar. The rules specify how the init string will be evaluated.</p>
+    <p>Every grammar must contain at least one recursive (string-to-string) rule - it wouldn’t generate a fractal otherwise! Every symbol in the alphabet must have at least one, and at most two, rules corresponding to it. Every symbol in the init string and in the rule list must be included in the alphabet. If a symbol has two rules, one rule must be recursive and the other must be non-recursive. There cannot be two recursive rules of the same name, or two terminal rules of the same name. Any other combination of rules is ambiguous and will throw an error.</p>
+    <p>Grammars are evaluated when they are passed into a drawing system function (<code>draw()</code> or <code>grow()</code>). Grammar evaluations start with the <code>init</code> string, which is then evaluated recursively for the number of times specified in the second argument to the drawing function call. For every recursive evaluation, the compiler will look for a recursive rule for each symbol, and will only use a terminal rule for a symbol if it cannot find a recursive rule, or if it has reached the end of its required iterations.</p>
 
     <h5>Arithmetic Expressions</h5>
     <p>Arithmetic expressions are expressions that contain an arithmetic operator, and evaluate to a literal value. They can be placed on the right-hand side of variable assignments, or passed as arguments to function calls.</p>
@@ -301,7 +402,7 @@ if(isTrue || isFalse) {
 }</pre></div>
 
 
-    <h4>3.4.3 Statements</h4>
+    <h4>3.3.3 Statements</h4>
     <p>A statement is a complete instruction that can be interpreted by the computer. Statements are executed sequentially within a function.</p>
     <h5>Expression Statements</h5>
     <p>Expression statements are the most common type of statement, and can include any of the previously covered expressions. In FRAC, all statements are terminated with a semicolon <code>;</code>.</p>
@@ -318,32 +419,43 @@ else {
 }</pre></div>
     <p>Only the <code>if</code> clause of the conditional statement is required. The <code>else</code> statement is executed only if none of the previous conditions return true.</p>
     <h5>Loop Statements</h5>
-    <p>Loop statements are constructed using the <code>while</code> keyword, which allows you to iterate over blocks of code.</p>
+    <p>Loop statements are constructed using the <code>while</code> and <code>for</code> keywords, which allow you to iterate over blocks of code.</p>
     <div class="highlight highlight-js"><pre>while (expression) {
     statement
     ...
-}</pre></div>
+}
+for(int i = 0; i < 5, i=i+1) {
+    statement
+    ...
+}
+</pre></div>
     <p>In the case of <code>while</code> loops, the truth condition of the boolean expression is checked before every execution of the body of the <code>while</code> loop, which is executed only if expression returns true.</p>
+    <p>In the case of <code>for</code> loops, there are three expressions within the parentheses, separated by semicolons. However, only the middle expression is required, and it must be an expression that evaluates to a boolean value, which is used to check if the <code>for</code> loop should continue running or if it should terminate.</p>
     <h5>Return Statements</h5>
     <p>Ends the execution of a function with the use of the keyword <code>return</code>. If a function does not have a <code>return</code> statement at the end, it is assumed to be a void function without a return type.</p>
 
-  <h3>3.5. System Functions</h3>
-    <h5>1. <code>move()</code></h5>
+  <h3>3.4. Special Functions</h3>
+    <h4>3.4.1 Terminal Functions</h4>
+    <p>There are three possible terminal functions that are used in grammar declarations in FRAC: <code>move()</code>, <code>rturn</code> and <code>lturn</code>. There should be at least one rule in your grammar that evaluates to a terminal function, in order to generate a fractal image. These functions correspond to the turtle graphics "pen", which draws the image that you are generating.
+    <h5><code>move()</code></h5>
     <p>This is one of two possible terminals in a FRAC grammar:</p>
     <div class="highlight highlight-js"><pre>move(int distance)</pre></div>
     <p>The function draws a line of length <code>distance</code>.</p>
-    <h5>2. <code>turn()</code></h5>
-    <p>The other possible terminal in a FRAC grammar:</p>
-    <div class="highlight highlight-js"><pre>turn(int angle)</pre></div>
+    <h5><code>turn()</code></h5>
+    <p>The other two possible terminals in a FRAC grammar:</p>
+    <div class="highlight highlight-js"><pre>rturn(int angle)</pre></div>
+    <p>or</p>
+    <div class="highlight highlight-js"><pre>lturn(int angle)</pre></div>
     <p>The function indicates to the grammar that the current line being drawn should be re-oriented by <code>angle</code> degrees, which can be in the positive or negative direction (abiding by the right hand rule).</p>
-    <h5>3. <code>draw()</code></h5>
+    <h4>3.4.2 System Functions</h4>
+    <h5><code>draw()</code></h5>
     <p>This is one of two functions in a FRAC program that generates a fractal image:</p>
     <div class="highlight highlight-js"><pre>draw(gram g, int n)</pre></div>
     <p>The function creates a static BMP image of the fractal described by the grammar <code>g</code> over <code>n</code> number of iterations.</p>
-    <h5>4. <code>grow()</code></h5>
+    <h5><code>grow()</code></h5>
     <div class="highlight highlight-js"><pre>grow(gram g, int n)</pre></div>
     <p>The function resembles <code>draw()</code>, except instead of creating a static image, it creates a dynamically “growing” GIF (by linking together a collection of static BMP images) of the fractal described by the given grammar <code>g</code> over <code>n</code> iterations.</p>
-    <h5>5. <code>print()</code></h5>
+    <h5><code>print()</code></h5>
     <div class="highlight highlight-js"><pre>print(string s)</pre></div>
     <p>The function prints out the string <code>s</code> to the standard output. The same escape sequences as Java would be interpreted correspondingly (i.e. <code>\n</code> for newline).</p>
 
@@ -353,8 +465,16 @@ else {
   <p>While building our language and the compiler, members of our group tried to work together as much as possible. Pair programming was a crucial part of our strategy - we recognized that this allowed us to catch errors much more easily, as well as write clearer and more readable code.</p>
 
   <h3>4.2 Team Roles</h3>
+  <ul>
+    <li><strong>Anne Zhang</strong>: Manager / Language Guru / System Architect</li>
+    <li><strong>Kunal Kamath</strong>: Language Guru / System Architect / Tester</li>
+    <li><strong>Calvin Li</strong>: System Architect</li>
+  </ul>
+  <p>Throughout the semester members of our group stepped up to take on various tasks, so no member had a static role. Anne was the primary author of the front-end (scanner, parser, AST). She and Kunal worked together on the semantic checker and the code generator, the core parts of our compiler. Kunal worked on building out a robust test suite for the language, as well as using libraries to generate dynamic GIFs. Calvin worked on using the turtle graphics library to write the C code into which FRAC is generated.</p>
+  <p>The following is an extensive log of our <code>git commits</code>, which show the work that each team member put into each part of the project.
 
   <h3>4.3 Development Tools</h3>
+  <p>We used <code>OCaml</code> to write the entirety of our compiler, specifically using <code>ocamllex</code> and <code>ocamllyacc</code> for the front-end, and regular <code>OCaml</code> for the semantic checker and the code generator. Our team used the Bash shell to run testing scripts, as well as Sublime Text and Atom as text editors for writing code. Finally, we used Github extensively for version control throughout the building of our project.</p>
 
   <h2>5. Architectural Design</h2>
   <img src="architecture.png" style="width:600px;height:350px">
@@ -414,10 +534,17 @@ int main(){
 }</pre></div>
 
   <h3>5.3. GIF Generation</h3>
+  <p>Our compiler uses two libraries, <code>GraphicsMagick</code> and <code>gifsicle</code>, which can be found in our source code directory. These are used to create animated GIFs when a FRAC program uses the <code>grow()</code> system function. When the <code>run.sh</code> shell script is run on a FRAC program that uses <code>grow()</code>, a series of BMP images showing the growth of the fractal is generated. Then, we use the <code>GraphicsMagick</code> library to link those images together into a single GIF image, and the <code>gifsicle</code> library to animate that GIF. 
 
   <h2>6. Testing Plan</h2>
 
   <h2>7. Lessons Learned</h2>
+  <h4>Calvin Li</h4>
+    <p>Like everyone says, don't wait until the last minute to do the work, and instead come up with
+     good concrete goals that your group can deliver incrementally. Also, periodically giving each team member
+     a clear idea of his/her task is a good way to ensure that everyone is at least doing something, even if
+     it's not just code. I had a tough semester, so I often found myself falling way behind my team, and sometimes I was afraid to admit it. However, my teammates were willing to help me catch up once I asked.
+     Even so, I really wish I could have contributed more. So, if you want to feel more useful, don't be afraid to ask your team to fill you in on what's going on if you feel behind.</p>
 
   <h2>8. Appendix</h2>
   <h3>8.1 Scanner</h3>
@@ -738,7 +865,7 @@ type program = gram_decl list * func_decl list</pre></div>
 
 <h3>8.4 Semantic Checker</h3>
 <code>semantic.ml</code><br><br>
-<div class="highlight highlight-js"><pre>open Ast
+<div class="highlight highlight-js" style="font-size:0.8em"><pre>open Ast
 open Sast
 
 type symbol_table = {
@@ -858,7 +985,8 @@ and check_assign (env : symbol_table) a = match a with
             | Var_Init(vt, s, e) -> (vt,s)) in
     let e = check_expr env expr in
     let (_, t2) = e in
-    if t <> t2 then raise (Failure "Incorrect type for assignment") else Sast.Assign(n, e), t
+    if t <> t2 then raise (Failure "Incorrect type for assignment") else 
+    Sast.Assign(n, e), t
   | _ -> raise (Failure "Not a valid assignment")
 
 and check_call (env : symbol_table) c = match c with
@@ -866,22 +994,25 @@ and check_call (env : symbol_table) c = match c with
         "print" -> (match actuals with
             []        -> raise(Failure "print() requires an argument")
           | hd :: []     -> let (id, t) = check_expr env hd in (match t with
-                                Sast.Void -> raise(Failure "cannot print an expression of type void")
+                                Sast.Void -> raise(Failure "cannot print an 
+                                expression of type void")
                               | _ -> Sast.Call(f, [(id, t)]), Sast.Void)
           | hd :: tl -> raise(Failure "print() only takes one argument"))
       | "draw" -> (match actuals with
             [g; i] -> (match (g, i) with
                           (Id(s), Int_lit(n)) -> ignore(try
-                                                  List.find(fun gram -> gram.gname = s) env.grams
-                                                  with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
+                                                  List.find(fun gram -> 
+                                                  gram.gname = s) env.grams
+                                                  with Not_found -> 
+                                                  raise(Failure ("gram " ^ s ^ " not defined")));
                           Sast.Call(f, [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
                         | _ -> raise(Failure "draw takes a gram g and int n as arguments"))
           | _      -> raise(Failure "draw() requires two arguments"))
       | "grow" -> (match actuals with
             [g; i] -> (match (g, i) with
                           (Id(s), Int_lit(n)) -> ignore(try
-                                                  List.find(fun gram -> gram.gname = s) env.grams
-                                                  with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
+                               List.find(fun gram -> gram.gname = s) env.grams
+                               with Not_found -> raise(Failure ("gram " ^ s ^ " not defined")));
                           Sast.Call(f, [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int]), Sast.Void
                         | _ -> raise(Failure "grow takes a gram g and int n as arguments"))
           | _      -> raise(Failure "draw() requires two arguments"))
@@ -891,7 +1022,8 @@ and check_call (env : symbol_table) c = match c with
              Sast.Call(f, (check_args env (called_func.formals, actuals))), called_func.rtype)
   | _ -> raise (Failure "Not a valid function call")
 
-and check_args (env : symbol_table) ((formals : var_decl list), (actuals : Ast.expr list)) = match (formals, actuals) with
+and check_args (env : symbol_table) ((formals : var_decl list), (actuals : Ast.expr list)) = 
+  match (formals, actuals) with
     ([], []) -> []
   | (f_hd :: f_tl, a_hd :: a_tl) ->
       let f_type = (match f_hd with
@@ -913,9 +1045,11 @@ let check_vtype (t : Ast.var_type) = match t with
 let rec check_dup_vdecl (vname : string) (vars : Sast.var_decl list) = match vars with
     [] -> vname
   | hd :: tl -> (match hd with
-                    Var(_, name) -> if(name = vname) then raise(Failure ("variable " ^ vname ^ " already declared"))
+                    Var(_, name) -> if(name = vname) then raise(Failure ("variable " ^ 
+                    vname ^ " already declared"))
                                     else check_dup_vdecl vname tl
-                  | Var_Init(_, name, _) -> if(name = vname) then raise(Failure ("variable " ^ vname ^ " already declared"))
+                  | Var_Init(_, name, _) -> if(name = vname) then raise(Failure ("variable " ^ 
+                  vname ^ " already declared"))
                                             else check_dup_vdecl vname tl
                 )
 
@@ -929,12 +1063,14 @@ let check_vdecl (env : symbol_table) (v : Ast.var_decl) =
       let t = check_vtype t in
       let expr = check_expr env expr in
       let (_, t2 ) = expr in
-      if t <> t2 then raise (Failure "Incorrect type for variable initialization") else Sast.Var_Init(t, name, expr))
+      if t <> t2 then raise (Failure "Incorrect type for variable initialization") 
+      else Sast.Var_Init(t, name, expr))
 
 let rec check_vdecl_list (env : symbol_table) (vl : Ast.var_decl list) = match vl with
     [] -> []
   | hd :: tl -> let checked_vdecl = check_vdecl env hd in
-                checked_vdecl :: (check_vdecl_list { vars = (checked_vdecl :: env.vars); funcs = env.funcs; grams = env.grams } tl)
+                checked_vdecl :: (check_vdecl_list { vars = (checked_vdecl :: env.vars); 
+                funcs = env.funcs; grams = env.grams } tl)
 
 let rec check_stmt (env : symbol_table) (s : Ast.stmt) = match s with
     Block(sl) -> Sast.Block(check_stmt_list env sl)
@@ -972,10 +1108,12 @@ and check_stmt_list (env : symbol_table) (sl : Ast.stmt list) = match sl with
     [] -> []
   | hd :: tl -> (check_stmt env hd) :: (check_stmt_list env tl)
 
-let rec find_rtype (env : symbol_table) (body : Ast.stmt list) (rtype : Sast.var_type) = match body with
+let rec find_rtype (env : symbol_table) (body : Ast.stmt list) (rtype : Sast.var_type) = 
+  match body with
     [] -> rtype
   | hd :: tl -> (match hd with
-      Return(e) -> if (rtype <> Sast.Void) then raise(Failure "function cannot have multiple return statements")
+      Return(e) -> if (rtype <> Sast.Void) 
+        then raise(Failure "function cannot have multiple return statements")
                    else let (_, t) = (check_expr env e) in find_rtype env tl t
     | _ -> find_rtype env tl rtype)
 
@@ -984,12 +1122,14 @@ let sast_fdecl (env : symbol_table) (f : Ast.func_decl) =
   let formals_env = { vars = env.vars @ checked_formals; funcs = env.funcs; grams = env.grams } in
   let checked_locals = check_vdecl_list formals_env f.locals in
   let new_env = { vars = formals_env.vars @ checked_locals; funcs = env.funcs; grams = env.grams } in
-  { fname = f.fname; rtype = (find_rtype new_env f.body Sast.Void); formals = checked_formals; locals = checked_locals; body = (check_stmt_list new_env f.body) }
+  { fname = f.fname; rtype = (find_rtype new_env f.body Sast.Void); 
+  formals = checked_formals; locals = checked_locals; body = (check_stmt_list new_env f.body) }
 
 (* returns an updated func_decl with return type *)
 let check_fdecl (env : symbol_table) (f : Ast.func_decl) = match f.fname with
     "main" -> (match f.formals with
-        [] -> let sast_main = sast_fdecl env f in if (sast_main.rtype <> Sast.Void) then raise(Failure "main function should not return anything")
+        [] -> let sast_main = sast_fdecl env f in if (sast_main.rtype <> Sast.Void) 
+        then raise(Failure "main function should not return anything")
               else sast_main
       | _  -> raise(Failure "main function cannot have formal parameters"))
   | _ -> sast_fdecl env f
@@ -999,13 +1139,15 @@ let rec check_fdecl_list (env : symbol_table ) (fdecls : Ast.func_decl list) = m
     []       -> raise(Failure "Valid FRAC program must have at least a main function")
   | hd :: [] -> if hd.fname <> "main" then raise(Failure "main function must be defined last")
                 else (check_fdecl env hd) :: env.funcs
-  | hd :: tl -> if (List.exists (fun func -> func.fname = hd.fname) env.funcs) then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
+  | hd :: tl -> if (List.exists (fun func -> func.fname = hd.fname) env.funcs) 
+  then raise(Failure("function " ^ hd.fname ^ "() defined twice"))
                 else match hd.fname with
                     "print" -> raise(Failure "reserved function name 'print'")
                   | "draw"  -> raise(Failure "reserved function name 'draw'")
                   | "grow"  -> raise(Failure "reserved function name 'grow'")
                   | "main"  -> raise(Failure "main function can only be defined once")
-                  | _ -> check_fdecl_list { vars = env.vars; funcs = (check_fdecl env hd) :: env.funcs; grams = env.grams } tl
+                  | _ -> check_fdecl_list { vars = env.vars; 
+                  funcs = (check_fdecl env hd) :: env.funcs; grams = env.grams } tl
 
 let rec find_rule (id : string) (rules : Ast.rule list) = match rules with
     [] -> raise(Failure "all elements of the alphabet must have corresponding rules")
@@ -1015,7 +1157,8 @@ let rec find_rule (id : string) (rules : Ast.rule list) = match rules with
                   | Term(c, t) -> if(c = id) then c
                                   else find_rule id tl)
 
-let rec check_alphabet (checked : string list) (rules : Ast.rule list) (a : string list) = match a with
+let rec check_alphabet (checked : string list) (rules : Ast.rule list) (a : string list) = 
+  match a with
     [] -> []
   | hd :: tl -> if(List.mem hd checked) then raise(Failure "cannot have duplicates in alphabet")
                 else let checked_c = find_rule hd rules in
@@ -1023,7 +1166,8 @@ let rec check_alphabet (checked : string list) (rules : Ast.rule list) (a : stri
 
 let rec check_rule (a : string list) (i : string list) = match i with
     [] -> []
-  | hd :: tl -> ignore(try List.find (fun id -> id = hd) a with Not_found -> raise(Failure "contains a rule not found in alphabet"));
+  | hd :: tl -> ignore(try List.find (fun id -> id = hd) a with Not_found -> 
+  raise(Failure "contains a rule not found in alphabet"));
                 hd :: (check_rule a tl)
 
 let check_turn_expr (e : Ast.expr) = match e with
@@ -1035,19 +1179,24 @@ let check_move_expr (e : Ast.expr) = match e with
     Int_lit(i) -> Sast.Int_lit(i)
   | _ -> raise(Failure "move functions must have argument of type int")
 
-let rec check_rules (recs : Sast.rule list) (terms : Sast.rule list) (a : string list) (rules : Ast.rule list) = match rules with
+let rec check_rules (recs : Sast.rule list) (terms : Sast.rule list) (a : string list) 
+(rules : Ast.rule list) = match rules with
     []       -> recs, terms
   | hd :: tl -> (match hd with
-                    Rec(c, rl) -> ignore(try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet"));
+                    Rec(c, rl) -> ignore(try List.find (fun id -> id = c) a 
+                    with Not_found -> raise(Failure "rule not found in alphabet"));
                       ignore(if(List.exists (fun (rl : Sast.rule) -> match rl with
                           Rec(id, _) -> if(id = c) then true else false
-                        | Term(_, _) -> false) recs) then raise(Failure "multiple recursive rules of the same name")
+                        | Term(_, _) -> false) recs) 
+                        then raise(Failure "multiple recursive rules of the same name")
                       else check_rule a rl); let checked_rec = Sast.Rec(c, rl) in
                       check_rules (checked_rec :: recs) terms a tl
-                  | Term(c, t) -> ignore(try List.find (fun id -> id = c) a with Not_found -> raise(Failure "rule not found in alphabet"));
+                  | Term(c, t) -> ignore(try List.find (fun id -> id = c) a 
+                  with Not_found -> raise(Failure "rule not found in alphabet"));
                       if(List.exists (fun (t : Sast.rule) -> match t with
                           Term(id, _) -> if(id = c) then true else false
-                        | Rec(_, _) -> false) terms) then raise(Failure "multiple terminal rules of the same name")
+                        | Rec(_, _) -> false) terms) 
+                        then raise(Failure "multiple terminal rules of the same name")
                       else let checked_t = (match t with
                           Rturn(e) -> Sast.Rturn(check_turn_expr e)
                         | Lturn(e) -> Sast.Lturn(check_turn_expr e)
@@ -1060,11 +1209,14 @@ let check_gdecl (g : Ast.gram_decl) =
   let checked_alphabet = check_alphabet [] g.rules g.alphabet in
   let (checked_recs, checked_terms) = check_rules [] [] checked_alphabet g.rules in
   let checked_init = check_rule checked_alphabet g.init in
-  { gname = g.gname; alphabet = checked_alphabet; init = checked_init; rec_rules = checked_recs; term_rules = checked_terms }
+  { gname = g.gname; alphabet = checked_alphabet; init = checked_init; 
+  rec_rules = checked_recs; term_rules = checked_terms }
 
-let rec check_gdecl_list (checked_gdecls : Sast.gram_decl list) (gdecls : Ast.gram_decl list) = match gdecls with
+let rec check_gdecl_list (checked_gdecls : Sast.gram_decl list) (gdecls : Ast.gram_decl list) = 
+match gdecls with
     [] -> checked_gdecls
-  | hd :: tl -> if (List.exists (fun gram -> gram.gname = hd.gname) checked_gdecls) then raise(Failure("gram " ^ hd.gname ^ " defined twice"))
+  | hd :: tl -> if (List.exists (fun gram -> gram.gname = hd.gname) checked_gdecls) 
+  then raise(Failure("gram " ^ hd.gname ^ " defined twice"))
                 else check_gdecl_list ((check_gdecl hd) :: checked_gdecls) tl
 
 (* entry point *)
@@ -1152,6 +1304,204 @@ type program = gram_decl list * func_decl list</pre></div>
 
   <h3>8.6. Code Generator</h3>
   <code>compile.ml</code><br><br>
+  <div class="highlight highlight-js" style="font-size:0.8em"><pre>open Ast
+open Sast
+
+let suffix_char s c = s ^ String.make 1 c
+
+let c_print_types t = match t with
+    Void    -> ""
+  | Int     -> "\"%d\\n\""
+  | Double  -> "\"%.2f\\n\""
+  | String  -> "\"%s\\n\""
+  | Boolean -> "\"%d\\n\""
+  | Gram    -> ""
+
+let rec expr = function
+    Int_lit(i) -> string_of_int i
+  | Bool_lit(b) -> if b == true then "1" else "0"
+  | Double_lit(d) -> if String.get (string_of_float d) (String.length 
+    (string_of_float d) - 1) == '.'
+                        then suffix_char (string_of_float d) '0'
+                     else string_of_float d
+  | Id(str) -> str
+  | String_lit(s) -> "\"" ^ s ^ "\""
+  | ParenExpr((e,_)) -> "(" ^ (expr e) ^ ")"
+  | Unop(op, (e,_)) -> (match op with
+        Not -> " ! "
+      | _   -> ""
+    ) ^ (expr e)
+  | Binop ((e1,_), op, (e2,_)) -> (expr e1) ^ (match op with
+        Add     -> " + "
+      | Sub     -> " - "
+      | Mult    -> " * "
+      | Div     -> " / "
+      | Mod     -> " % "
+      | Equal   -> " == "
+      | Neq     -> " != "
+      | Less    -> " < "
+      | Leq     -> " <= "
+      | Greater -> " > "
+      | Geq     -> " >= "
+      | And     -> " && "
+      | Or      -> " || "
+      | _       -> ""
+    ) ^ (expr e2)
+  | Assign (str, (e,_)) -> str ^ " = " ^ (expr e)
+  (* This DEFINITELY needs to be made more efficient *)
+  | Call (fname, actuals) -> (match fname with
+      "print" -> "printf(" ^
+                 (let actuals_type = function
+                   [] ->  ""
+                   | (_,t)::[] -> c_print_types t
+                   | _ -> ""
+                   in actuals_type actuals)
+                 ^ ", " ^
+                 (let rec gen_actuals = function
+                    [] ->  ""
+                    | (e,_)::[] -> expr e
+                    | _ -> ""
+                    in gen_actuals actuals) ^ ")"
+      | "draw" -> "turtle_init(2000, 2000);\n" ^
+                (match actuals with
+                    [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int] ->
+                      (s ^ "_start(" ^ (string_of_int n) ^ ");\nturtle_save_bmp(\"" ^ 
+                      s ^ ".bmp\");\nturtle_cleanup()")
+                  | _ -> raise(Failure "wrong argument types in draw()"))
+      | "grow" -> (match actuals with
+                    [Sast.Id(s), Sast.Gram; Sast.Int_lit(n), Sast.Int] ->
+                      "char buf[1024];\nint i;\nfor(i = 0; i <" ^ (string_of_int n) ^ 
+                      "; i++) {\nturtle_init(2000, 2000);\n" ^ s
+                      ^"_start(i+1);\n" ^ "sprintf(buf, \"" ^ s ^ 
+                      "%02d.bmp\", i);\nturtle_save_bmp(buf);\nturtle_cleanup();\n}\n"
+                  | _ -> raise(Failure "wrong argument types in grow()"))
+      | _       -> fname ^ "(" ^
+                 (let rec gen_actuals = function
+                    [] ->  ""
+                    | (e,_)::[] -> expr e
+                    | (e,_)::tl -> expr e ^ ", " ^ gen_actuals tl
+                    in gen_actuals actuals) ^ ")")
+  | Noexpr -> ""
+
+let rec stmt = function
+    Block sl -> String.concat "" (List.map stmt sl)
+  | Expr (e,_) -> (match e with
+                    Call(f, _) -> (match f with
+                                    "grow" -> (expr e)
+                                  | _      -> (expr e) ^ ";\n")
+                  | _          -> (expr e) ^ ";\n")
+  | Return (e,_) -> "return " ^ (expr e) ^ ";\n"
+  | If ((e,_), st, Block[]) -> "if(" ^ (expr e) ^ ") {\n" ^ (stmt st) ^ "}\n"
+  | If ((e,_), st1, st2) -> "if(" ^ (expr e) ^ ") {\n" ^ (stmt st1) ^ "}\n" ^
+                            "else" ^ "{\n" ^ (stmt st2) ^ "}\n"
+  | For ((e1,_), (e2,_), (e3,_), st) -> "for(" ^ (expr e1) ^ "; " ^ (expr e2) ^ 
+    "; " ^ (expr e3) ^ ") {\n" ^ (stmt st) ^ "}\n"
+  | While ((e,_), st) -> "while(" ^ (expr e) ^ ") {\n" ^ (stmt st) ^ "}\n"
+
+let rec gen_var_types = function
+      Void    -> "void "
+    | Int     -> "int "
+    | Double  -> "double "
+    | String  -> "char *"
+    | Boolean -> "int "
+    | Gram -> ""
+
+let gen_formals v =
+    (match v with
+       Var(var_type, str) -> gen_var_types var_type ^ str
+     | Var_Init(var_type, str, _) -> gen_var_types var_type ^ str)
+
+ let gen_locals v =
+  (match v with
+       Var(var_type, str) -> gen_var_types var_type ^ str
+     | Var_Init(var_type, str, (e,_)) -> gen_var_types var_type ^ str ^ " = " ^ (expr e))
+
+let rec gen_formals_list fl = match fl with
+  [] -> ""
+  | hd::[] -> gen_formals hd
+  | hd::tl -> gen_formals hd ^ ", " ^ gen_formals_list tl
+
+let rec gen_locals_list ll = match ll with
+  [] -> ""
+  | hd::[] -> gen_locals hd ^ ";\n"
+  | hd::tl -> gen_locals hd ^ ";\n" ^ gen_locals_list tl
+
+let gen_fdecl fdecl =
+  (match fdecl.fname with
+      "main" -> "int main()"
+    | _      -> (match fdecl.rtype with
+                    Sast.Void    -> "void "
+                  | Sast.Int     -> "int "
+                  | Sast.Double  -> "double "
+                  | Sast.String  -> "char *"
+                  | Sast.Boolean -> "int "
+                  | Sast.Gram -> "")
+  ^ fdecl.fname ^ "(" ^ (gen_formals_list fdecl.formals) ^ ")") ^ "{\n" ^ 
+  (gen_locals_list fdecl.locals) ^ String.concat "" (List.map stmt fdecl.body) ^
+  (match fdecl.fname with
+      "main" -> "return 0;\n"
+    | _      -> "" )
+  ^ "}\n"
+
+let rec divide_term_rules (tm, rtm) (recs : Sast.rule list) (terms : Sast.rule list) = 
+match terms with
+    [] -> tm, rtm
+  | hd :: tl -> let id = (match hd with
+                    Term(name, _) -> name
+                  | Rec(name, _) -> name) in
+                if(List.exists (fun (rl : Sast.rule) -> match rl with
+                      Rec(s, _) -> if(s = id) then true else false
+                    | Term(_, _) -> false) recs) then divide_term_rules (tm, hd :: rtm) recs tl
+                else divide_term_rules (hd :: tm, rtm) recs tl
+
+let gen_term_arg (e : Sast.expr) = match e with
+    Int_lit(i) -> string_of_int i
+  | Double_lit(d) -> string_of_float d
+  | _ -> ""
+
+let rec gen_term_rules (terms : Sast.rule list) = match terms with
+    [] -> ""
+  | hd :: tl -> let (id, t) = (match hd with
+                    Term(name, tp) -> name, tp
+                  | Rec(_, _) -> raise(Failure "should be a terminal rule")) in 
+                    "if (var == '" ^ id ^ "') {\n" ^
+                (match t with
+                    Rturn(e) -> "turtle_turn_right(" ^ (gen_term_arg e) ^ ");\n"
+                  | Lturn(e) -> "turtle_turn_left(" ^ (gen_term_arg e) ^ ");\n"
+                  | Move(e) -> "turtle_forward(" ^ (gen_term_arg e) ^ ");\n"
+                ) ^ "}\n" ^ gen_term_rules tl
+
+let rec gen_init (gname : string) (rl : string list) = match rl with
+    [] -> ""
+  | hd :: tl -> gname ^ "('" ^ hd ^ "', iter);\n" ^ gen_init gname tl
+
+let rec gen_rule (gname : string) (rl : string list) = match rl with
+    [] -> ""
+  | hd :: tl -> gname ^ "('" ^ hd ^ "', iter - 1);\n" ^ gen_rule gname tl
+
+let rec gen_rec_rules (gname : string) (recs : Sast.rule list) = match recs with
+    [] -> ""
+  | hd :: tl -> let (id, rl) = (match hd with
+                    Rec(name, rule) -> name, rule
+                  | Term(_, _) -> raise(Failure "should be a recursive rule")) in
+                "if(var == '" ^ id ^ "') {\n" ^ (gen_rule gname rl) ^ "}\n" ^ 
+                  (gen_rec_rules gname tl)
+
+let gen_gdecl (g : Sast.gram_decl) =
+  let (terms, rterms) = divide_term_rules ([], []) g.rec_rules g.term_rules in
+  "void " ^ g.gname ^ "(char var, int iter) {\n" ^ "if (iter < 0) {\n" ^
+  (gen_term_rules rterms) ^ "} else {\n" ^ (gen_rec_rules g.gname g.rec_rules) ^ 
+    (gen_term_rules terms) ^ "}\n}\n" ^
+  "void " ^ g.gname ^ "_start(int iter) {\n" ^ (gen_init g.gname (List.rev g.init)) ^ "}\n"
+
+let generate (grams : Sast.gram_decl list) (funcs : Sast.func_decl list) (name : string) =
+  let outfile = open_out (name ^ ".c") in
+  let translated_program =  (if List.length grams > 0 
+  then "#include \"turtle.h\"\n#include <string.h>\n" else "") ^ "#include <stdio.h>\n\n" ^
+  String.concat "" (List.rev (List.map gen_gdecl grams)) ^ 
+  String.concat "" (List.rev (List.map gen_fdecl funcs)) ^ "\n" in
+  ignore(Printf.fprintf outfile "%s" translated_program);
+  close_out outfile;</pre></div>
   
   <h3>8.7. FRAC</h3>
   <code>frac.ml</code><br><br>
